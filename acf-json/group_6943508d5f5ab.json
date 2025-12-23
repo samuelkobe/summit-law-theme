@@ -1,0 +1,383 @@
+{
+    "key": "group_6943508d5f5ab",
+    "title": "Team Content",
+    "fields": [
+        {
+            "key": "field_6943508d366da",
+            "label": "Role",
+            "name": "role",
+            "aria-label": "",
+            "type": "button_group",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "100",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "partner": "Partner",
+                "associate": "Associate",
+                "clerk": "Clerk",
+                "assistant": "Legal Assistant"
+            },
+            "default_value": "partner",
+            "return_format": "array",
+            "allow_null": 0,
+            "allow_in_bindings": 0,
+            "layout": "horizontal"
+        },
+        {
+            "key": "field_6943509f366db",
+            "label": "Email",
+            "name": "email",
+            "aria-label": "",
+            "type": "email",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "35",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "allow_in_bindings": 0,
+            "placeholder": "info@summitlaw.ca",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_694350ab366dc",
+            "label": "Phone",
+            "name": "phone",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "placeholder": 1235552000,
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_694593a0ad76b",
+            "label": "Extension",
+            "name": "extension",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "15",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "min": "",
+            "max": "",
+            "allow_in_bindings": 0,
+            "placeholder": "",
+            "step": "",
+            "prepend": "Ext",
+            "append": ""
+        },
+        {
+            "key": "field_6949c787b1b6e",
+            "label": "Fax",
+            "name": "fax",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "613.749.4703",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "placeholder": "613.749.4703",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_6943519b366e6",
+            "label": "Social Links",
+            "name": "social_links",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "Add as many social links as you like. Use handle only (no full URLs).",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "pagination": 0,
+            "min": 0,
+            "max": 0,
+            "collapsed": "field_6944668945612",
+            "button_label": "Add Link",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_6944668945612",
+                    "label": "Social Type",
+                    "name": "social_type",
+                    "aria-label": "",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "30",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "linkedin": "LinkedIn",
+                        "facebook": "Facebook",
+                        "x": "X (Twitter)",
+                        "instagram": "Instagram",
+                        "youtube": "YouTube",
+                        "email": "Email",
+                        "phone": "Phone"
+                    },
+                    "default_value": false,
+                    "return_format": "value",
+                    "multiple": 0,
+                    "allow_null": 0,
+                    "allow_in_bindings": 0,
+                    "ui": 0,
+                    "ajax": 0,
+                    "placeholder": "",
+                    "create_options": 0,
+                    "save_options": 0,
+                    "parent_repeater": "field_6943519b366e6"
+                },
+                {
+                    "key": "field_6944694e037dc",
+                    "label": "NOTE",
+                    "name": "",
+                    "aria-label": "",
+                    "type": "message",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_6944668945612",
+                                "operator": "==",
+                                "value": "linkedin"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "30",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "Only paste the path\/handle, e.g. in\/name or company\/summitlaw. Do not paste the entire link.",
+                    "new_lines": "wpautop",
+                    "esc_html": 0,
+                    "parent_repeater": "field_6943519b366e6"
+                },
+                {
+                    "key": "field_69446b82e3362",
+                    "label": "NOTE",
+                    "name": "",
+                    "aria-label": "",
+                    "type": "message",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_6944668945612",
+                                "operator": "!=",
+                                "value": "linkedin"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "30",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "Only paste the path\/handle. Do not paste the entire link.",
+                    "new_lines": "wpautop",
+                    "esc_html": 0,
+                    "parent_repeater": "field_6943519b366e6"
+                },
+                {
+                    "key": "field_69435175366e4",
+                    "label": "Social Handle",
+                    "name": "social_handle",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "Enter the handle only (e.g. summitlaw, \/in\/name, username, or email address).",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "40",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "allow_in_bindings": 0,
+                    "placeholder": "",
+                    "prepend": "@",
+                    "append": "",
+                    "parent_repeater": "field_6943519b366e6"
+                }
+            ]
+        },
+        {
+            "key": "field_694350f2366df",
+            "label": "Has Legal Assistant?",
+            "name": "legal_assistant_toggle",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "Toggle on the \"Legal Assistant\" section of this team member's page. If they don't have an assistant toggle this to \"No\".",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 0,
+            "allow_in_bindings": 0,
+            "ui_on_text": "Yes",
+            "ui_off_text": "No",
+            "ui": 1
+        },
+        {
+            "key": "field_694350de366de",
+            "label": "Assistant Information",
+            "name": "assistant_information",
+            "aria-label": "",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_694350f2366df",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "sub_fields": [
+                {
+                    "key": "field_6949a016b7f96",
+                    "label": "Legal Assistant",
+                    "name": "legal_assistant",
+                    "aria-label": "",
+                    "type": "relationship",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "post_type": [
+                        "team"
+                    ],
+                    "post_status": [
+                        "publish"
+                    ],
+                    "taxonomy": [
+                        "role:legal-assistant"
+                    ],
+                    "filters": "",
+                    "return_format": "object",
+                    "min": 1,
+                    "max": 1,
+                    "allow_in_bindings": 0,
+                    "elements": "",
+                    "bidirectional": 0,
+                    "bidirectional_target": []
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "team"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "acf_after_title",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": [
+        "the_content"
+    ],
+    "active": true,
+    "description": "",
+    "show_in_rest": 0,
+    "display_title": "",
+    "modified": 1766445009
+}

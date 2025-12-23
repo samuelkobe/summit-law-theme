@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/cta",
+  "title": "Call to Action",
+  "description": "Call to action block template using ACF.",
+  "category": "formatting",
+  "icon": "megaphone",
+  "keywords": ["call to action", "cta", "action", "button prompt"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "cta.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

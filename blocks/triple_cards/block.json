@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/triple-cards",
+  "title": "Triple Cards",
+  "description": "A starter template for creating ACF blocks.",
+  "category": "formatting",
+  "icon": "slides",
+  "keywords": ["triple", "cards", "acf"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "triple_cards.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

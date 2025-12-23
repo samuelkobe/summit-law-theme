@@ -1,0 +1,258 @@
+/* Component imports must come first */
+@import "./components/navigation.css";
+
+/* Block imports */
+@import "../../blocks/starter_template/starter_template.css";
+@import "../../blocks/triple_cards/triple_cards.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Global body styles */
+  body {
+    background-color: rgb(247 243 242);
+    font-weight: 400;
+    font-family: "Hanken Grotesk", system-ui, Segoe UI, Arial, sans-serif;
+    font-size: clamp(16px, 1vw + 14px, 18px);
+    line-height: 1.6;
+    /* color removed - use Tailwind utilities instead */
+  }
+  /* PP Museum - Multiple weights */
+  @font-face {
+    font-family: "PP Museum";
+    src: url("../fonts/PPMuseum-Light.woff2") format("woff2");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "PP Museum";
+    src: url("../fonts/PPMuseum-LightItalic.woff2") format("woff2");
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "PP Museum";
+    src: url("../fonts/PPMuseum-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "PP Museum";
+    src: url("../fonts/PPMuseum-RegularItalic.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "PP Museum";
+    src: url("../fonts/PPMuseum-Ultrabold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "PP Museum";
+    src: url("../fonts/PPMuseum-UltraboldItalic.woff2") format("woff2");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  /* Hanken Grotesk - Variable Font */
+  @font-face {
+    font-family: "Hanken Grotesk";
+    src: url("../fonts/HankenGrotesk-VariableFont_wght.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Hanken Grotesk";
+    src: url("../fonts/HankenGrotesk-Italic-VariableFont_wght.woff2")
+      format("woff2");
+    font-weight: 100 900;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  /* CSS Custom Properties - Colors only (typography now in Tailwind) */
+  :root {
+    --c-deep: #29472d;
+    --c-nearblack: #292725;
+    --c-accent1: #e2ef4a;
+    --c-accent2: #d1d436;
+    --c-n10: #f7f3f2;
+    --c-n20: #efe8e6;
+    --c-n30: #dad3cf;
+    --c-n40: #b7b0ab;
+    --c-white: #ffffff;
+  }
+
+  html {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    color: #292725; /* brand-black - using regular CSS so utilities can override */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Hairline divider */
+  .rule {
+    @apply border-t-[0.5px] border-brand-black;
+  }
+
+  /* Typography - Opt-in via classes */
+  /* Use class="h1" on any element to get h1 styling */
+  /* This prevents conflicts with Tailwind utilities */
+  .h1 {
+    @apply font-normal leading-tight text-green-deep tracking-[-0.02em];
+    font-family: "PP Museum", "Hanken Grotesk", system-ui, Arial, sans-serif;
+    font-size: clamp(44px, 3vw + 32px, 56px);
+  }
+
+  .h2 {
+    @apply font-normal leading-tight text-green-deep tracking-[-0.015em];
+    font-family: "PP Museum", "Hanken Grotesk", system-ui, Arial, sans-serif;
+    font-size: clamp(32px, 2.2vw + 24px, 40px);
+  }
+
+  .h3 {
+    @apply font-medium leading-tight text-brand-black tracking-[-0.01em];
+    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
+    font-size: clamp(22px, 1.4vw + 18px, 26px);
+  }
+
+  .h4 {
+    @apply font-medium leading-tight text-brand-black tracking-[-0.005em];
+    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
+    font-size: clamp(18px, 1.2vw + 16px, 20px);
+  }
+
+  .h5 {
+    @apply font-medium leading-snug text-brand-black;
+    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
+    font-size: clamp(16px, 1vw + 14px, 18px);
+  }
+
+  .h6 {
+    @apply font-semibold uppercase leading-snug tracking-wider text-brand-black;
+    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
+    font-size: clamp(14px, 0.8vw + 12px, 15px);
+  }
+
+  /* Auto-apply to WordPress content areas */
+  .entry-content h1,
+  .page-content h1 {
+    @apply font-normal leading-tight text-green-deep tracking-[-0.02em];
+    font-family: "PP Museum", "Hanken Grotesk", system-ui, Arial, sans-serif;
+    font-size: clamp(44px, 3vw + 32px, 56px);
+  }
+
+  .entry-content h2,
+  .page-content h2 {
+    @apply font-normal leading-tight text-green-deep tracking-[-0.015em];
+    font-family: "PP Museum", "Hanken Grotesk", system-ui, Arial, sans-serif;
+    font-size: clamp(32px, 2.2vw + 24px, 40px);
+  }
+
+  .entry-content h3,
+  .page-content h3 {
+    @apply font-medium leading-tight text-brand-black tracking-[-0.01em];
+    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
+    font-size: clamp(22px, 1.4vw + 18px, 26px);
+  }
+
+  .entry-content h4,
+  .page-content h4 {
+    @apply font-medium leading-tight text-brand-black tracking-[-0.005em];
+    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
+    font-size: clamp(18px, 1.2vw + 16px, 20px);
+  }
+
+  .entry-content h5,
+  .page-content h5 {
+    @apply font-medium leading-snug text-brand-black;
+    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
+    font-size: clamp(16px, 1vw + 14px, 18px);
+  }
+
+  .entry-content h6,
+  .page-content h6 {
+    @apply font-semibold uppercase leading-snug tracking-wider text-brand-black;
+    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
+    font-size: clamp(14px, 0.8vw + 12px, 15px);
+  }
+}
+
+@layer components {
+  /* WordPress Content Area Typography */
+  .entry-content p,
+  .page-content p {
+    line-height: 1.6;
+    font-size: clamp(16px, 1vw + 14px, 18px);
+  }
+
+  /* Links - Default (light backgrounds) */
+  /* Only apply to links within content areas, not all links globally */
+  .entry-content a:not(.btn),
+  .page-content a:not(.btn),
+  p a:not(.btn) {
+    @apply underline text-green-deep decoration-[0.08em] underline-offset-[0.15em] transition-colors duration-200;
+  }
+
+  .entry-content a:not(.btn):hover,
+  .page-content a:not(.btn):hover,
+  p a:not(.btn):hover {
+    @apply text-brand-black;
+  }
+
+  /* Original components layer content below */
+  /* Buttons */
+  .btn {
+    @apply max-w-[100dvm] w-fit py-3 px-6 rounded-[8px] text-base lg:text-lg leading-[23px] tracking-[0.05em] hover:cursor-pointer shadow-md hover:shadow-lg transition-all duration-300;
+    /* Default: primary style */
+    @apply bg-green-deep hover:bg-brand-black text-white;
+  }
+
+  .btn.alt {
+    /* Override colors for alt variant */
+    @apply bg-green-accent1 hover:bg-green-accent2 text-brand-black;
+  }
+
+  /* Forms */
+  .label {
+    @apply text-brand-black;
+    font-size: clamp(14px, 0.8vw + 12px, 15px);
+  }
+
+  .input,
+  .textarea,
+  .select {
+    @apply w-full p-3 border border-brand-30 bg-white text-brand-black rounded-none outline-none;
+  }
+
+  .input:focus,
+  .textarea:focus,
+  .select:focus {
+    @apply shadow-none border-brand-black;
+  }
+
+  .help {
+    @apply opacity-80 text-brand-black;
+    font-size: clamp(14px, 0.8vw + 12px, 15px);
+  }
+
+  /* Form tone: errors and success */
+  .error {
+    @apply p-2 border-l-[0.5px] bg-brand-20 border-brand-black text-brand-black;
+  }
+
+  .success {
+    @apply p-2 border-l-[0.5px] border-l-green-deep bg-brand-10 text-brand-black;
+  }
+}

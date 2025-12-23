@@ -1,0 +1,85 @@
+{
+    "key": "group_6942f75766a08",
+    "title": "BLOCK: Call to Action",
+    "fields": [
+        {
+            "key": "field_6942f757457d1",
+            "label": "Title",
+            "name": "call_to_action_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "This title should be short and impactful (maximum 50 characters).",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": 50,
+            "allow_in_bindings": 0,
+            "placeholder": "Contact Us",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_6942f7aa457d2",
+            "label": "Content",
+            "name": "call_to_action_content",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "Add the message and a call to action here. This can be a couple sentences long (maximum 250 characters).",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": 250,
+            "allow_in_bindings": 0,
+            "rows": 4,
+            "placeholder": "Reach out today...",
+            "new_lines": "br"
+        },
+        {
+            "key": "field_6942f815457d3",
+            "label": "Linked Page\/Action",
+            "name": "call_to_action_linked_page",
+            "aria-label": "",
+            "type": "link",
+            "instructions": "Link to a page or add an email\/phone number for users to action on.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "array",
+            "allow_in_bindings": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/cta"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "",
+    "show_in_rest": 0,
+    "display_title": "",
+    "modified": 1765996673
+}

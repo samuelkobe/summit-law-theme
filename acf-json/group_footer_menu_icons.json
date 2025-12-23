@@ -1,0 +1,140 @@
+{
+    "key": "group_footer_menu_icons",
+    "title": "Footer Menu Icons",
+    "fields": [
+        {
+            "key": "field_menu_icons_settings",
+            "label": "Menu Icon Settings",
+            "name": "menu_icons_settings",
+            "aria-label": "",
+            "type": "group",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "row",
+            "sub_fields": [
+                {
+                    "key": "field_icons_toggle",
+                    "label": "Enable Icons",
+                    "name": "icons_toggle",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "Enable SVG icons for menu items in this menu",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "30",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "allow_in_bindings": 1,
+                    "ui_on_text": "",
+                    "ui_off_text": "",
+                    "ui": 1
+                },
+                {
+                    "key": "field_icons",
+                    "label": "Icons",
+                    "name": "icons",
+                    "aria-label": "",
+                    "type": "repeater",
+                    "instructions": "Add SVG icons with keynames that match menu item CSS classes (e.g., icon-phone)",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_icons_toggle",
+                                "operator": "==",
+                                "value": "1"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "70",
+                        "class": "",
+                        "id": ""
+                    },
+                    "layout": "table",
+                    "pagination": 0,
+                    "min": 0,
+                    "max": 10,
+                    "collapsed": "field_keyname",
+                    "button_label": "Add Icon",
+                    "rows_per_page": 20,
+                    "sub_fields": [
+                        {
+                            "key": "field_keyname",
+                            "label": "Key Name (CSS Class)",
+                            "name": "keyname",
+                            "aria-label": "",
+                            "type": "text",
+                            "instructions": "",
+                            "required": 1,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "30",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "maxlength": "",
+                            "placeholder": "icon-phone",
+                            "prepend": "",
+                            "append": "",
+                            "parent_repeater": "field_icons"
+                        },
+                        {
+                            "key": "field_svg_code",
+                            "label": "SVG Code",
+                            "name": "svg_code",
+                            "aria-label": "",
+                            "type": "textarea",
+                            "instructions": "",
+                            "required": 1,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "40",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "maxlength": "",
+                            "allow_in_bindings": 1,
+                            "rows": 4,
+                            "placeholder": "<svg>...<\/svg>",
+                            "new_lines": "",
+                            "parent_repeater": "field_icons"
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "nav_menu",
+                "operator": "==",
+                "value": "location\/footer-contact"
+            }
+        ]
+    ],
+    "menu_order": 1,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "",
+    "show_in_rest": 0,
+    "display_title": "",
+    "modified": 1765320942
+}

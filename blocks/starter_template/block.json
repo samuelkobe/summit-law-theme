@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/starter-template",
+  "title": "Starter Template",
+  "description": "A starter template for creating ACF blocks.",
+  "category": "formatting",
+  "icon": "admin-appearance",
+  "keywords": ["starter", "template", "acf"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "starter_template.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

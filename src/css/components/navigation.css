@@ -1,0 +1,595 @@
+@tailwind components;
+
+/**
+ * Navigation Styles
+ *
+ * Includes:
+ * - Header (light/dark versions, hidden state)
+ * - Logo (small/large versions)
+ * - Desktop mega menus
+ * - Mobile drawer menu
+ * - Search overlay
+ * - Transitions & animations
+ * - Focus styles
+ */
+
+/* =============================================================================
+   HEADER BASE
+   ============================================================================= */
+
+[data-header] {
+  @apply fixed top-0 left-0 right-0 z-50;
+  @apply transition-transform duration-300 ease-in-out;
+}
+
+/* WordPress admin bar spacing - when logged in */
+.admin-bar [data-header] {
+  top: 46px; /* Mobile admin bar height */
+}
+
+@media screen and (min-width: 783px) {
+  .admin-bar [data-header] {
+    top: 32px; /* Desktop admin bar height */
+  }
+}
+
+/* Header container */
+[data-header] .container {
+  @apply mx-auto px-4 lg:px-8;
+  max-width: 1440px;
+}
+
+/* Header inner flexbox */
+.header-inner {
+  @apply flex items-center justify-between gap-6;
+  @apply py-4 lg:py-6;
+}
+
+/* =============================================================================
+   HEADER VARIANTS - Light & Dark
+   ============================================================================= */
+
+/* Light header (default pages) */
+.header--light {
+  @apply bg-white shadow-sm;
+}
+
+.header--light .nav-menu > li > button,
+.header--light .nav-menu > li > a {
+  @apply text-brand-black;
+}
+
+.header--light .search-toggle,
+.header--light .mobile-menu-toggle {
+  @apply text-brand-black;
+}
+
+.header--light .hamburger span {
+  @apply bg-brand-black;
+}
+
+/* Dark header (home page top) */
+.header--dark {
+  @apply bg-transparent;
+}
+
+.header--dark .nav-menu > li > button,
+.header--dark .nav-menu > li > a {
+  @apply text-white;
+}
+
+.header--dark .search-toggle,
+.header--dark .mobile-menu-toggle {
+  @apply text-white;
+}
+
+.header--dark .hamburger span {
+  @apply bg-white;
+}
+
+/* Hidden state (scroll down on desktop) */
+.header--hidden {
+  transform: translateY(-100%);
+}
+
+/* =============================================================================
+   LOGO
+   ============================================================================= */
+
+[data-logo] {
+  @apply flex-shrink-0;
+}
+
+[data-logo] a {
+  @apply no-underline block;
+}
+
+[data-logo] img {
+  @apply block h-auto;
+  @apply transition-all duration-500 ease-in-out;
+}
+
+/* Large logo (home page top) */
+[data-logo]:not(.logo--small) img {
+  @apply w-[180px] lg:w-[240px];
+}
+
+/* Small logo (scrolled or default pages) */
+[data-logo].logo--small img {
+  @apply w-[140px] lg:w-[180px];
+}
+
+/* Mobile: always one size */
+@media (max-width: 1023px) {
+  [data-logo] img {
+    @apply w-[140px];
+  }
+}
+
+/* =============================================================================
+   RESPONSIVE DISPLAY
+   ============================================================================= */
+
+/* Desktop elements - hide on mobile */
+.primary-nav {
+  @apply hidden lg:flex flex-1 justify-center;
+}
+
+.search-toggle {
+  @apply hidden lg:flex items-center justify-center w-10 h-10 p-2;
+  @apply transition-colors duration-200;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.search-toggle:hover {
+  @apply opacity-80;
+}
+
+.search-toggle svg {
+  @apply w-5 h-5;
+}
+
+/* Mobile elements - hide on desktop */
+.mobile-menu-toggle {
+  @apply flex lg:hidden items-center justify-center w-10 h-10 p-2;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* =============================================================================
+   DESKTOP NAVIGATION
+   ============================================================================= */
+
+/* Top level menu */
+.nav-menu {
+  @apply flex items-center gap-2;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Top level items */
+.nav-menu > li {
+  @apply static;
+}
+
+/* Top level links & buttons */
+.nav-menu > li > button,
+.nav-menu > li > a {
+  @apply flex items-center gap-2 px-4 py-2;
+  @apply no-underline font-medium tracking-[0.01em];
+  @apply transition-colors duration-200;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.nav-menu > li > button:hover,
+.nav-menu > li > a:hover {
+  @apply opacity-80;
+}
+
+/* Chevron icon in buttons */
+.nav-menu > li > button svg {
+  @apply w-4 h-4;
+  @apply transition-transform duration-300;
+}
+
+/* Rotate chevron when expanded */
+.nav-menu > li > button[aria-expanded="true"] svg {
+  @apply rotate-180;
+}
+
+/* =============================================================================
+   MEGA MENU
+   ============================================================================= */
+
+.mega-menu {
+  @apply absolute left-1/2 top-full;
+  transform: translateX(-50%);
+  @apply w-screen max-w-[1440px];
+  @apply bg-white shadow-lg;
+  @apply opacity-0 invisible;
+  @apply transition-all duration-300 ease-in-out;
+  margin-top: 0;
+  z-index: 100;
+}
+
+/* Show mega menu */
+.mega-menu:not([hidden]) {
+  @apply opacity-100 visible;
+  margin-top: 8px;
+}
+
+/* Mega menu content wrapper */
+.mega-menu-content {
+  @apply container mx-auto px-8 py-8;
+  @apply grid gap-8;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+/* Mega menu column */
+.mega-menu-column {
+  @apply flex flex-col gap-4;
+}
+
+/* Category header (tier 2) */
+.mega-menu-column > a {
+  @apply text-lg font-semibold text-green-deep;
+  @apply no-underline;
+  @apply pb-2 border-b border-brand-30;
+  @apply transition-colors duration-200;
+}
+
+.mega-menu-column > a:hover {
+  @apply text-brand-black;
+}
+
+/* Category links list (tier 3) */
+.mega-menu-links {
+  @apply flex flex-col gap-2;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mega-menu-links li a {
+  @apply text-brand-black no-underline;
+  @apply transition-colors duration-200;
+  font-size: 15px;
+}
+
+.mega-menu-links li a:hover {
+  @apply text-green-deep underline;
+}
+
+/* =============================================================================
+   DESKTOP SEARCH
+   ============================================================================= */
+
+/* Search overlay */
+.search-overlay {
+  @apply fixed top-0 right-0 bottom-0;
+  @apply w-full lg:w-[480px];
+  @apply bg-white shadow-2xl;
+  @apply flex items-start justify-center pt-32;
+  @apply opacity-0 invisible;
+  @apply transition-all duration-300 ease-in-out;
+  transform: translateX(100%);
+  z-index: 60;
+}
+
+/* WordPress admin bar spacing */
+.admin-bar .search-overlay {
+  top: 46px;
+}
+
+@media screen and (min-width: 783px) {
+  .admin-bar .search-overlay {
+    top: 32px;
+  }
+}
+
+.search-overlay:not([hidden]) {
+  @apply opacity-100 visible;
+  transform: translateX(0);
+}
+
+/* Search form */
+.search-overlay form {
+  @apply relative w-full px-8;
+}
+
+.search-overlay input[type="search"] {
+  @apply w-full px-4 py-3 pr-12;
+  @apply border-b-2 border-brand-30;
+  @apply bg-transparent text-brand-black;
+  @apply text-lg;
+  @apply outline-none;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+  border-radius: 0;
+}
+
+.search-overlay input[type="search"]:focus {
+  @apply border-brand-black;
+}
+
+.search-overlay form button[type="submit"] {
+  @apply absolute right-8 top-1/2;
+  transform: translateY(-50%);
+  @apply p-2;
+  @apply text-brand-black;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.search-overlay form button[type="submit"] svg {
+  @apply w-5 h-5;
+}
+
+/* Search close button */
+.search-close {
+  @apply absolute top-8 right-8;
+  @apply w-10 h-10 p-2;
+  @apply text-brand-black;
+  @apply transition-colors duration-200;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.search-close:hover {
+  @apply opacity-80;
+}
+
+.search-close svg {
+  @apply w-6 h-6;
+}
+
+/* =============================================================================
+   MOBILE MENU
+   ============================================================================= */
+
+/* Hamburger icon */
+.hamburger {
+  @apply relative w-6 h-5;
+  @apply flex flex-col justify-between;
+}
+
+.hamburger span {
+  @apply block w-full h-[2px];
+  @apply transition-all duration-300;
+}
+
+/* Animate hamburger to X */
+.mobile-menu-toggle[aria-expanded="true"] .hamburger span:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.mobile-menu-toggle[aria-expanded="true"] .hamburger span:nth-child(2) {
+  @apply opacity-0;
+}
+
+.mobile-menu-toggle[aria-expanded="true"] .hamburger span:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Mobile menu drawer */
+.mobile-menu {
+  @apply fixed top-0 right-0 bottom-0;
+  @apply w-full;
+  @apply bg-white;
+  @apply overflow-y-auto;
+  @apply opacity-0 invisible;
+  @apply transition-all duration-300 ease-in-out;
+  transform: translateX(100%);
+  z-index: 60;
+  padding-top: 80px; /* Space for header */
+}
+
+/* WordPress admin bar spacing */
+.admin-bar .mobile-menu {
+  top: 46px;
+}
+
+@media screen and (min-width: 783px) {
+  .admin-bar .mobile-menu {
+    top: 32px;
+  }
+}
+
+.mobile-menu:not([hidden]) {
+  @apply opacity-100 visible;
+  transform: translateX(0);
+}
+
+/* Mobile nav menu */
+.mobile-nav-menu {
+  @apply flex flex-col;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Mobile menu items */
+.mobile-nav-menu > li {
+  @apply border-b border-brand-20;
+}
+
+/* Mobile parent items (with submenus) */
+.mobile-nav-menu > li > button {
+  @apply w-full flex items-center justify-between;
+  @apply px-6 py-4;
+  @apply text-left text-brand-black font-medium;
+  @apply transition-colors duration-200;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.mobile-nav-menu > li > button:active {
+  @apply bg-brand-10;
+}
+
+/* Mobile top level links (no submenu) */
+.mobile-nav-menu > li > a {
+  @apply block px-6 py-4;
+  @apply text-brand-black font-medium no-underline;
+  @apply transition-colors duration-200;
+  font-size: 18px;
+}
+
+.mobile-nav-menu > li > a:active {
+  @apply bg-brand-10;
+}
+
+/* Chevron in mobile parent items */
+.mobile-nav-menu > li > button svg {
+  @apply w-5 h-5;
+  @apply transition-transform duration-300;
+}
+
+.mobile-nav-menu > li > button[aria-expanded="true"] svg {
+  @apply rotate-180;
+}
+
+/* Mobile submenu */
+.mobile-submenu {
+  @apply bg-brand-10;
+  @apply max-h-0 overflow-hidden;
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.mobile-submenu:not([hidden]) {
+  @apply max-h-[1000px];
+  padding: 8px 0;
+}
+
+/* Mobile submenu column */
+.mobile-submenu-column {
+  @apply flex flex-col;
+}
+
+/* Mobile category header */
+.mobile-submenu-column > a {
+  @apply block px-6 py-3;
+  @apply text-green-deep font-semibold no-underline;
+  @apply border-l-2 border-transparent;
+  @apply transition-all duration-200;
+  font-size: 16px;
+}
+
+.mobile-submenu-column > a:active {
+  @apply border-l-green-deep bg-white;
+}
+
+/* Mobile category links */
+.mobile-submenu-links {
+  @apply flex flex-col;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mobile-submenu-links li a {
+  @apply block px-6 py-2 pl-8;
+  @apply text-brand-black no-underline;
+  @apply border-l-2 border-transparent;
+  @apply transition-all duration-200;
+  font-size: 15px;
+}
+
+.mobile-submenu-links li a:active {
+  @apply border-l-green-deep bg-white;
+}
+
+/* Mobile search */
+.mobile-search {
+  @apply px-6 py-6 border-t-2 border-brand-30;
+}
+
+.mobile-search form {
+  @apply relative;
+}
+
+.mobile-search input[type="search"] {
+  @apply w-full px-4 py-3 pr-12;
+  @apply border border-brand-30 bg-white;
+  @apply text-brand-black;
+  @apply outline-none;
+}
+
+.mobile-search input[type="search"]:focus {
+  @apply border-brand-black;
+}
+
+.mobile-search button[type="submit"] {
+  @apply absolute right-0 top-1/2;
+  transform: translateY(-50%);
+  @apply p-3;
+  @apply text-brand-black;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mobile-search button[type="submit"] svg {
+  @apply w-5 h-5;
+}
+
+/* =============================================================================
+   ACCESSIBILITY - Focus Styles
+   ============================================================================= */
+
+/* Focus visible for all interactive elements */
+[data-header] button:focus-visible,
+[data-header] a:focus-visible {
+  @apply outline-2 outline-offset-2 outline-green-deep;
+  outline-style: solid;
+}
+
+/* Focus within mega menu */
+.mega-menu a:focus-visible {
+  @apply outline-2 outline-offset-2 outline-green-deep;
+  outline-style: solid;
+}
+
+/* Focus in search overlay */
+.search-overlay input:focus-visible,
+.search-overlay button:focus-visible {
+  @apply outline-2 outline-offset-2 outline-green-deep;
+  outline-style: solid;
+}
+
+/* Focus in mobile menu */
+.mobile-menu button:focus-visible,
+.mobile-menu a:focus-visible,
+.mobile-menu input:focus-visible {
+  @apply outline-2 outline-offset-2 outline-green-deep;
+  outline-style: solid;
+}
+
+/* =============================================================================
+   UTILITY CLASSES
+   ============================================================================= */
+
+/* Screen reader only */
+.sr-only {
+  @apply absolute w-px h-px p-0 -m-px overflow-hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Prevent body scroll when overlay open */
+body.scroll-locked {
+  @apply overflow-hidden;
+}
