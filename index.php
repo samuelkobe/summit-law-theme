@@ -12,6 +12,18 @@
           <!-- test area -->
     
           <div class="min-h-[500px]">
+
+          <?php
+// TESTING - Remove after testing
+$all_cases = get_posts( array( 'post_type' => 'case', 'numberposts' => -1 ) );
+foreach ( $all_cases as $case ) {
+    $areas = get_the_terms( $case->ID, 'area' );
+    echo $areas ? $areas[0]->name : 'REMOVE ME AT LAUNCH';
+    echo '<br>';
+}
+?>
+
+
             <?php the_content(); ?>
           </div>
         </article>

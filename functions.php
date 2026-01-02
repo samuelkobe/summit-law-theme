@@ -29,6 +29,13 @@ if (!function_exists('summit_theme_setup')) {
       'style',
       'script'
     ]);
+
+    // Register custom image sizes for team member photos
+    // These provide more granular options for responsive images
+    add_image_size('team-photo-small', 400, 400, true);   // Mobile devices
+    add_image_size('team-photo-medium', 600, 600, true);  // Tablets
+    add_image_size('team-photo-large', 800, 800, true);   // Desktop
+    add_image_size('team-photo-xlarge', 1000, 1000, true); // Large screens
     add_theme_support('custom-logo', [
       'height' => 100,
       'width' => 300,
@@ -184,11 +191,38 @@ function summit_rename_posts_to_insights( $args, $post_type ) {
       'slug' => 'insights',
       'with_front' => false,
     ];
+
+    // Remove default taxonomies (categories and tags) from Insights
+    $args['taxonomies'] = [];
   }
 
   return $args;
 }
 add_filter( 'register_post_type_args', 'summit_rename_posts_to_insights', 10, 2 );
+
+/**
+ * Unregister default Categories and Tags from Insights (Posts)
+ */
+function summit_remove_default_taxonomies() {
+  // Unregister category taxonomy from posts
+  unregister_taxonomy_for_object_type( 'category', 'post' );
+
+  // Unregister post_tag taxonomy from posts
+  unregister_taxonomy_for_object_type( 'post_tag', 'post' );
+}
+add_action( 'init', 'summit_remove_default_taxonomies' );
+
+/**
+ * Remove Categories and Tags from admin menu
+ */
+function summit_remove_taxonomy_menus() {
+  // Remove Categories submenu from Insights
+  remove_submenu_page( 'edit.php', 'edit-tags.php?taxonomy=category' );
+
+  // Remove Tags submenu from Insights
+  remove_submenu_page( 'edit.php', 'edit-tags.php?taxonomy=post_tag' );
+}
+add_action( 'admin_menu', 'summit_remove_taxonomy_menus' );
 
 /**
  * Add custom rewrite rules for insights
@@ -252,3 +286,203 @@ function summit_flush_rewrite_rules() {
   flush_rewrite_rules();
 }
 add_action( 'after_switch_theme', 'summit_flush_rewrite_rules' );
+
+/**
+ * Completely Disable Comments Site-Wide
+ * Removes comments from all post types including posts, pages, and custom post types
+ */
+
+// Close comments on the front-end
+add_filter( 'comments_open', '__return_false', 20, 2 );
+add_filter( 'pings_open', '__return_false', 20, 2 );
+
+// Hide existing comments
+add_filter( 'comments_array', '__return_empty_array', 10, 2 );
+
+// Remove comments page in menu
+add_action( 'admin_menu', function() {
+  remove_menu_page( 'edit-comments.php' );
+} );
+
+// Remove comments links from admin bar
+add_action( 'admin_bar_menu', function( $wp_admin_bar ) {
+  $wp_admin_bar->remove_node( 'comments' );
+}, 999 );
+
+// Remove comments metabox from dashboard
+add_action( 'admin_init', function() {
+  remove_meta_box( 'dashboard_recent_comments', 'dashboard', 'normal' );
+} );
+
+// Disable support for comments and trackbacks in post types
+add_action( 'admin_init', function() {
+  // Get all post types
+  $post_types = get_post_types();
+
+  foreach ( $post_types as $post_type ) {
+    if ( post_type_supports( $post_type, 'comments' ) ) {
+      remove_post_type_support( $post_type, 'comments' );
+      remove_post_type_support( $post_type, 'trackbacks' );
+    }
+  }
+} );
+
+// Close comments on all existing posts
+add_action( 'admin_init', function() {
+  // Update all posts to have comments closed (runs once)
+  if ( ! get_option( 'summit_comments_disabled' ) ) {
+    global $wpdb;
+    $wpdb->query( "UPDATE $wpdb->posts SET comment_status = 'closed', ping_status = 'closed'" );
+    update_option( 'summit_comments_disabled', true );
+  }
+} );
+
+// Remove comment-reply script
+add_action( 'wp_enqueue_scripts', function() {
+  wp_dequeue_script( 'comment-reply' );
+}, 100 );
+
+// Remove comments from admin bar
+add_action( 'wp_before_admin_bar_render', function() {
+  global $wp_admin_bar;
+  $wp_admin_bar->remove_menu( 'comments' );
+} );
+
+/**
+ * Limit 'Areas' Taxonomy to Single Selection with Radio Buttons
+ * Applies to Cases and Insights post types
+ * Displays hierarchical structure with indentation
+ */
+function summit_areas_taxonomy_radio_metabox( $post, $box ) {
+  $taxonomy = 'area';
+
+  // Get current selected term
+  $current = wp_get_object_terms( $post->ID, $taxonomy, array( 'fields' => 'ids' ) );
+  $current_id = ! empty( $current ) ? $current[0] : 0;
+
+  echo '<div id="taxonomy-' . $taxonomy . '" class="categorydiv">';
+  echo '<ul style="list-style: none; padding-left: 0;">';
+
+  // Add "None" option
+  echo '<li style="margin-bottom: 5px;">';
+  echo '<label style="display: inline-block;">';
+  echo '<input type="radio" name="tax_input[' . $taxonomy . '][]" value="0"' . checked( $current_id, 0, false ) . ' style="margin-right: 5px;"> ';
+  echo '<em>None</em>';
+  echo '</label>';
+  echo '</li>';
+
+  // Display hierarchical terms with indentation
+  summit_display_area_terms_hierarchical( $taxonomy, 0, $current_id );
+
+  echo '</ul>';
+  echo '</div>';
+}
+
+/**
+ * Recursively display area terms in hierarchical order with indentation
+ *
+ * @param string $taxonomy Taxonomy name
+ * @param int    $parent_id Parent term ID (0 for top-level)
+ * @param int    $current_id Currently selected term ID
+ * @param int    $level Indentation level
+ */
+function summit_display_area_terms_hierarchical( $taxonomy, $parent_id = 0, $current_id = 0, $level = 0 ) {
+  // Get terms at this level
+  $terms = get_terms( array(
+    'taxonomy' => $taxonomy,
+    'hide_empty' => false,
+    'parent' => $parent_id,
+    'orderby' => 'name',
+    'order' => 'ASC'
+  ) );
+
+  if ( empty( $terms ) || is_wp_error( $terms ) ) {
+    return;
+  }
+
+  foreach ( $terms as $term ) {
+    // Calculate indentation (20px per level)
+    $indent = $level * 20;
+
+    echo '<li style="margin-bottom: 5px; padding-left: ' . $indent . 'px;">';
+    echo '<label style="display: inline-block;">';
+    echo '<input type="radio" name="tax_input[' . $taxonomy . '][]" value="' . $term->term_id . '"' . checked( $current_id, $term->term_id, false ) . ' style="margin-right: 5px;"> ';
+
+    // Add visual indicator for child items
+    if ( $level > 0 ) {
+      echo '<span style="color: #999;">— </span>';
+    }
+
+    echo esc_html( $term->name );
+    echo '</label>';
+    echo '</li>';
+
+    // Recursively display child terms
+    summit_display_area_terms_hierarchical( $taxonomy, $term->term_id, $current_id, $level + 1 );
+  }
+}
+
+/**
+ * Replace default Areas metabox with radio button version
+ * Only for Case and Post (Insight) post types
+ */
+function summit_register_areas_radio_metabox() {
+  // Remove default metabox for Cases
+  remove_meta_box( 'tagsdiv-area', 'case', 'side' );
+  remove_meta_box( 'areadiv', 'case', 'side' );
+
+  // Remove default metabox for Insights (posts)
+  remove_meta_box( 'tagsdiv-area', 'post', 'side' );
+  remove_meta_box( 'areadiv', 'post', 'side' );
+
+  // Add custom radio button metabox for Cases
+  add_meta_box(
+    'area-radio-metabox',
+    'Areas',
+    'summit_areas_taxonomy_radio_metabox',
+    'case',
+    'side',
+    'default'
+  );
+
+  // Add custom radio button metabox for Insights
+  add_meta_box(
+    'area-radio-metabox',
+    'Areas',
+    'summit_areas_taxonomy_radio_metabox',
+    'post',
+    'side',
+    'default'
+  );
+}
+add_action( 'add_meta_boxes', 'summit_register_areas_radio_metabox' );
+
+/**
+ * Remove 'Areas' taxonomy from Gutenberg block editor sidebar
+ * This prevents the checkbox interface from appearing alongside our radio buttons
+ */
+function summit_remove_area_from_gutenberg_sidebar() {
+  // Unregister the taxonomy panel from REST API for Cases
+  unregister_taxonomy_for_object_type( 'area', 'case' );
+
+  // Unregister the taxonomy panel from REST API for Insights
+  unregister_taxonomy_for_object_type( 'area', 'post' );
+
+  // Re-register it only for saving purposes (keeps functionality, removes UI)
+  register_taxonomy_for_object_type( 'area', 'case' );
+  register_taxonomy_for_object_type( 'area', 'post' );
+}
+add_action( 'init', 'summit_remove_area_from_gutenberg_sidebar', 99 );
+
+/**
+ * Remove the Areas taxonomy from Gutenberg block editor
+ * Uses the proper WordPress filter to prevent it from showing in the sidebar
+ */
+function summit_remove_area_taxonomy_from_rest( $args, $taxonomy ) {
+  if ( 'area' === $taxonomy ) {
+    // Hide from REST API response (removes from Gutenberg sidebar)
+    $args['show_in_rest'] = false;
+  }
+  return $args;
+}
+add_filter( 'register_taxonomy_args', 'summit_remove_area_taxonomy_from_rest', 10, 2 );

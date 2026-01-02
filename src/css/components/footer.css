@@ -43,7 +43,7 @@
   }
 
   .footer-menu li a {
-    @apply text-base text-white no-underline hover:text-green-accent1 hover:underline transition-colors duration-200;
+    @apply text-base text-white no-underline hover:text-green-accent1 hover:underline transition-colors duration-300;
   }
 
   .footer-legal-menu {
@@ -51,12 +51,12 @@
   }
 
   .footer-legal-menu li a {
-    @apply text-white no-underline hover:text-green-accent1 transition-colors duration-200 text-sm;
+    @apply text-white no-underline hover:text-green-accent1 transition-colors duration-300 text-sm;
   }
 
   /* Footer menu title links */
   .footer-grid .footer-menu-title-link {
-    @apply no-underline text-green-accent1 hover:text-green-accent2 transition-colors duration-200 inline-flex items-center gap-2;
+    @apply no-underline text-green-accent1 hover:text-green-accent2 transition-colors duration-300 inline-flex items-center gap-2;
   }
 
   /* Footer grid default link styles (for links without specific classes) */
@@ -73,5 +73,14 @@
   .footer-menu li a svg {
     @apply inline-block w-4 h-4 mr-2 align-text-bottom;
     fill: currentColor;
+  }
+
+  .footer-menu li.icon-phone a svg,
+  .footer-menu li.icon-email a svg {
+    @apply fill-[transparent] stroke-white;
+  }
+  .footer-menu li.icon-phone a:hover svg,
+  .footer-menu li.icon-email a:hover svg {
+    @apply stroke-green-accent1 transition-colors duration-300;
   }
 }

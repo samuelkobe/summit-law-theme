@@ -42,7 +42,7 @@
         "item_link": "Team Member Link",
         "item_link_description": "A link to a team member."
     },
-    "description": "",
+    "description": "Trial-ready lawyers focused on insurance defence, commercial disputes, and practical resolution—including mediation.",
     "public": true,
     "hierarchical": false,
     "exclude_from_search": false,
@@ -56,7 +56,7 @@
     "rest_base": "",
     "rest_namespace": "wp\/v2",
     "rest_controller_class": "WP_REST_Posts_Controller",
-    "menu_position": "",
+    "menu_position": 4,
     "menu_icon": {
         "type": "dashicons",
         "value": "dashicons-groups"
@@ -66,7 +66,6 @@
     "plural_capability_name": "posts",
     "supports": [
         "title",
-        "excerpt",
         "thumbnail",
         "custom-fields"
     ],
@@ -85,5 +84,5 @@
     "delete_with_user": false,
     "register_meta_box_cb": "",
     "enter_title_here": "",
-    "modified": 1766169741
+    "modified": 1767322932
 }

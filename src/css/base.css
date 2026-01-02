@@ -118,7 +118,7 @@
   .h2 {
     @apply font-normal leading-tight text-green-deep tracking-[-0.015em];
     font-family: "PP Museum", "Hanken Grotesk", system-ui, Arial, sans-serif;
-    font-size: clamp(32px, 2.2vw + 24px, 40px);
+    font-size: clamp(28px, 2.2vw + 24px, 32px);
   }
 
   .h3 {
@@ -202,7 +202,7 @@
   .entry-content a:not(.btn),
   .page-content a:not(.btn),
   p a:not(.btn) {
-    @apply underline text-green-deep decoration-[0.08em] underline-offset-[0.15em] transition-colors duration-200;
+    @apply underline text-green-deep decoration-[0.08em] underline-offset-[0.15em] transition-colors duration-300;
   }
 
   .entry-content a:not(.btn):hover,
@@ -214,7 +214,7 @@
   /* Original components layer content below */
   /* Buttons */
   .btn {
-    @apply max-w-[100dvm] w-fit py-3 px-6 rounded-[8px] text-base lg:text-lg leading-[23px] tracking-[0.05em] hover:cursor-pointer shadow-md hover:shadow-lg transition-all duration-300;
+    @apply font-semibold max-w-[100dvm] w-fit py-3 px-6 rounded-[8px] text-base lg:text-lg leading-[23px] tracking-[0.05em] hover:cursor-pointer shadow-md hover:shadow-lg transition-all duration-300;
     /* Default: primary style */
     @apply bg-green-deep hover:bg-brand-black text-white;
   }
@@ -222,6 +222,11 @@
   .btn.alt {
     /* Override colors for alt variant */
     @apply bg-green-accent1 hover:bg-green-accent2 text-brand-black;
+  }
+
+  .btn.outlined {
+    /* Override colors for outlined variant */
+    @apply border-2 border-brand-40 text-green-deep bg-transparent shadow-none hover:shadow-lg;
   }
 
   /* Forms */

@@ -137,7 +137,7 @@
 
 .search-toggle {
   @apply hidden lg:flex items-center justify-center w-10 h-10 p-2;
-  @apply transition-colors duration-200;
+  @apply transition-colors duration-300;
   background: none;
   border: none;
   cursor: pointer;
@@ -181,7 +181,7 @@
 .nav-menu > li > a {
   @apply flex items-center gap-2 px-4 py-2;
   @apply no-underline font-medium tracking-[0.01em];
-  @apply transition-colors duration-200;
+  @apply transition-colors duration-300;
   background: none;
   border: none;
   cursor: pointer;
@@ -242,7 +242,7 @@
   @apply text-lg font-semibold text-green-deep;
   @apply no-underline;
   @apply pb-2 border-b border-brand-30;
-  @apply transition-colors duration-200;
+  @apply transition-colors duration-300;
 }
 
 .mega-menu-column > a:hover {
@@ -259,7 +259,7 @@
 
 .mega-menu-links li a {
   @apply text-brand-black no-underline;
-  @apply transition-colors duration-200;
+  @apply transition-colors duration-300;
   font-size: 15px;
 }
 
@@ -339,7 +339,7 @@
   @apply absolute top-8 right-8;
   @apply w-10 h-10 p-2;
   @apply text-brand-black;
-  @apply transition-colors duration-200;
+  @apply transition-colors duration-300;
   background: none;
   border: none;
   cursor: pointer;
@@ -428,7 +428,7 @@
   @apply w-full flex items-center justify-between;
   @apply px-6 py-4;
   @apply text-left text-brand-black font-medium;
-  @apply transition-colors duration-200;
+  @apply transition-colors duration-300;
   background: none;
   border: none;
   cursor: pointer;
@@ -443,7 +443,7 @@
 .mobile-nav-menu > li > a {
   @apply block px-6 py-4;
   @apply text-brand-black font-medium no-underline;
-  @apply transition-colors duration-200;
+  @apply transition-colors duration-300;
   font-size: 18px;
 }
 
@@ -483,7 +483,7 @@
   @apply block px-6 py-3;
   @apply text-green-deep font-semibold no-underline;
   @apply border-l-2 border-transparent;
-  @apply transition-all duration-200;
+  @apply transition-all duration-300;
   font-size: 16px;
 }
 
@@ -503,7 +503,7 @@
   @apply block px-6 py-2 pl-8;
   @apply text-brand-black no-underline;
   @apply border-l-2 border-transparent;
-  @apply transition-all duration-200;
+  @apply transition-all duration-300;
   font-size: 15px;
 }
 

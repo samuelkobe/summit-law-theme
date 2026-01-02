@@ -23,7 +23,7 @@ if (!function_exists('summit_get_svg_icon')) {
 
     $args = wp_parse_args($args, $defaults);
 
-    $class = $args['class'] ? ' class="' . esc_attr($args['class']) . '"' : '';
+    $class = $args['class'] ? ' class="' . esc_attr($args['class']) . ' hover:fill-brand-black hover:shadow-lg transition-all duration-300"' : '';
     $aria_hidden = $args['aria-hidden'] ? ' aria-hidden="' . esc_attr($args['aria-hidden']) . '"' : '';
     $width = $args['width'] ? ' width="' . esc_attr($args['width']) . '"' : '';
     $height = $args['height'] ? ' height="' . esc_attr($args['height']) . '"' : '';
@@ -49,7 +49,7 @@ if (!function_exists('summit_get_svg_icon')) {
 
       'youtube' => '<svg xmlns="http://www.w3.org/2000/svg"' . $width . $height . ' viewBox="0 0 24 24" fill="currentColor"' . $class . $aria_hidden . '><path d="M10 9.333l5.333 2.662-5.333 2.672v-5.334zm14-4.333v14c0 2.761-2.238 5-5 5h-14c-2.761 0-5-2.239-5-5v-14c0-2.761 2.239-5 5-5h14c2.762 0 5 2.239 5 5zm-4 7c-.02-4.123-.323-5.7-2.923-5.877-2.403-.164-7.754-.163-10.153 0-2.598.177-2.904 1.747-2.924 5.877.02 4.123.323 5.7 2.923 5.877 2.399.163 7.75.164 10.153 0 2.598-.177 2.904-1.747 2.924-5.877z"/></svg>',
 
-      'email' => '<svg xmlns="http://www.w3.org/2000/svg"' . $width . $height . ' viewBox="0 0 24 24" fill="currentColor"' . $class . $aria_hidden . '><polygon points="19.5 6.4 4.5 6.4 12 12.6 19.5 6.4"/><polygon points="19.9 8.2 12 14.6 4.1 8.2 4.1 17.6 19.9 17.6 19.9 8.2"/><path d="M19,0H5C2.2,0,0,2.2,0,5v14c0,2.8,2.2,5,5,5h14c2.8,0,5-2.2,5-5V5c0-2.8-2.2-5-5-5ZM21.5,19.1H2.5V4.9h19v14.3Z"/></svg>',
+      'email' => '<svg xmlns="http://www.w3.org/2000/svg"' . $width . $height . ' viewBox="0 0 24 24" fill="currentColor"' . $class . $aria_hidden . '><path d="M18.1,7H5.9c-.2,0-.3.3-.1.4l5.7,4.7c.3.3.8.3,1.1,0l5.7-4.7c.2-.1,0-.4-.1-.4Z"/><path d="M18.8,8.9l-6.2,5c-.3.3-.8.3-1.1,0l-6.2-5c-.1-.1-.4,0-.4.2v7.8c0,.1.1.2.2.2h13.8c.1,0,.2-.1.2-.2v-7.8c0-.2-.2-.3-.4-.2Z"/><path d="M19,0H5C2.2,0,0,2.2,0,5v14c0,2.8,2.2,5,5,5h14c2.8,0,5-2.2,5-5V5c0-2.8-2.2-5-5-5ZM19.7,18.4H4.3c-.5,0-.9-.4-.9-.9V6.5c0-.5.4-.9.9-.9h15.3c.5,0,.9.4.9.9v11c0,.5-.4.9-.9.9Z"/></svg>',
 
       'email-alt' => '<svg xmlns="http://www.w3.org/2000/svg"' . $width . $height . ' viewBox="0 0 24 24" fill="#00000000" stroke="currentColor"' . $class . $aria_hidden . '><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>',
 
@@ -57,7 +57,7 @@ if (!function_exists('summit_get_svg_icon')) {
       
       'phone-alt' => '<svg xmlns="http://www.w3.org/2000/svg"' . $width . $height . ' viewBox="0 0 24 24"fill="#00000000" stroke="currentColor"' . $class . $aria_hidden . '><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>',
 
-      'fax-alt' => '<svg xmlns="http://www.w3.org/2000/svg"' . $width . $height . ' viewBox="0 0 24 24" fill="#00000000" stroke="currentColor"' . $class . $aria_hidden . '><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4h10M5 8h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2zM8 4v4M16 4v4"></path><rect x="6" y="12" width="2" height="2" rx="0.5" fill="currentColor"/><rect x="11" y="12" width="2" height="2" rx="0.5" fill="currentColor"/><rect x="16" y="12" width="2" height="2" rx="0.5" fill="currentColor"/><rect x="6" y="16" width="2" height="2" rx="0.5" fill="currentColor"/><rect x="11" y="16" width="2" height="2" rx="0.5" fill="currentColor"/><rect x="16" y="16" width="2" height="2" rx="0.5" fill="currentColor"/></svg>',
+      'fax-alt' => '<svg xmlns="http://www.w3.org/2000/svg"' . $width . $height . ' viewBox="0 0 24 24" fill="currentColor"' . $class . $aria_hidden . '><path d="M8 13v1h2v-1h-2zm2-1v-1h-2v1h2zm1 1v1h2v-1h-2zm2-1v-1h-2v1h2zm1 1v1h2v-1h-2zm2-1v-1h-2v1h2zm3-5h-14v3h14v-3zm-3 11h-8v1h8v-1zm-2 2h-6v1h6v-1zm6-17v-3h-16v3h-3v17h3v4h11.73c1.248 0 3.437-2.604 4.041-4h3.229v-17h-3zm-15-2h14v2h-14v-2zm14 17.771c0 1.418-1.943 1.717-2.62 1.531.453.813.276 2.698-1.109 2.698h-10.271v-6h14v1.771zm2-3.771h-18v-10h18v10z"/></svg>',
 
       'vcard-alt' => '<svg xmlns="http://www.w3.org/2000/svg"' . $width . $height . ' viewBox="0 0 24 24" fill="#00000000" stroke="currentColor"' . $class . $aria_hidden . '><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path><rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>',
     ];

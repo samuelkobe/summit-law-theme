@@ -22,10 +22,22 @@ get_header(); ?>
 		<section class="bg-gradient-to-b from-brand-black to-[#34312D]">
 			<div class="grid md:grid-cols-12 md:container mx-auto !px-0">
 
-				<div class="md:self-end md:col-start-1 md:col-span-6 lg:col-start-2 lg:col-span-5 xl:col-start-2 xl:col-span-4 px-4">
+				<div class="overflow-hidden md:self-end md:col-start-1 md:col-span-6 lg:col-start-2 lg:col-span-5 xl:col-start-2 xl:col-span-4 px-4">
 					<?php if ( has_post_thumbnail() ) : ?>
-						<div class="aspect-[3/4] overflow-hidden opacity-95">
-							<?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-full object-cover' ) ); ?>
+						<div class="aspect-[3/4] overflow-hidden opacity-100">
+							<?php
+								the_post_thumbnail( 'large', array(
+									'class' => 'w-full h-full object-cover',
+									'sizes' => '(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw'
+								) );
+							?>
+						</div>
+						<?php else : ?>
+						<div class="hidden md:aspect-[3/4] md:flex md:items-center md:justify-center">
+							<!-- Wordpress'site identity Logo -->
+							<?php if ( function_exists( 'the_custom_logo' ) ) {
+								the_custom_logo();
+							} ?>
 						</div>
 					<?php endif; ?>
 				</div>
@@ -37,7 +49,7 @@ get_header(); ?>
 							echo esc_html( $role['label'] ); // display role label
 						endif; ?>
 					</h2>
-					<p class="text-lg lg:text-xl text-white lg:mb-16 2xl:max-w-[75%]"><?php echo wp_kses_post( get_the_excerpt() ); ?></p>
+					<p class="text-lg max-md:block max-lg:hidden lg:text-xl text-white lg:mb-16 2xl:max-w-[75%]"><?php echo wp_kses_post( get_field( 'short_description' ) ); ?></p>
 
 					<?php
 					// Check if legal assistant is enabled
@@ -136,7 +148,7 @@ get_header(); ?>
 			</div>
 		</section>
 
-		<section class="bg-white ">
+		<section class="bg-white">
 																	
 			<div class="container mx-auto flex flex-col md:flex-row md:justify-between">
 				<nav aria-label="Breadcrumb" class="hidden md:block py-8">
@@ -166,9 +178,9 @@ get_header(); ?>
 						</li>
 					</ol>
 				</nav>
-				<div class="py-8 flex flex-row gap-x-4">
-					<span class="text-base">connect</span>
-					<?php if ( have_rows('social_links') ) : ?>
+				<?php if ( have_rows('social_links') ) : ?>
+					<div class="py-8 flex flex-row gap-x-4">
+						<span class="text-base lowercase">Connect</span>
 							<ul class="team-social flex flex-row items-center gap-2">
 									<?php while ( have_rows('social_links') ) : the_row(); 
 											$type   = get_sub_field('social_type');
@@ -233,11 +245,216 @@ get_header(); ?>
 											</li>
 									<?php endwhile; ?>
 							</ul>
+						</div>
 					<?php endif; ?>
-				</div>
 			</div>
 			
 		</section>
+
+		<section class="bg-white min-h-[30dvh] pb-12 lg:pb-16">
+			<div class="md:container grid grid-cols-1 lg:grid-cols-12 gap-8 p-6  lg:px-6 lg:py-8">
+				<div class="lg:col-span-4">
+					<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]">Profile Summary</h2>
+				</div>
+				<div class="lg:col-span-7">
+					<p class="text-lg leading-8 xl:text-xl xl:leading-9 2xl:text-xl 2xl:leading-10 font-normal"><?php echo get_field( 'profile_summary' ); ?></p>
+				</div>
+			</div>
+	
+
+
+		<?php if ( have_rows( 'areas' ) ) : ?>
+
+				<div class="md:container grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 lg:px-6 lg:py-10">
+					<div class="lg:col-span-4">
+						<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]">Focus Areas</h2>
+					</div>
+					<div class="lg:col-span-7">
+							<ul class="text-lg leading-8 xl:text-xl xl:leading-9 2xl:text-xl 2xl:leading-10 font-normal list-none space-y-2">
+								<?php while ( have_rows( 'areas' ) ) : the_row(); ?>
+									<li class="flex items-start before:top-4 xl:before:top-[18px] 2xl:before:top-5 before:relative gap-5 before:content-[''] before:block before:w-[15px] before:h-[3px] before:bg-green-accent1 before:flex-shrink-0">
+										<?php the_sub_field( 'area_name' ); ?>
+									</li>
+								<?php endwhile; ?>
+							</ul>
+					</div>
+				</div>
+
+		<?php else : ?>
+			<?php // No rows found ?>
+		<?php endif; ?>
+
+		<?php if ( have_rows( 'affiliations' ) ) : ?>
+
+				<div class="md:container grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 lg:px-6 lg:py-10">
+					<div class="lg:col-span-4">
+						<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]">Advocacy Affiliations</h2>
+					</div>
+					<div class="lg:col-span-7">
+							<ul class="text-lg leading-8 xl:text-xl xl:leading-9 2xl:text-xl 2xl:leading-10 font-normal list-none space-y-2">
+								<?php while ( have_rows( 'affiliations' ) ) : the_row(); ?>
+									<li class="flex items-start before:top-[14px] xl:before:top-[18px] 2xl:before:top-5 before:relative gap-4 lg:gap-5 before:content-[''] before:block before:w-[15px] before:h-[3px] before:bg-green-accent1 before:flex-shrink-0">
+										<?php the_sub_field( 'affiliation_title' ); ?>
+									</li>
+								<?php endwhile; ?>
+							</ul>
+					</div>
+				</div>
+
+		<?php else : ?>
+			<?php // No rows found ?>
+		<?php endif; ?>
+
+		<?php $cases = get_field( 'cases' ); ?>
+		<?php if ( $cases ) : ?>
+
+				<div class="md:container grid grid-cols-1 gap-8 p-6 lg:px-6 lg:py-16">
+					<div class="col-spam-1">
+						<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]">Selected Cases</h2>
+					</div>
+					<div class="col-span-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+						<?php foreach ( $cases as $post ) : ?>
+							<?php setup_postdata ( $post ); ?>
+							<div class="group col-span-1 mb-6">
+								<!-- <?//php if ( has_post_thumbnail() ) : ?>
+									<a href="<?//php the_permalink(); ?>" class="block mb-1 rounded-lg overflow-hidden group-hover:shadow-xl transition-shadow duration-300">
+										<//?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover' ) ); ?>
+									</a>
+								<?//php endif; ?> -->
+								<div class="flex justify-between items-center mb-2 text-brand-black uppercase text-xs border-b-2 border-b-brand-30 pt-4 lg:pt-6 pb-2 lg:pb-3">
+									<div>
+										<?php
+										// Create link to case archive filtered by month/year
+										$year = get_the_date( 'Y' );
+										$month = get_the_date( 'm' );
+										$date_link = add_query_arg(
+											array(
+												'post_type' => 'case',
+												'year' => $year,
+												'monthnum' => $month
+											),
+											home_url( '/' )
+										);
+										?>
+										<a href="<?php echo esc_url( $date_link ); ?>" class="hover:text-brand-black transition-colors duration-300 border-b-transparent border-b-[1px] hover:border-b-brand-black">
+											<?php echo get_the_date( 'F Y' ); ?>
+										</a>
+									</div>
+									<div>
+									<?php
+										$areas = get_the_terms( get_the_ID(), 'area' );
+										if ( $areas && ! is_wp_error( $areas ) ) {
+											$term_link = add_query_arg( 'post_type', 'case', get_term_link( $areas[0] ) );
+											echo '<a href="' . esc_url( $term_link ) . '" class="hover:text-brand-black transition-colors duration-300 border-b-transparent border-b-[1px] hover:border-b-brand-black">';
+											echo esc_html( $areas[0]->name );
+											echo '</a>';
+										}
+										?>
+									</div>
+								</div>
+								<a href="<?php the_permalink(); ?>" class="text-green-deep font-hanken font-normal text-lg lg:text-xl border-b-transparent border-b-2 group-hover:border-b-green-deep transition-colors duration-300">
+									<?php the_title(); ?>
+								</a>
+								<div class="mt-1 lg:mt-2 text-sm lg:text-base text-brand-70">
+									<?php
+									$excerpt = get_the_excerpt();
+									if ( $excerpt ) {
+										echo wp_trim_words( $excerpt, 15, '...' );
+									}
+									?>
+								</div>
+							</div>
+						<?php endforeach; ?>
+					</div>
+					<a class="btn outlined"
+					   href="<?php echo esc_url( get_post_type_archive_link( 'case' ) ); ?>"
+					   aria-label="View all insights articles"
+					   title="Browse our complete collection of legal insights and articles">
+						View All Cases
+					</a>
+				</div>
+
+			<?php wp_reset_postdata(); ?>
+		<?php endif; ?>
+
+
+<?php $insights = get_field( 'insights' ); ?>
+		<?php if ( $insights ) : ?>
+
+				<div class="md:container grid grid-cols-1 gap-8 p-6 lg:px-6 lg:py-16">
+					<div class="col-spam-1">
+						<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]">Related Insights</h2>
+						<?php if ( get_field( 'insights_subtitle' ) ) : ?>
+							<p class="text-lg lg:text-xl text-brand-50 pt-2 lg:pt-4"><?php echo esc_html( get_field( 'insights_subtitle' ) ); ?></p>
+						<?php endif; ?>
+					</div>
+					<div class="col-span-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+						<?php foreach ( $insights as $post ) : ?>
+							<?php setup_postdata ( $post ); ?>
+							<div class="group col-span-1 mb-6">
+								<?php if ( has_post_thumbnail() ) : ?>
+									<a href="<?php the_permalink(); ?>" class="block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000">
+										<?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover' ) ); ?>
+									</a>
+								<?php endif; ?>
+								<div class="flex justify-between items-center mb-2 text-brand-black uppercase text-xs border-b-2 border-b-brand-30 pt-4 lg:pt-6 pb-2 lg:pb-3">
+									<div>
+										<?php
+										// Create link to case archive filtered by month/year
+										$year = get_the_date( 'Y' );
+										$month = get_the_date( 'm' );
+										$date_link = add_query_arg(
+											array(
+												'post_type' => 'case',
+												'year' => $year,
+												'monthnum' => $month
+											),
+											home_url( '/' )
+										);
+										?>
+										<a href="<?php echo esc_url( $date_link ); ?>" class="hover:text-brand-black transition-colors duration-300 border-b-transparent border-b-[1px] hover:border-b-brand-black">
+											<?php echo get_the_date( 'F Y' ); ?>
+										</a>
+									</div>
+									<div>
+									<?php
+										$areas = get_the_terms( get_the_ID(), 'area' );
+										if ( $areas && ! is_wp_error( $areas ) ) {
+											$term_link = add_query_arg( 'post_type', 'case', get_term_link( $areas[0] ) );
+											echo '<a href="' . esc_url( $term_link ) . '" class="hover:text-brand-black transition-colors duration-300 border-b-transparent border-b-[1px] hover:border-b-brand-black">';
+											echo esc_html( $areas[0]->name );
+											echo '</a>';
+										}
+										?>
+									</div>
+								</div>
+								<a href="<?php the_permalink(); ?>" class="text-green-deep font-hanken font-normal text-lg lg:text-xl underline decoration-2 decoration-transparent group-hover:decoration-green-deep underline-offset-2 transition-colors duration-300">
+									<?php the_title(); ?>
+								</a>
+								<div class="mt-1 lg:mt-2 text-sm lg:text-base text-brand-70">
+									<?php
+									$excerpt = get_the_excerpt();
+									if ( $excerpt ) {
+										echo wp_trim_words( $excerpt, 15, '...' );
+									}
+									?>
+								</div>
+							</div>
+						<?php endforeach; ?>
+					</div>
+
+					<a class="btn outlined"
+					   href="<?php echo esc_url( get_post_type_archive_link( 'post' ) ); ?>"
+					   aria-label="View all insights articles"
+					   title="Browse our complete collection of legal insights and articles">
+						View All Insights
+					</a>
+
+				</div>
+			<?php wp_reset_postdata(); ?>
+		<?php endif; ?>
+
+	</section>
 
 				<!-- Bio / Main Content -->
 				<?php if ( get_the_content() ) : ?>

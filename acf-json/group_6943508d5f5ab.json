@@ -19,7 +19,7 @@
             "choices": {
                 "partner": "Partner",
                 "associate": "Associate",
-                "clerk": "Clerk",
+                "clerk": "Law Clerk",
                 "assistant": "Legal Assistant"
             },
             "default_value": "partner",
@@ -27,6 +27,45 @@
             "allow_null": 0,
             "allow_in_bindings": 0,
             "layout": "horizontal"
+        },
+        {
+            "key": "field_6952e4b1de86a",
+            "label": "Short Description",
+            "name": "short_description",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "Add a short description of the team member here. This information will appear on their team card and at the top of their team member page. It should be no more than 250 characters in length.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": 250,
+            "allow_in_bindings": 0,
+            "rows": 4,
+            "placeholder": "",
+            "new_lines": "br"
+        },
+        {
+            "key": "field_6952e45a2987f",
+            "label": "Contact",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
         },
         {
             "key": "field_6943509f366db",
@@ -264,6 +303,39 @@
             ]
         },
         {
+            "key": "field_6952e470062f7",
+            "label": "Assistant",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
             "key": "field_694350f2366df",
             "label": "Has Legal Assistant?",
             "name": "legal_assistant_toggle",
@@ -356,6 +428,384 @@
                     "bidirectional_target": []
                 }
             ]
+        },
+        {
+            "key": "field_6952ea813c1cf",
+            "label": "Summary",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_6952ebecf06f5",
+            "label": "Profile Summary",
+            "name": "profile_summary",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "Longer description of the team member (Max 1000 characters).",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": 1000,
+            "allow_in_bindings": 0,
+            "rows": 6,
+            "placeholder": "",
+            "new_lines": "br"
+        },
+        {
+            "key": "field_6952eaa711872",
+            "label": "Focus Areas",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_6952f448df1d2",
+            "label": "Areas",
+            "name": "areas",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "pagination": 0,
+            "min": 1,
+            "max": 0,
+            "collapsed": "field_6952f459df1d3",
+            "button_label": "Add Focus Area",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_6952f459df1d3",
+                    "label": "Area name",
+                    "name": "area_name",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "allow_in_bindings": 0,
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_6952f448df1d2"
+                }
+            ]
+        },
+        {
+            "key": "field_6952eabd11874",
+            "label": "Advocacy Affiliations",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_6952f62d4f283",
+            "label": "Affiliations",
+            "name": "affiliations",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "pagination": 0,
+            "min": 1,
+            "max": 0,
+            "collapsed": "field_6952f62d4f284",
+            "button_label": "Add Affiliation",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_6952f62d4f284",
+                    "label": "Affiliation title",
+                    "name": "affiliation_title",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "allow_in_bindings": 0,
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_6952f62d4f283"
+                }
+            ]
+        },
+        {
+            "key": "field_6952ead611876",
+            "label": "Selected Cases",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_69545b5170588",
+            "label": "Cases",
+            "name": "cases",
+            "aria-label": "",
+            "type": "relationship",
+            "instructions": "Add up to 8 selected cases.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "post_type": [
+                "case"
+            ],
+            "post_status": [
+                "publish"
+            ],
+            "taxonomy": "",
+            "filters": [
+                "search"
+            ],
+            "return_format": "object",
+            "min": "",
+            "max": 8,
+            "allow_in_bindings": 0,
+            "elements": "",
+            "bidirectional": 0,
+            "bidirectional_target": []
+        },
+        {
+            "key": "field_6952eae711878",
+            "label": "Related Insights",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_6955bc296987c",
+            "label": "Insights Subtitle",
+            "name": "insights_subtitle",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Short subtitle for this section (Max 50 characters, optional).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": 50,
+            "allow_in_bindings": 0,
+            "placeholder": "ie. Papers and Seminars Delivered",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_6955bbdd39a05",
+            "label": "Insights",
+            "name": "insights",
+            "aria-label": "",
+            "type": "relationship",
+            "instructions": "Add up to 8 selected cases.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "post_type": [
+                "post"
+            ],
+            "post_status": [
+                "publish"
+            ],
+            "taxonomy": "",
+            "filters": [
+                "search"
+            ],
+            "return_format": "object",
+            "min": "",
+            "max": 8,
+            "allow_in_bindings": 0,
+            "elements": "",
+            "bidirectional": 0,
+            "bidirectional_target": []
         }
     ],
     "location": [
@@ -379,5 +829,5 @@
     "description": "",
     "show_in_rest": 0,
     "display_title": "",
-    "modified": 1766445009
+    "modified": 1767303099
 }

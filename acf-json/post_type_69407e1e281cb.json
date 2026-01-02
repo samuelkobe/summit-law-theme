@@ -42,7 +42,7 @@
         "item_link": "Service Link",
         "item_link_description": "A link to a service."
     },
-    "description": "Our Custom Post Type for Services",
+    "description": "Focused advocacy in insurance defence, commercial litigation, and mediation across multiple provinces—delivering clarity, strategy, and results.",
     "public": true,
     "hierarchical": true,
     "exclude_from_search": false,
@@ -56,7 +56,7 @@
     "rest_base": "",
     "rest_namespace": "wp\/v2",
     "rest_controller_class": "WP_REST_Posts_Controller",
-    "menu_position": "",
+    "menu_position": 4,
     "menu_icon": {
         "type": "dashicons",
         "value": "dashicons-bank"
@@ -87,5 +87,5 @@
     "delete_with_user": false,
     "register_meta_box_cb": "",
     "enter_title_here": "",
-    "modified": 1765836819
+    "modified": 1767323030
 }

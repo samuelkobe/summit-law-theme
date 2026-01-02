@@ -5,6 +5,7 @@ import MegaMenu from './navigation/mega-menu.js';
 import MobileMenu from './navigation/mobile-menu.js';
 import SearchOverlay from './navigation/search-overlay.js';
 import ScrollBehavior from './navigation/scroll-behavior.js';
+import BannerAnimation from './banner-animation.js';
 
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Summit Law Theme loaded');
@@ -14,6 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
   new MobileMenu();
   new SearchOverlay();
   new ScrollBehavior();
+
+  // Initialize banner animation
+  new BannerAnimation();
 });
 
 // Focus first error on submit for accessibility
