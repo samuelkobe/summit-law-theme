@@ -23,9 +23,9 @@ get_header();
 				// Optional: Add ACF fields or custom description
 				$post_type = get_post_type_object( 'service' );
 				if ( $post_type && ! empty( $post_type->description ) ) : ?>
-					<?php echo esc_html( $post_type->description ); ?>
+					<?php echo 'ARCHIVE: ' . esc_html( $post_type->description ); ?>
 				<?php else : ?>
-					Focused advocacy in insurance defence, commercial litigation, and mediation across multiple provinces—delivering clarity, strategy, and results.
+					ARCHIVE: Focused advocacy in insurance defence, commercial litigation, and mediation across multiple provinces—delivering clarity, strategy, and results.
 				<?php endif; ?>
 			</p>
 		</section>

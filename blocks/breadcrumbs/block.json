@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/breadcrumbs",
+  "title": "Breadcrumbs - Summit Law LLP",
+  "description": "A block for displaying breadcrumbs.",
+  "category": "formatting",
+  "icon": "ellipsis",
+  "keywords": ["breadcrumbs", "navigation", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "breadcrumbs.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

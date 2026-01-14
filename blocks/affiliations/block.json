@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/affiliations",
+  "title": "Affiliations - Summit Law LLP",
+  "description": "A block for displaying affiliations logos/links in a grid layout.",
+  "category": "formatting",
+  "icon": "images-alt",
+  "keywords": ["affiliations", "logos", "links", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "affiliations.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

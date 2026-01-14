@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/accordion",
+  "title": "Accordion - Summit Law LLP",
+  "description": "A block to display an accordion style content section.",
+  "category": "formatting",
+  "icon": "excerpt-view",
+  "keywords": ["accordion", "faq", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "accordion.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

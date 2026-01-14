@@ -6,6 +6,7 @@ import MobileMenu from './navigation/mobile-menu.js';
 import SearchOverlay from './navigation/search-overlay.js';
 import ScrollBehavior from './navigation/scroll-behavior.js';
 import BannerAnimation from './banner-animation.js';
+import BulletGroupStyling from './bullet-group.js';
 
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Summit Law Theme loaded');
@@ -18,6 +19,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Initialize banner animation
   new BannerAnimation();
+
+  // Initialize bullet group styling
+  new BulletGroupStyling();
 });
 
 // Focus first error on submit for accessibility

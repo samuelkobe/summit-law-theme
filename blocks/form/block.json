@@ -1,0 +1,23 @@
+{
+  "name": "acf/form",
+  "title": "Contact Form - Summit Law LLP",
+  "description": "A block for adding content and a main form",
+  "style": ["file:./form.css"],
+  "category": "formatting",
+  "icon": "text",
+  "keywords": [
+    "form",
+    "contact",
+    "contact form",
+    "submit",
+    "webok",
+    "summit law llp"
+  ],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "form.php"
+  },
+  "supports": {
+    "anchor": true
+  }
+}

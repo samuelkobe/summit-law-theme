@@ -59,6 +59,10 @@
   position: relative;
 }
 
+.h2-line-after.alt-line-after {
+  @apply after:bg-brand-30;
+}
+
 /* Animation states for h2 line */
 .h2-line-after::after {
   transform-origin: left center;

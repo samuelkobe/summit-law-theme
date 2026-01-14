@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/content-banner",
+  "title": "Content Banner - Summit Law LLP",
+  "description": "A content banner block for displaying a small banner with content.",
+  "category": "formatting",
+  "icon": "cover-image",
+  "keywords": ["banner", "content", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "content_banner.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

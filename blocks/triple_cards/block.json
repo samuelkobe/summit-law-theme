@@ -2,11 +2,11 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "acf/triple-cards",
-  "title": "Triple Cards",
+  "title": "Triple Cards - Summit Law LLP",
   "description": "A starter template for creating ACF blocks.",
   "category": "formatting",
   "icon": "slides",
-  "keywords": ["triple", "cards", "acf"],
+  "keywords": ["triple", "cards", "acf", "summit law llp"],
   "acf": {
     "mode": "preview",
     "renderTemplate": "triple_cards.php"

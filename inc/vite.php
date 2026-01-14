@@ -175,14 +175,24 @@ function summit_enqueue_editor_assets() {
       filemtime($css_file)
     );
 
-    // Debug: Output inline to confirm this is running
+    // Debug: Output inline to confirm this is running in both admin and iframe
     add_action('admin_head', function() {
-      echo '<!-- Summit Law: Editor CSS enqueued successfully -->';
+      echo '<!-- Summit Law: Editor CSS enqueued in admin_head -->' . "\n";
+    });
+    add_action('wp_head', function() {
+      if (is_admin()) {
+        echo '<!-- Summit Law: Editor CSS enqueued in wp_head (iframe) -->' . "\n";
+      }
     });
   } else {
     // Debug: File doesn't exist
     add_action('admin_head', function() use ($css_file) {
-      echo '<!-- Summit Law: CSS file NOT found at ' . esc_html($css_file) . ' -->';
+      echo '<!-- Summit Law: CSS file NOT found at ' . esc_html($css_file) . ' -->' . "\n";
+    });
+    add_action('wp_head', function() use ($css_file) {
+      if (is_admin()) {
+        echo '<!-- Summit Law: CSS file NOT found in iframe at ' . esc_html($css_file) . ' -->' . "\n";
+      }
     });
   }
 
@@ -207,6 +217,26 @@ function summit_enqueue_editor_assets() {
     /* Full-width blocks remain 100% */
     .wp-block[data-align="full"] {
       max-width: none;
+    }
+
+    /* Override WordPress block editor default image styles */
+    /* This allows Tailwind utilities to work on images in ACF blocks */
+    .block-editor__container img {
+      max-width: none !important;
+      height: auto !important;
+    }
+
+    /* Ensure Tailwind utilities apply to images in blocks */
+    [data-type^="acf/"] img.w-full {
+      width: 100% !important;
+    }
+
+    [data-type^="acf/"] img.h-full {
+      height: 100% !important;
+    }
+
+    [data-type^="acf/"] img.object-cover {
+      object-fit: cover !important;
     }
   ';
 

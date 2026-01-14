@@ -316,11 +316,6 @@ get_header(); ?>
 						<?php foreach ( $cases as $post ) : ?>
 							<?php setup_postdata ( $post ); ?>
 							<div class="group col-span-1 mb-6">
-								<!-- <?//php if ( has_post_thumbnail() ) : ?>
-									<a href="<?//php the_permalink(); ?>" class="block mb-1 rounded-lg overflow-hidden group-hover:shadow-xl transition-shadow duration-300">
-										<//?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover' ) ); ?>
-									</a>
-								<?//php endif; ?> -->
 								<div class="flex justify-between items-center mb-2 text-brand-black uppercase text-xs border-b-2 border-b-brand-30 pt-4 lg:pt-6 pb-2 lg:pb-3">
 									<div>
 										<?php
@@ -368,8 +363,8 @@ get_header(); ?>
 					</div>
 					<a class="btn outlined"
 					   href="<?php echo esc_url( get_post_type_archive_link( 'case' ) ); ?>"
-					   aria-label="View all insights articles"
-					   title="Browse our complete collection of legal insights and articles">
+					   aria-label="View all cases"
+					   title="Browse our complete collection of legal cases handled by our team">
 						View All Cases
 					</a>
 				</div>

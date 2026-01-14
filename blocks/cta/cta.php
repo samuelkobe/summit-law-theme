@@ -32,9 +32,9 @@ if ( ! empty( $block['align'] ) ) {
 	}
 </style>
 
-<div id="<?php echo esc_attr( $id ); ?>" class="<?php echo esc_attr( $classes ); ?> bg-brand-20 py-24">
+<div id="<?php echo esc_attr( $id ); ?>" class="<?php echo esc_attr( $classes ); ?> bg-brand-10 py-24">
 	<div class="container mx-auto flex flex-col items-center justify-center text-center px-4 lg:px-0">
-		<h2 class="h2 mb-4 lg:mb-5"><?php the_field( 'call_to_action_title' ); ?></h2>
+		<h2 class="h2 mb-4"><?php the_field( 'call_to_action_title' ); ?></h2>
 		<p class="text-brand-black text-lg lg:text-xl mb-7 lg:mb-11 w-fit text-center"><?php the_field( 'call_to_action_content' ); ?></p>
 		<?php $call_to_action_linked_page = get_field( 'call_to_action_linked_page' ); ?>
 		<?php if ( $call_to_action_linked_page ) : ?>

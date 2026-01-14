@@ -1,0 +1,209 @@
+/* Form Fields */
+.wpcf7-form input,
+.wpcf7-form textarea,
+.wpcf7-form .wpcf7-select {
+  @apply text-green-deep mb-3 lg:mb-6 rounded-lg font-normal border-transparent focus:outline-none outline-none ring-2 ring-transparent focus:ring-2 focus:ring-transparent focus:text-green-deep focus:border-green-accent2 px-2 py-4 lg:p-4 w-full max-w-full shadow-md focus:shadow-xl transition-all duration-300;
+}
+
+.wpcf7-form input::placeholder,
+.wpcf7-form textarea::placeholder {
+  @apply font-normal text-brand-40;
+}
+
+.wpcf7-form input {
+  @apply h-12 lg:h-14;
+}
+
+.wpcf7-form textarea {
+  @apply h-20 lg:h-32;
+}
+
+.wpcf7-form .wpcf7-checkbox {
+  @apply flex flex-col w-full mt-0;
+}
+
+.wpcf7-form .wpcf7-list-item.first,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.first,
+.wpcf7-form .wpcf7-list-item.last,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.last,
+.wpcf7-form .wpcf7-list-item,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item {
+  @apply flex flex-row items-start;
+}
+
+.wpcf7-form .wpcf7-list-item.first label,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.first label,
+.wpcf7-form .wpcf7-list-item.last label,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.last label,
+.wpcf7-form .wpcf7-list-item label,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item label {
+  @apply flex flex-row-reverse gap-2 items-center;
+}
+
+.wpcf7-form .wpcf7-list-item.first label input,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.first label input,
+.wpcf7-form .wpcf7-list-item.last label input,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.last label input,
+.wpcf7-form .wpcf7-list-item label input,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item label input {
+  @apply inline-block w-2 h-2 p-2;
+}
+
+.wpcf7-form .wpcf7-list-item.first label span,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.first label span,
+.wpcf7-form .wpcf7-list-item.last label span,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.last label span,
+.wpcf7-form .wpcf7-list-item label span,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item label span {
+  @apply text-lg lg:text-xl text-brand-black;
+}
+
+.wpcf7-form .wpcf7-list-item,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item {
+  @apply ml-0;
+}
+
+.wpcf7-form input.wpcf7-submit {
+  @apply mt-2 text-base xl:text-lg py-1 px-8 font-normal lg:font-medium font-sans tracking-wider shadow-md hover:shadow-xl text-green-deep flex w-fit bg-green-accent1 hover:bg-green-accent2 hover:border-green-accent2 border-2 lg:border-[3px] border-green-accent1 cursor-pointer transition-all duration-300;
+}
+
+.wpcf7-form .wpcf7-select {
+  @apply inline-block h-10 lg:h-12 py-1 text-xl font-normal text-green-deep w-full max-w-full min-w-[180px] bg-[#ffffff] placeholder-brand-30;
+  box-shadow: 0 1px 0 1px rgba(0, 0, 0, 0.04);
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7.57 3.75'%3E%3Cpolygon points='1.22 0.5 6.36 0.5 3.79 3.04 3.79 3.04 1.22 0.5' style='fill:%2329472d;stroke:%2329472d;stroke-miterlimit:10'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, repeat;
+  background-position: right 0.7em top 50%, 0 0;
+  background-size: 0.65em auto, 100%;
+}
+
+/* When the empty value option is selected (placeholder state) */
+.wpcf7-form .wpcf7-select:has(option[value=""]:checked) {
+  @apply text-brand-40;
+}
+
+.wpcf7-form .ajax-loader {
+  @apply absolute m-0 -left-3 top-3;
+}
+
+.wpcf7-form input,
+.wpcf7-form textarea,
+.wpcf7-form .wpcf7-select {
+  @apply border-2 border-green-accent1;
+}
+
+.wpcf7-form h2,
+.wpcf7-form h3,
+.wpcf7-form h4 {
+  @apply col-span-12 text-brand-black font-bold inline-block mt-1 lg:mt-2;
+}
+
+.wpcf7-form h2 {
+  @apply text-xl lg:text-3xl mt-4;
+}
+
+.wpcf7-form h3 {
+  @apply text-lg lg:text-2xl italic;
+}
+
+.wpcf7-form h4 {
+  @apply text-base lg:text-xl -mb-4 lg:-mb-6;
+}
+
+.wpcf7-form .form-wrapper:first-child .form-col:first-child h2 {
+  @apply mt-0 !important;
+}
+
+.wpcf7-form .form-label {
+  @apply text-sm lg:text-lg text-inherit font-normal mb-1 inline-block;
+}
+
+.wpcf7-form .form-note {
+  @apply text-xs text-brand-30 mb-1 inline-block;
+}
+
+/* Form Structure */
+.wpcf7-form {
+}
+
+.form-wrapper {
+}
+
+.form-wrapper .form-col {
+  @apply flex flex-col col-span-12;
+}
+
+.form-wrapper .col-half {
+  @apply col-span-12 sm:col-span-6;
+}
+
+.form-wrapper .col-third {
+  @apply col-span-12 sm:col-span-6 lg:col-span-4;
+}
+
+.form-wrapper .col-quarter {
+  @apply col-span-12 sm:col-span-6 lg:col-span-3;
+}
+
+.form-wrapper .col-two-third {
+  @apply col-span-12 lg:col-span-8;
+}
+
+.form-wrapper .col-three-quarter {
+  @apply col-span-12 lg:col-span-9;
+}
+
+.form-wrapper .col-five-sixth {
+  @apply col-span-12 sm:col-span-10 lg:col-span-10;
+}
+
+.form-wrapper .col-sixth {
+  @apply col-span-12 sm:col-span-2 lg:col-span-2;
+}
+
+.wpcf7-form *[dir="rtl"] .wpcf7-select,
+.wpcf7-form :root:lang(ar) .wpcf7-select,
+.wpcf7-form :root:lang(iw) .wpcf7-select {
+  background-position: left 0.7em top 50%, 0 0;
+  padding: 0.6em 0.8em 0.5em 1.4em;
+}
+
+.wpcf7-spinner {
+  @apply absolute top-0 right-0;
+}
+
+.wpcf7 form.invalid > div.wpcf7-response-output {
+  @apply text-lg border-transparent !mx-0 !my-8 text-green-accent2 font-bold !p-0;
+}
+
+#wpcf7-f1687-o1 > form > div:nth-child(6) > div > div > p > span > span > span {
+  @apply ml-0 !important;
+}
+
+#agreement {
+  @apply h-8 w-8 !important;
+}
+
+.wpcf7-not-valid-tip {
+  @apply bg-transparent text-base text-green-accent2 font-bold transform -translate-y-5;
+}
+
+.wpcf7-form-control-wrap[data-name="message"] .wpcf7-not-valid-tip {
+  @apply transform -translate-y-7;
+}
+
+/* Autofill background color override */
+input:-internal-autofill-selected {
+  @apply bg-green-accent1/15 !important;
+}
+
+/* Additional autofill states for better browser support */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px rgba(209, 212, 54, 0.15) inset !important;
+  -webkit-text-fill-color: #29472d !important;
+}

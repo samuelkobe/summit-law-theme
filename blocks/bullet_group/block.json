@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/bullet-group",
+  "title": "Bullet Group - Summit Law LLP",
+  "description": "A bullet group block for displaying a list of bullet points.",
+  "category": "formatting",
+  "icon": "editor-ul",
+  "keywords": ["bullet", "bullets", "list", "point form", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "bullet_group.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

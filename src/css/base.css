@@ -4,6 +4,8 @@
 /* Block imports */
 @import "../../blocks/starter_template/starter_template.css";
 @import "../../blocks/triple_cards/triple_cards.css";
+@import "../../blocks/bullet_group/bullet_group.css";
+@import "../../blocks/form/form.css";
 
 @tailwind base;
 @tailwind components;
@@ -101,6 +103,11 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  .form-col.editor-only {
+    display: none;
+    visibility: hidden;
+  }
+
   /* Hairline divider */
   .rule {
     @apply border-t-[0.5px] border-brand-black;
@@ -110,82 +117,58 @@
   /* Use class="h1" on any element to get h1 styling */
   /* This prevents conflicts with Tailwind utilities */
   .h1 {
-    @apply font-normal leading-tight text-green-deep tracking-[-0.02em];
-    font-family: "PP Museum", "Hanken Grotesk", system-ui, Arial, sans-serif;
-    font-size: clamp(44px, 3vw + 32px, 56px);
+    @apply font-museum font-normal leading-tight text-green-deep tracking-[-0.02em] text-h1 antialiased;
   }
 
   .h2 {
-    @apply font-normal leading-tight text-green-deep tracking-[-0.015em];
-    font-family: "PP Museum", "Hanken Grotesk", system-ui, Arial, sans-serif;
-    font-size: clamp(28px, 2.2vw + 24px, 32px);
+    @apply font-museum font-normal leading-tight text-green-deep tracking-[-0.015em] text-h2 antialiased;
   }
 
   .h3 {
-    @apply font-medium leading-tight text-brand-black tracking-[-0.01em];
-    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
-    font-size: clamp(22px, 1.4vw + 18px, 26px);
+    @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.01em] text-h3 antialiased;
   }
 
   .h4 {
-    @apply font-medium leading-tight text-brand-black tracking-[-0.005em];
-    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
-    font-size: clamp(18px, 1.2vw + 16px, 20px);
+    @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.005em] text-h4 antialiased;
   }
 
   .h5 {
-    @apply font-medium leading-snug text-brand-black;
-    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
-    font-size: clamp(16px, 1vw + 14px, 18px);
+    @apply font-hanken font-medium leading-snug text-brand-black text-h5 antialiased;
   }
 
   .h6 {
-    @apply font-semibold uppercase leading-snug tracking-wider text-brand-black;
-    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
-    font-size: clamp(14px, 0.8vw + 12px, 15px);
+    @apply font-hanken font-semibold uppercase leading-snug tracking-wider text-brand-black text-h6 antialiased;
   }
 
   /* Auto-apply to WordPress content areas */
   .entry-content h1,
   .page-content h1 {
-    @apply font-normal leading-tight text-green-deep tracking-[-0.02em];
-    font-family: "PP Museum", "Hanken Grotesk", system-ui, Arial, sans-serif;
-    font-size: clamp(44px, 3vw + 32px, 56px);
+    @apply font-museum font-normal leading-tight text-green-deep tracking-[-0.02em] text-h1;
   }
 
   .entry-content h2,
   .page-content h2 {
-    @apply font-normal leading-tight text-green-deep tracking-[-0.015em];
-    font-family: "PP Museum", "Hanken Grotesk", system-ui, Arial, sans-serif;
-    font-size: clamp(32px, 2.2vw + 24px, 40px);
+    @apply font-museum font-normal leading-tight text-green-deep tracking-[-0.015em] text-h2;
   }
 
   .entry-content h3,
   .page-content h3 {
-    @apply font-medium leading-tight text-brand-black tracking-[-0.01em];
-    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
-    font-size: clamp(22px, 1.4vw + 18px, 26px);
+    @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.01em] text-h3;
   }
 
   .entry-content h4,
   .page-content h4 {
-    @apply font-medium leading-tight text-brand-black tracking-[-0.005em];
-    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
-    font-size: clamp(18px, 1.2vw + 16px, 20px);
+    @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.005em] text-h4;
   }
 
   .entry-content h5,
   .page-content h5 {
-    @apply font-medium leading-snug text-brand-black;
-    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
-    font-size: clamp(16px, 1vw + 14px, 18px);
+    @apply font-hanken font-medium leading-snug text-brand-black text-h5;
   }
 
   .entry-content h6,
   .page-content h6 {
-    @apply font-semibold uppercase leading-snug tracking-wider text-brand-black;
-    font-family: "Hanken Grotesk", system-ui, Arial, sans-serif;
-    font-size: clamp(14px, 0.8vw + 12px, 15px);
+    @apply font-hanken font-semibold uppercase leading-snug tracking-wider text-brand-black text-h6;
   }
 }
 
@@ -193,8 +176,7 @@
   /* WordPress Content Area Typography */
   .entry-content p,
   .page-content p {
-    line-height: 1.6;
-    font-size: clamp(16px, 1vw + 14px, 18px);
+    @apply leading-relaxed;
   }
 
   /* Links - Default (light backgrounds) */
@@ -231,8 +213,7 @@
 
   /* Forms */
   .label {
-    @apply text-brand-black;
-    font-size: clamp(14px, 0.8vw + 12px, 15px);
+    @apply text-brand-black text-h6;
   }
 
   .input,
@@ -248,8 +229,7 @@
   }
 
   .help {
-    @apply opacity-80 text-brand-black;
-    font-size: clamp(14px, 0.8vw + 12px, 15px);
+    @apply opacity-80 text-brand-black text-h6;
   }
 
   /* Form tone: errors and success */

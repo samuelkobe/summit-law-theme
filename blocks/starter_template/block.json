@@ -2,11 +2,11 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "acf/starter-template",
-  "title": "Starter Template",
+  "title": "Starter Template - Summit Law LLP",
   "description": "A starter template for creating ACF blocks.",
   "category": "formatting",
   "icon": "admin-appearance",
-  "keywords": ["starter", "template", "acf"],
+  "keywords": ["starter", "template", "acf", "summit law llp"],
   "acf": {
     "mode": "preview",
     "renderTemplate": "starter_template.php"

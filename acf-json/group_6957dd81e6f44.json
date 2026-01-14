@@ -1,0 +1,97 @@
+{
+    "key": "group_6957dd81e6f44",
+    "title": "BLOCK: Hero Banner",
+    "fields": [
+        {
+            "key": "field_6957dd82aa30c",
+            "label": "Custom Title?",
+            "name": "custom_title",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "Turn on a custom page title.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 0,
+            "allow_in_bindings": 0,
+            "ui_on_text": "Yes",
+            "ui_off_text": "No",
+            "ui": 1
+        },
+        {
+            "key": "field_6957de5f63d25",
+            "label": "Title",
+            "name": "title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "This title will override the page title above so that banner on the page shows this text instead.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6957dd82aa30c",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "placeholder": "ie. Our Team",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_6957e90411ecf",
+            "label": "Page Description",
+            "name": "page_description",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "Add a page description (Max 500 characters).",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": 500,
+            "allow_in_bindings": 0,
+            "rows": "",
+            "placeholder": "",
+            "new_lines": "br"
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/hero-banner"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "",
+    "show_in_rest": 0,
+    "display_title": "",
+    "modified": 1768353005
+}

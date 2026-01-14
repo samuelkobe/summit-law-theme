@@ -36,6 +36,10 @@ if (!function_exists('summit_theme_setup')) {
     add_image_size('team-photo-medium', 600, 600, true);  // Tablets
     add_image_size('team-photo-large', 800, 800, true);   // Desktop
     add_image_size('team-photo-xlarge', 1000, 1000, true); // Large screens
+
+    // Register custom image size for form block images
+    // Optimized for 3:4 aspect ratio portraits at ~600px rendered width
+    add_image_size('form-image', 900, 1200, true);  // 3:4 aspect ratio, crisp for retina
     add_theme_support('custom-logo', [
       'height' => 100,
       'width' => 300,
@@ -347,6 +351,31 @@ add_action( 'wp_before_admin_bar_render', function() {
   global $wp_admin_bar;
   $wp_admin_bar->remove_menu( 'comments' );
 } );
+
+/**
+ * Add Block Template to Service Post Type
+ * Locks the hero_banner block as required, but allows inserting additional blocks
+ */
+function summit_service_block_template( $args, $post_type ) {
+	if ( $post_type !== 'service' ) {
+		return $args;
+	}
+
+	// Ensure block editor is available
+	$args['show_in_rest'] = true;
+
+	// Define required blocks that will be pre-loaded
+	$args['template'] = [
+		[ 'acf/hero-banner', [] ],
+	];
+
+	// Lock setting: false means users can add, remove, and reorder blocks freely
+	// The hero_banner will be pre-loaded but not locked in place
+	$args['template_lock'] = false;
+
+	return $args;
+}
+add_filter( 'register_post_type_args', 'summit_service_block_template', 10, 2 );
 
 /**
  * Limit 'Areas' Taxonomy to Single Selection with Radio Buttons

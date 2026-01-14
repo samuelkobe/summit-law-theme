@@ -19,7 +19,7 @@
 		</div>
 	<?php endif; ?>
 
-	<div class="entry-content">
+	<div>
 		<?php the_content(); ?>
 	</div>
 

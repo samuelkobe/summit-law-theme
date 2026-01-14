@@ -1,88 +1,96 @@
 <?php
 /**
  * Archive template for Cases
- *
- * Displays all cases in a grid layout
- * URL: /cases/
  */
 
 get_header();
 ?>
 
-<main id="main" class="site-main team-archive">
+<main id="main" class="site-main">
 
-	<header class="page-header container mx-auto px-4 py-12">
-		<h1 class="text-4xl md:text-5xl font-bold text-green-deep mb-4">
-			<?php post_type_archive_title(); ?>
-		</h1>
-		<?php
-		// Optional: Add ACF fields or custom description
-		$post_type = get_post_type_object( 'case' );
-		if ( $post_type && ! empty( $post_type->description ) ) {
-			echo '<p class="text-lg text-gray-600">' . esc_html( $post_type->description ) . '</p>';
-		}
-		?>
-	</header>
+	<section class="bg-white py-12 lg:py-24">
+		<div class="md:container grid grid-cols-1 gap-8 p-6 lg:px-6 md:mx-auto">
 
-	<div class="team-grid container mx-auto px-4 pb-16">
-		<?php if ( have_posts() ) : ?>
-
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-				<?php while ( have_posts() ) : the_post(); ?>
-
-					<article class="team-member-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
-
-						<?php if ( has_post_thumbnail() ) : ?>
-							<a href="<?php the_permalink(); ?>" class="block aspect-[3/4] overflow-hidden">
-								<?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-full object-cover hover:scale-105 transition-transform duration-300' ) ); ?>
-							</a>
-						<?php endif; ?>
-
-						<div class="p-6">
-							<h2 class="text-2xl font-bold text-green-deep mb-2">
-								<a href="<?php the_permalink(); ?>" class="hover:underline">
-									<?php the_title(); ?>
-								</a>
-							</h2>
-
-							<?php if ( get_field( 'role' ) ) : ?>
-								<p class="text-sm font-medium text-gray-500 uppercase tracking-wide mb-4">
-									<?php the_field( 'role' ); ?>
-								</p>
-							<?php endif; ?>
-
-							<?php if ( get_the_excerpt() ) : ?>
-								<div class="text-gray-700 mb-4">
-									<?php the_excerpt(); ?>
-								</div>
-							<?php endif; ?>
-
-							<a href="<?php the_permalink(); ?>" class="inline-block text-green-deep font-medium hover:underline">
-								View Profile →
-							</a>
-						</div>
-
-					</article>
-
-				<?php endwhile; ?>
+			<div class="col-span-1">
+				<h1 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]">
+					<?php post_type_archive_title(); ?>
+				</h1>
 			</div>
 
-			<?php
-			// Pagination
-			the_posts_pagination( array(
-				'mid_size'  => 2,
-				'prev_text' => __( '← Previous', 'summit-law-theme' ),
-				'next_text' => __( 'Next →', 'summit-law-theme' ),
-				'class'     => 'mt-12',
-			) );
-			?>
+			<?php if ( have_posts() ) : ?>
 
-		<?php else : ?>
+				<div class="col-span-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+					<?php while ( have_posts() ) : the_post(); ?>
+						<div class="group col-span-1 mb-6">
+							<?php if ( has_post_thumbnail() ) : ?>
+								<a href="<?php the_permalink(); ?>" class="block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000">
+									<?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover' ) ); ?>
+								</a>
+							<?php endif; ?>
+							<div class="flex justify-between items-center mb-2 text-brand-black uppercase text-xs border-b-2 border-b-brand-30 pt-4 lg:pt-6 pb-2 lg:pb-3">
+								<div>
+									<?php
+									// Create link to archive filtered by month/year
+									$year = get_the_date( 'Y' );
+									$month = get_the_date( 'm' );
+									$date_link = add_query_arg(
+										array(
+											'post_type' => get_post_type(),
+											'year' => $year,
+											'monthnum' => $month
+										),
+										home_url( '/' )
+									);
+									?>
+									<a href="<?php echo esc_url( $date_link ); ?>" class="hover:text-brand-black transition-colors duration-300 border-b-transparent border-b-[1px] hover:border-b-brand-black">
+										<?php echo get_the_date( 'F Y' ); ?>
+									</a>
+								</div>
+								<div>
+								<?php
+									$areas = get_the_terms( get_the_ID(), 'area' );
+									if ( $areas && ! is_wp_error( $areas ) ) {
+										$term_link = add_query_arg( 'post_type', get_post_type(), get_term_link( $areas[0] ) );
+										echo '<a href="' . esc_url( $term_link ) . '" class="hover:text-brand-black transition-colors duration-300 border-b-transparent border-b-[1px] hover:border-b-brand-black">';
+										echo esc_html( $areas[0]->name );
+										echo '</a>';
+									}
+									?>
+								</div>
+							</div>
+							<a href="<?php the_permalink(); ?>" class="text-green-deep font-hanken font-normal text-lg lg:text-xl underline decoration-2 decoration-transparent group-hover:decoration-green-deep underline-offset-2 transition-colors duration-300">
+								<?php the_title(); ?>
+							</a>
+							<div class="mt-1 lg:mt-2 text-sm lg:text-base text-brand-70">
+								<?php
+								$excerpt = get_the_excerpt();
+								if ( $excerpt ) {
+									echo wp_trim_words( $excerpt, 15, '...' );
+								}
+								?>
+							</div>
+						</div>
+					<?php endwhile; ?>
+				</div>
 
-			<p class="text-center text-gray-600"><?php esc_html_e( 'No team members found.', 'summit-law-theme' ); ?></p>
+				<?php
+				// Pagination
+				the_posts_pagination( array(
+					'mid_size'  => 2,
+					'prev_text' => __( '← Previous', 'summit-law-theme' ),
+					'next_text' => __( 'Next →', 'summit-law-theme' ),
+					'class'     => 'mt-12',
+				) );
+				?>
 
-		<?php endif; ?>
-	</div>
+			<?php else : ?>
+
+				<p class="text-center text-gray-600"><?php esc_html_e( 'No cases found.', 'summit-law-theme' ); ?></p>
+
+			<?php endif; ?>
+
+		</div>
+	</section>
 
 </main>
 

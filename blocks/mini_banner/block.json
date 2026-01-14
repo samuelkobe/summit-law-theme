@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/mini-banner",
+  "title": "Mini Banner - Summit Law LLP",
+  "description": "A mini banner block for displaying a small banner with content groups below it.",
+  "category": "formatting",
+  "icon": "button",
+  "keywords": ["banner", "mini", "content", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "mini_banner.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}
