@@ -43,7 +43,7 @@ if ( ! empty( $block['align'] ) ) {
 				
 				<div class="flex flex-col justify-between gap-y-8 lg:col-span-4">
 					<div class="flex flex-col gap-y-4 lg:gap-y-8 2xl:gap-y-12">
-						<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]"><?php the_sub_field( 'title' ); ?></h2>
+						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]"><?php the_sub_field( 'title' ); ?></h2>
 						<p class="font-normal text-base 2xl:text-lg lg:max-w-[75%] 2xl:max-w-[60%]"><?php the_sub_field( 'content' ); ?></p>
 					</div>
 					<?php if ( $button ) : ?>

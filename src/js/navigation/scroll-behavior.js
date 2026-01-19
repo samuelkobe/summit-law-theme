@@ -10,14 +10,16 @@
 
 export default class ScrollBehavior {
   constructor() {
-    this.header = document.querySelector('[data-header]');
-    this.logo = document.querySelector('[data-logo]');
-    this.isHomePage = document.body.classList.contains('home');
+    this.header = document.querySelector("[data-header]");
+    this.logo = document.querySelector("[data-logo]");
+    this.isHomePage = document.body.classList.contains("home");
     this.isMobile = window.innerWidth < 1024; // Tailwind lg breakpoint
     this.lastScroll = 0;
-    this.scrollThreshold = 160;
+    this.scrollThreshold = this.isHomePage ? window.innerHeight * 0.75 : 160; // 75% of viewport height on home, 160px elsewhere
     this.logoTransitionPoint = 80;
     this.ticking = false;
+    this.scrollListenerActive = false;
+    this.boundRequestTick = () => this.requestTick();
 
     this.init();
   }
@@ -30,16 +32,81 @@ export default class ScrollBehavior {
       return;
     }
 
-    // Skip scroll behavior on mobile
+    // Apply initial state based on current scroll position (for page refresh while scrolled)
+    // This runs for both mobile and desktop to set correct logo/header state
+    this.applyScrollState();
+
+    // Reveal header after state is applied (prevents flash of wrong state)
+    this.header.classList.add("header--ready");
+
+    // Always add resize listener to handle viewport changes
+    window.addEventListener("resize", () => this.handleResize());
+
+    // Add scroll listener if on desktop
+    if (!this.isMobile) {
+      this.addScrollListener();
+    }
+  }
+
+  /**
+   * Add scroll event listener
+   */
+  addScrollListener() {
+    if (!this.scrollListenerActive) {
+      window.addEventListener("scroll", this.boundRequestTick);
+      this.scrollListenerActive = true;
+    }
+  }
+
+  /**
+   * Remove scroll event listener
+   */
+  removeScrollListener() {
+    if (this.scrollListenerActive) {
+      window.removeEventListener("scroll", this.boundRequestTick);
+      this.scrollListenerActive = false;
+    }
+  }
+
+  /**
+   * Apply scroll-based state without affecting hide/show
+   * Used on initial load to handle page refresh while scrolled
+   */
+  applyScrollState() {
+    const currentScroll = window.pageYOffset;
+
+    // On mobile, always use light header - no dark/light switching
     if (this.isMobile) {
+      if (this.isHomePage) {
+        this.header.classList.remove("header--dark");
+        this.header.classList.add("header--light");
+      }
+      this.lastScroll = currentScroll;
       return;
     }
 
-    // Add scroll listener with requestAnimationFrame for performance
-    window.addEventListener('scroll', () => this.requestTick());
+    // Desktop only: Logo resize (home page only)
+    if (this.isHomePage && this.logo) {
+      if (currentScroll >= this.logoTransitionPoint) {
+        this.logo.classList.add("logo--small");
+      } else {
+        this.logo.classList.remove("logo--small");
+      }
+    }
 
-    // Handle resize (recalculate isMobile)
-    window.addEventListener('resize', () => this.handleResize());
+    // Desktop only: Menu color switch (home page only)
+    if (this.isHomePage) {
+      if (currentScroll >= this.logoTransitionPoint) {
+        this.header.classList.remove("header--dark");
+        this.header.classList.add("header--light");
+      } else {
+        this.header.classList.add("header--dark");
+        this.header.classList.remove("header--light");
+      }
+    }
+
+    // Set lastScroll so first scroll event calculates direction correctly
+    this.lastScroll = currentScroll;
   }
 
   /**
@@ -61,20 +128,20 @@ export default class ScrollBehavior {
     // Logo resize (home page only)
     if (this.isHomePage && this.logo) {
       if (currentScroll >= this.logoTransitionPoint) {
-        this.logo.classList.add('logo--small');
+        this.logo.classList.add("logo--small");
       } else {
-        this.logo.classList.remove('logo--small');
+        this.logo.classList.remove("logo--small");
       }
     }
 
     // Menu color switch (home page only)
     if (this.isHomePage) {
       if (currentScroll >= this.logoTransitionPoint) {
-        this.header.classList.remove('header--dark');
-        this.header.classList.add('header--light');
+        this.header.classList.remove("header--dark");
+        this.header.classList.add("header--light");
       } else {
-        this.header.classList.add('header--dark');
-        this.header.classList.remove('header--light');
+        this.header.classList.add("header--dark");
+        this.header.classList.remove("header--light");
       }
     }
 
@@ -82,14 +149,14 @@ export default class ScrollBehavior {
     if (currentScroll > this.scrollThreshold) {
       if (currentScroll > this.lastScroll) {
         // Scrolling down - hide menu
-        this.header.classList.add('header--hidden');
+        this.header.classList.add("header--hidden");
       } else {
         // Scrolling up - show menu
-        this.header.classList.remove('header--hidden');
+        this.header.classList.remove("header--hidden");
       }
     } else {
       // Near top - always show
-      this.header.classList.remove('header--hidden');
+      this.header.classList.remove("header--hidden");
     }
 
     this.lastScroll = currentScroll;
@@ -103,16 +170,27 @@ export default class ScrollBehavior {
     const wasMobile = this.isMobile;
     this.isMobile = window.innerWidth < 1024;
 
-    // If switching to mobile, remove all desktop scroll classes
+    // Recalculate scroll threshold based on new viewport height
+    this.scrollThreshold = this.isHomePage ? window.innerHeight * 0.75 : 160;
+
+    // If switching to mobile, remove scroll listener and reset to light header
     if (this.isMobile && !wasMobile) {
-      this.header.classList.remove('header--hidden');
+      this.removeScrollListener();
+      this.header.classList.remove("header--hidden");
       if (this.logo) {
-        this.logo.classList.remove('logo--small');
+        this.logo.classList.remove("logo--small");
+      }
+      // Always use light header on mobile (even on home page)
+      if (this.isHomePage) {
+        this.header.classList.remove("header--dark");
+        this.header.classList.add("header--light");
       }
     }
 
-    // If switching to desktop, reapply scroll behavior
+    // If switching to desktop, add scroll listener and apply current scroll state
     if (!this.isMobile && wasMobile) {
+      this.addScrollListener();
+      this.applyScrollState();
       this.handleScroll();
     }
   }

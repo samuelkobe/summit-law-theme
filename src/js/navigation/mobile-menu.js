@@ -17,6 +17,7 @@ export default class MobileMenu {
     this.menu = document.querySelector('[data-mobile-menu]');
     this.submenuToggles = document.querySelectorAll('[data-mobile-submenu-toggle]');
     this.focusTrap = null;
+    this.desktopBreakpoint = 1024; // Tailwind lg breakpoint
 
     this.init();
   }
@@ -45,6 +46,21 @@ export default class MobileMenu {
 
     // Close on Escape
     document.addEventListener('keydown', (e) => this.handleEscape(e));
+
+    // Close mobile menu when resizing to desktop
+    window.addEventListener('resize', () => this.handleResize());
+  }
+
+  /**
+   * Handle window resize - close menu when entering desktop size
+   */
+  handleResize() {
+    if (window.innerWidth >= this.desktopBreakpoint) {
+      const isMenuOpen = this.toggle.getAttribute('aria-expanded') === 'true';
+      if (isMenuOpen) {
+        this.closeMenu();
+      }
+    }
   }
 
   /**

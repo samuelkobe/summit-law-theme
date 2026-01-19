@@ -3,7 +3,7 @@
   "apiVersion": 3,
   "name": "acf/triple-cards",
   "title": "Triple Cards - Summit Law LLP",
-  "description": "A starter template for creating ACF blocks.",
+  "description": "A block displaying three cards side by side.",
   "category": "formatting",
   "icon": "slides",
   "keywords": ["triple", "cards", "acf", "summit law llp"],

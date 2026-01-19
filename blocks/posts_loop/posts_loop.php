@@ -59,7 +59,7 @@ if ( ! empty( $block['align'] ) ) {
 			if ( $posts_query->have_posts() ) : ?>
 
 				<div class="col-span-1">
-					<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]">Recent Insights & Cases</h2>
+					<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">Recent Insights & Cases</h2>
 					<?php if ( get_field( 'posts_subtitle' ) ) : ?>
 						<p class="text-lg lg:text-xl text-brand-50 pt-2 lg:pt-4"><?php echo esc_html( get_field( 'posts_subtitle' ) ); ?></p>
 					<?php endif; ?>
@@ -172,7 +172,7 @@ if ( ! empty( $block['align'] ) ) {
 				if ( ! empty( $posts_to_display ) ) : ?>
 
 					<div class="col-span-1">
-						<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]"><?php echo esc_html( $heading ); ?></h2>
+						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]"><?php echo esc_html( $heading ); ?></h2>
 						<?php if ( get_field( 'posts_subtitle' ) ) : ?>
 							<p class="text-lg lg:text-xl text-brand-50 pt-2 lg:pt-4"><?php echo esc_html( get_field( 'posts_subtitle' ) ); ?></p>
 						<?php endif; ?>
@@ -260,7 +260,7 @@ if ( ! empty( $block['align'] ) ) {
 					if ( $posts_query->have_posts() ) : ?>
 
 						<div class="col-span-1">
-							<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]"><?php echo esc_html( $heading ); ?></h2>
+							<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]"><?php echo esc_html( $heading ); ?></h2>
 							<?php if ( get_field( 'posts_subtitle' ) ) : ?>
 								<p class="text-lg lg:text-xl text-brand-50 pt-2 lg:pt-4"><?php echo esc_html( get_field( 'posts_subtitle' ) ); ?></p>
 							<?php endif; ?>

@@ -4,7 +4,7 @@
   "description": "A block for adding content and a main form",
   "style": ["file:./form.css"],
   "category": "formatting",
-  "icon": "text",
+  "icon": "editor-table",
   "keywords": [
     "form",
     "contact",

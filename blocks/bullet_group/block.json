@@ -6,7 +6,14 @@
   "description": "A bullet group block for displaying a list of bullet points.",
   "category": "formatting",
   "icon": "editor-ul",
-  "keywords": ["bullet", "bullets", "list", "point form", "acf", "summit law llp"],
+  "keywords": [
+    "bullet",
+    "bullets",
+    "list",
+    "point form",
+    "acf",
+    "summit law llp"
+  ],
   "acf": {
     "mode": "preview",
     "renderTemplate": "bullet_group.php"

@@ -42,7 +42,7 @@ if ( ! empty( $block['align'] ) ) {
 					$content_gap = !empty( $content ) ? 'gap-y-2' : 'gap-y-0'; 
 				?>
 				<div class="flex flex-col <?php echo esc_attr( $content_gap ); ?>">
-					<h2 class="h2 xl:text-[clamp(32px,_3vw_+_28px,_50px)] w-fit"><?php the_field( 'title' ); ?></h2>
+					<h2 class="h2 xl:text-h2 w-fit"><?php the_field( 'title' ); ?></h2>
 					<?php if ( !empty( $content ) ) : ?>
 						<p class="font-normal text-base 2xl:text-lg lg:max-w-[75%] 2xl:max-w-[60%]"><?php echo esc_html( $content ); ?></p>
 					<?php endif; ?>

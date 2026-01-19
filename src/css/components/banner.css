@@ -91,3 +91,63 @@
     transform: scaleX(1);
   }
 }
+
+/* Home banner with before and after decorative lines */
+.home-before-after-content {
+  @apply relative;
+}
+
+/* Before line: top-right corner, spans left to middle */
+.home-before-after-content::before {
+  content: "";
+  @apply absolute top-8 right-0 w-1/2 h-[2px] lg:h-[3px] bg-green-accent1;
+  transform-origin: right center;
+}
+
+/* After line: bottom-left corner, spans right to middle */
+.home-before-after-content::after {
+  content: "";
+  @apply absolute bottom-8 left-0 w-1/2 h-[2px] lg:h-[3px] bg-green-accent1;
+  transform-origin: left center;
+}
+
+/* Animation states - starts hidden */
+.home-before-after-content:not(.animate-line):not(.show-line)::before,
+.home-before-after-content:not(.animate-line):not(.show-line)::after {
+  @apply scale-x-0;
+}
+
+/* Show lines immediately without animation */
+.home-before-after-content.show-line::before,
+.home-before-after-content.show-line::after {
+  @apply scale-x-100;
+}
+
+/* Animated state */
+.home-before-after-content.animate-line::before {
+  animation: growLineFromRight 0.8s ease-out forwards;
+}
+
+.home-before-after-content.animate-line::after {
+  animation: growLineFromLeft 0.8s ease-out forwards;
+}
+
+/* Grow from right to left */
+@keyframes growLineFromRight {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Grow from left to right */
+@keyframes growLineFromLeft {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}

@@ -85,7 +85,7 @@
       </div>
       <?php if (get_theme_mod('footer_maintained_by')) : ?>
         <div class="text-brand-40 text-sm">
-          Maintained by
+          Designed and maintained by
           <?php if (get_theme_mod('footer_maintained_by_link')) : ?>
             <a href="<?php echo esc_url(get_theme_mod('footer_maintained_by_link')); ?>" target="_blank" rel="noopener noreferrer">
               <?php echo esc_html(get_theme_mod('footer_maintained_by', 'Web Ok Solutions Inc.')); ?>

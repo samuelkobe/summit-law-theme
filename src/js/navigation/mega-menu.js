@@ -5,6 +5,7 @@
  * - Click to toggle open/close
  * - Close on outside click
  * - Close on Escape key
+ * - Close on scroll
  * - Only one menu open at a time
  * - Focus management
  */
@@ -15,9 +16,13 @@ export default class MegaMenu {
   constructor() {
     this.toggleButtons = document.querySelectorAll('[data-mega-toggle]');
     this.menus = document.querySelectorAll('[data-mega-menu]');
+    this.header = document.querySelector('[data-header]');
     this.activeMenu = null;
     this.activeTrap = null;
     this.activeButton = null;
+    this.scrollHandler = null;
+    this.scrollStartPosition = null;
+    this.scrollThreshold = 10; // Minimum scroll distance before closing menu
 
     this.init();
   }
@@ -44,6 +49,9 @@ export default class MegaMenu {
 
     // Close on Escape key
     document.addEventListener('keydown', (e) => this.handleEscape(e));
+
+    // Create scroll handler (will be added/removed when menu opens/closes)
+    this.scrollHandler = () => this.handleScroll();
   }
 
   /**
@@ -87,8 +95,26 @@ export default class MegaMenu {
    * @param {HTMLElement} button Toggle button
    */
   open(menu, button) {
-    // Show menu
+    // Remove hidden for accessibility
     menu.removeAttribute('hidden');
+
+    // Add class to header so it gets white background (needed for dark header on home page)
+    if (this.header) {
+      this.header.classList.add('has-mega-open');
+
+      // Position the mega menu directly below the header
+      const headerRect = this.header.getBoundingClientRect();
+      menu.style.top = `${headerRect.bottom}px`;
+    }
+
+    // Make visible first
+    menu.classList.add('is-visible');
+
+    // Force reflow so browser registers the visibility change before adding is-open
+    menu.offsetHeight;
+
+    // Now trigger the fade-in animation
+    menu.classList.add('is-open');
 
     // Update ARIA
     button.setAttribute('aria-expanded', 'true');
@@ -100,6 +126,10 @@ export default class MegaMenu {
     // Trap focus
     this.activeTrap = new FocusTrap(menu);
     this.activeTrap.activate();
+
+    // Store current scroll position and add scroll listener to close on scroll
+    this.scrollStartPosition = window.pageYOffset;
+    window.addEventListener('scroll', this.scrollHandler, { passive: true });
   }
 
   /**
@@ -107,10 +137,25 @@ export default class MegaMenu {
    *
    * @param {HTMLElement} menu Menu element
    * @param {HTMLElement} button Toggle button
+   * @param {boolean} returnFocus Whether to return focus to button (default true)
    */
-  close(menu, button) {
-    // Hide menu
-    menu.setAttribute('hidden', '');
+  close(menu, button, returnFocus = true) {
+    // Remove is-open to trigger slide-up animation (menu stays visible during transition)
+    menu.classList.remove('is-open');
+
+    // After transition completes, hide visibility, add hidden attribute, and remove header class
+    menu.addEventListener('transitionend', () => {
+      if (!menu.classList.contains('is-open')) {
+        menu.classList.remove('is-visible');
+        menu.setAttribute('hidden', '');
+        menu.style.top = ''; // Clear inline position
+
+        // Remove header class after menu is fully closed
+        if (this.header) {
+          this.header.classList.remove('has-mega-open');
+        }
+      }
+    }, { once: true });
 
     // Update ARIA
     button.setAttribute('aria-expanded', 'false');
@@ -121,12 +166,18 @@ export default class MegaMenu {
       this.activeTrap = null;
     }
 
-    // Return focus to button
-    button.focus();
+    // Return focus to button (skip when closing due to scroll)
+    if (returnFocus) {
+      button.focus();
+    }
 
-    // Clear active menu
+    // Remove scroll listener
+    window.removeEventListener('scroll', this.scrollHandler);
+
+    // Clear active menu and scroll tracking
     this.activeMenu = null;
     this.activeButton = null;
+    this.scrollStartPosition = null;
   }
 
   /**
@@ -153,6 +204,21 @@ export default class MegaMenu {
 
     if (!clickedInside) {
       this.close(this.activeMenu, this.activeButton);
+    }
+  }
+
+  /**
+   * Handle scroll event - close menu when user scrolls past threshold
+   */
+  handleScroll() {
+    if (this.activeMenu && this.activeButton) {
+      // Only close if user has scrolled more than the threshold
+      // This prevents closing on tiny scroll movements from reflow
+      const scrollDistance = Math.abs(window.pageYOffset - this.scrollStartPosition);
+      if (scrollDistance > this.scrollThreshold) {
+        // Close without returning focus (user is scrolling, not navigating)
+        this.close(this.activeMenu, this.activeButton, false);
+      }
     }
   }
 

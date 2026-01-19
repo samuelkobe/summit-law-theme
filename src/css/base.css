@@ -219,7 +219,7 @@
   .input,
   .textarea,
   .select {
-    @apply w-full p-3 border border-brand-30 bg-white text-brand-black rounded-none outline-none;
+    @apply w-full p-3 border border-brand-30 bg-brand-10 text-brand-black rounded-none outline-none;
   }
 
   .input:focus,
@@ -227,6 +227,29 @@
   .select:focus {
     @apply shadow-none border-brand-black;
   }
+
+  /* Contact Form 7 form fields */
+  .wpcf7 input[type="text"],
+  .wpcf7 input[type="email"],
+  .wpcf7 input[type="tel"],
+  .wpcf7 input[type="url"],
+  .wpcf7 input[type="number"],
+  .wpcf7 input[type="date"],
+  .wpcf7 textarea,
+  .wpcf7 select {
+    @apply bg-brand-10;
+  }
+
+  /* .wpcf7 input[type="text"]:focus,
+  .wpcf7 input[type="email"]:focus,
+  .wpcf7 input[type="tel"]:focus,
+  .wpcf7 input[type="url"]:focus,
+  .wpcf7 input[type="number"]:focus,
+  .wpcf7 input[type="date"]:focus,
+  .wpcf7 textarea:focus,
+  .wpcf7 select:focus {
+    @apply shadow-none border-brand-black;
+  } */
 
   .help {
     @apply opacity-80 text-brand-black text-h6;

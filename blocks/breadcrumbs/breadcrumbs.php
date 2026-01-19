@@ -32,42 +32,96 @@ if ( ! empty( $block['align'] ) ) {
 	}
 </style>
 
-<section id="<?php echo esc_attr( $id ); ?>" class="bg-white <?php echo esc_attr( $classes ); ?>">			
-	<div class="container mx-auto flex flex-col md:flex-row md:justify-between">
+<section id="<?php echo esc_attr( $id ); ?>" class="bg-white <?php echo esc_attr( $classes ); ?>">
+	<?php
+	// Get current post type and parent info (used by both mobile and desktop nav)
+	$current_post_type = get_post_type();
+	$parent_id = wp_get_post_parent_id( get_the_ID() );
+	$is_service = $current_post_type === 'service';
+	$is_child_service = $is_service && $parent_id;
+
+	// Get Services archive page (if one exists)
+	$services_page = get_page_by_path( 'services' );
+	$services_url = $services_page ? get_permalink( $services_page->ID ) : home_url( '/services/' );
+
+	// Determine mobile back link (immediate parent only)
+	if ( $is_child_service ) {
+		// Child service -> link to parent service
+		$mobile_back_url = get_permalink( $parent_id );
+		$mobile_back_text = get_the_title( $parent_id );
+	} elseif ( $is_service ) {
+		// Parent service -> link to services page
+		$mobile_back_url = $services_url;
+		$mobile_back_text = 'Services';
+	} else {
+		// Other pages -> link to home
+		$mobile_back_url = home_url( '/' );
+		$mobile_back_text = 'Summit Law LLP';
+	}
+	?>
+
+	<div class="container mx-auto flex flex-row justify-between">
+		<!-- Mobile: Condensed back link -->
+		<nav aria-label="Back navigation" class="md:hidden py-4">
+			<a href="<?php echo esc_url( $mobile_back_url ); ?>" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-40 hover:text-green-deep transition-colors">
+				<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" class="flex-shrink-0 fill-green-accent1 rotate-180" aria-hidden="true">
+					<path d="M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z"></path>
+				</svg>
+				<?php echo esc_html( $mobile_back_text ); ?>
+			</a>
+		</nav>
+
+		<!-- Desktop: Full breadcrumb trail -->
 		<nav aria-label="Breadcrumb" class="hidden md:block py-8">
 			<ol class="flex items-center gap-2 text-sm font-semibold">
+				<!-- Home -->
 				<li>
 					<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="text-brand-40 hover:text-green-deep transition-colors">
-						Summit Law
+						Summit Law LLP
 					</a>
 				</li>
 				<li aria-hidden="true">
-					<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" class="flex-shrink-0 fill-green-accent1">
+					<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" class="flex-shrink-0 fill-green-accent1" aria-hidden="true">
 						<path d="M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z"></path>
 					</svg>
 				</li>
-				<?php
-				// Check if this is a child service (practice area) with a parent
-				$parent_id = wp_get_post_parent_id( get_the_ID() );
-				if ( $parent_id && get_post_type() === 'service' ) : ?>
+
+				<?php if ( $is_service ) : ?>
+					<!-- Services -->
 					<li>
-						<a href="<?php echo esc_url( get_permalink( $parent_id ) ); ?>" class="text-brand-40 hover:text-green-deep transition-colors">
-							<?php echo esc_html( get_the_title( $parent_id ) ); ?>
+						<a href="<?php echo esc_url( $services_url ); ?>" class="text-brand-40 hover:text-green-deep transition-colors">
+							Services
 						</a>
 					</li>
 					<li aria-hidden="true">
-						<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" class="flex-shrink-0 fill-green-accent1">
+						<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" class="flex-shrink-0 fill-green-accent1" aria-hidden="true">
 							<path d="M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z"></path>
 						</svg>
 					</li>
+
+					<?php if ( $is_child_service ) : ?>
+						<!-- Parent Service -->
+						<li>
+							<a href="<?php echo esc_url( get_permalink( $parent_id ) ); ?>" class="text-brand-40 hover:text-green-deep transition-colors">
+								<?php echo esc_html( get_the_title( $parent_id ) ); ?>
+							</a>
+						</li>
+						<li aria-hidden="true">
+							<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" class="flex-shrink-0 fill-green-accent1" aria-hidden="true">
+								<path d="M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z"></path>
+							</svg>
+						</li>
+					<?php endif; ?>
 				<?php endif; ?>
+
+				<!-- Current Page -->
 				<li aria-current="page" class="text-green-deep">
 					<?php echo esc_html( get_the_title() ); ?>
 				</li>
 			</ol>
 		</nav>
-		<div class="py-8 flex flex-row gap-x-4">
-			<span class="text-base lowercase">Share</span>
+		<div class="py-4 md:py-8 flex flex-row gap-x-4">
+			<span class="text-base lowercase hidden lg:block">Share</span>
 			<ul class="social-share flex flex-row items-center gap-2">
 				<?php
 				// Get current page URL and title for sharing

@@ -18,8 +18,32 @@
    ============================================================================= */
 
 [data-header] {
-  @apply fixed top-0 left-0 right-0 z-50;
-  @apply transition-transform duration-300 ease-in-out;
+  @apply sticky top-0 left-0 right-0 z-50;
+  @apply transition-transform duration-1000 ease-out;
+  /* Start hidden above viewport, JS will reveal after applying correct state */
+  transform: translateY(-100%);
+}
+
+/* Dark header (home page at top) should be fixed to overlay the hero */
+.header--dark {
+  @apply fixed;
+}
+
+/* When scrolled (has header--light), use sticky positioning */
+.header--light {
+  @apply sticky;
+}
+
+/* On home page, keep header fixed even when scrolled (prevents page jump when opening mega menu) */
+body.home [data-header],
+body.home [data-header].header--light,
+body.home [data-header].header--dark {
+  @apply fixed;
+}
+
+/* Header ready state - applied by JS after scroll state is determined */
+[data-header].header--ready {
+  transform: translateY(0);
 }
 
 /* WordPress admin bar spacing - when logged in */
@@ -33,62 +57,103 @@
   }
 }
 
-/* Header container */
-[data-header] .container {
-  @apply mx-auto px-4 lg:px-8;
-  max-width: 1440px;
+/* Header container - matches Tailwind container */
+[data-header] > .container {
+  @apply mx-auto w-full;
+  @apply px-4 lg:px-8;
 }
 
 /* Header inner flexbox */
 .header-inner {
-  @apply flex items-center justify-between gap-6;
+  @apply flex items-center justify-between;
   @apply py-4 lg:py-6;
+}
+
+/* Right side wrapper for nav and search */
+.header-right {
+  @apply hidden lg:flex items-center gap-6;
 }
 
 /* =============================================================================
    HEADER VARIANTS - Light & Dark
    ============================================================================= */
 
-/* Light header (default pages) */
+/* Light header (default pages and scrolled on home) */
 .header--light {
   @apply bg-white shadow-sm;
+  @apply transition-all duration-300 ease-out;
 }
 
 .header--light .nav-menu > li > button,
 .header--light .nav-menu > li > a {
   @apply text-brand-black;
+  @apply transition-colors duration-300;
 }
 
 .header--light .search-toggle,
 .header--light .mobile-menu-toggle {
   @apply text-brand-black;
+  @apply transition-colors duration-300;
 }
 
 .header--light .hamburger span {
   @apply bg-brand-black;
+  @apply transition-all duration-300;
 }
 
-/* Dark header (home page top) */
+/* Dark header (home page top) - transparent by default */
 .header--dark {
   @apply bg-transparent;
+  @apply transition-all duration-300 ease-out;
 }
 
 .header--dark .nav-menu > li > button,
 .header--dark .nav-menu > li > a {
   @apply text-white;
+  @apply transition-colors duration-300;
 }
 
 .header--dark .search-toggle,
 .header--dark .mobile-menu-toggle {
   @apply text-white;
+  @apply transition-colors duration-300;
 }
 
 .header--dark .hamburger span {
   @apply bg-white;
+  @apply transition-all duration-300;
 }
 
-/* Hidden state (scroll down on desktop) */
-.header--hidden {
+/* When mega menu is open, force light header style (needed for slide animation) */
+.header--dark.has-mega-open {
+  @apply bg-white shadow-sm;
+}
+
+.header--dark.has-mega-open .nav-menu > li > button,
+.header--dark.has-mega-open .nav-menu > li > a {
+  @apply text-brand-black;
+}
+
+.header--dark.has-mega-open .search-toggle,
+.header--dark.has-mega-open .mobile-menu-toggle {
+  @apply text-brand-black;
+}
+
+.header--dark.has-mega-open .hamburger span {
+  @apply bg-brand-black;
+}
+
+/* Also switch to alternate logo when mega menu is open on dark header */
+.header--dark.has-mega-open .logo-primary {
+  @apply opacity-0;
+}
+
+.header--dark.has-mega-open .logo-alternate {
+  @apply opacity-100;
+}
+
+/* Hidden state (scroll down on desktop) - must override header--ready */
+[data-header].header--hidden {
   transform: translateY(-100%);
 }
 
@@ -101,12 +166,42 @@
 }
 
 [data-logo] a {
-  @apply no-underline block;
+  @apply no-underline block relative;
 }
 
 [data-logo] img {
   @apply block h-auto;
   @apply transition-all duration-500 ease-in-out;
+}
+
+/* Logo wrapper spans - start hidden to prevent flash */
+.logo-primary,
+.logo-alternate {
+  @apply block opacity-0;
+  @apply transition-opacity duration-300 ease-in-out;
+}
+
+/* Position alternate logo absolutely so they can overlap during transition */
+.logo-alternate {
+  @apply absolute top-0 left-0;
+}
+
+/* Dark header (home page top): show primary logo, hide alternate */
+.header--dark .logo-primary {
+  @apply opacity-100;
+}
+
+.header--dark .logo-alternate {
+  @apply opacity-0;
+}
+
+/* Light header: show alternate logo, hide primary */
+.header--light .logo-primary {
+  @apply opacity-0;
+}
+
+.header--light .logo-alternate {
+  @apply opacity-100;
 }
 
 /* Large logo (home page top) */
@@ -132,11 +227,11 @@
 
 /* Desktop elements - hide on mobile */
 .primary-nav {
-  @apply hidden lg:flex flex-1 justify-center;
+  @apply flex;
 }
 
 .search-toggle {
-  @apply hidden lg:flex items-center justify-center w-10 h-10 p-2;
+  @apply flex items-center justify-center w-10 h-10 p-2;
   @apply transition-colors duration-300;
   background: none;
   border: none;
@@ -209,44 +304,53 @@
    ============================================================================= */
 
 .mega-menu {
-  @apply absolute left-1/2 top-full;
-  transform: translateX(-50%);
-  @apply w-screen max-w-[1440px];
-  @apply bg-white shadow-lg;
-  @apply opacity-0 invisible;
-  @apply transition-all duration-300 ease-in-out;
-  margin-top: 0;
-  z-index: 100;
+  @apply fixed left-0 right-0 w-full bg-brand-10 shadow-lg;
+  @apply transition-all duration-300 ease-out;
+  top: 0;
+  opacity: 0;
+  pointer-events: none; /* Prevent interaction when closed */
+  visibility: hidden; /* Hidden by default */
+  z-index: 40; /* Below header (z-50) but above content */
 }
 
-/* Show mega menu */
-.mega-menu:not([hidden]) {
-  @apply opacity-100 visible;
-  margin-top: 8px;
+/* Visible state - applied immediately on open, removed after close transition */
+.mega-menu.is-visible {
+  visibility: visible;
+}
+
+/* Open state - fade in and slide from top of header */
+.mega-menu.is-open {
+  opacity: 1;
+  pointer-events: auto; /* Allow interaction when open */
 }
 
 /* Mega menu content wrapper */
 .mega-menu-content {
   @apply container mx-auto px-8 py-8;
-  @apply grid gap-8;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  @apply grid lg:grid-cols-3 2xl:lg:grid-cols-4 gap-8;
+  /* grid-template-columns: repeat(auto-fit, minmax(250px, 4fr)); */
 }
 
 /* Mega menu column */
 .mega-menu-column {
-  @apply flex flex-col gap-4;
+  @apply flex flex-col gap-3;
 }
 
 /* Category header (tier 2) */
 .mega-menu-column > a {
-  @apply text-lg font-semibold text-green-deep;
-  @apply no-underline;
-  @apply pb-2 border-b border-brand-30;
-  @apply transition-colors duration-300;
+  @apply relative pl-6 text-lg leading-none mb-2 font-semibold text-green-deep underline decoration-2 decoration-transparent transition-all duration-300;
+}
+
+.mega-menu-column > a::before {
+  content: "";
+  @apply absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%23d1d436'%3E%3Cpath d='M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
 }
 
 .mega-menu-column > a:hover {
-  @apply text-brand-black;
+  @apply decoration-green-deep;
 }
 
 /* Category links list (tier 3) */
@@ -258,13 +362,12 @@
 }
 
 .mega-menu-links li a {
-  @apply text-brand-black no-underline;
-  @apply transition-colors duration-300;
+  @apply text-brand-black text-base underline decoration-transparent decoration-2 transition-all duration-300;
   font-size: 15px;
 }
 
 .mega-menu-links li a:hover {
-  @apply text-green-deep underline;
+  @apply text-green-deep decoration-green-deep;
 }
 
 /* =============================================================================
@@ -273,7 +376,7 @@
 
 /* Search overlay */
 .search-overlay {
-  @apply fixed top-0 right-0 bottom-0;
+  @apply sticky top-0 right-0 bottom-0;
   @apply w-full lg:w-[480px];
   @apply bg-white shadow-2xl;
   @apply flex items-start justify-center pt-32;
@@ -383,7 +486,7 @@
 
 /* Mobile menu drawer */
 .mobile-menu {
-  @apply fixed top-0 right-0 bottom-0;
+  @apply sticky top-0 right-0 bottom-0;
   @apply w-full;
   @apply bg-white;
   @apply overflow-y-auto;

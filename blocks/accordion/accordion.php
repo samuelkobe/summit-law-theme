@@ -65,12 +65,23 @@ if ( ! empty( $block['align'] ) ) {
 	}
 </style>
 
+<?php
+$accordion_title      = get_field( 'title' );
+$has_accordion_items = have_rows( 'accordion_object' );
+?>
+
 <section id="<?php echo esc_attr( $id ); ?>" class="bg-white py-12 lg:pb-24 2xl:pt-24 2xl:pb-48 <?php echo esc_attr( $classes ); ?>">
 	<div class="md:container px-6 md:mx-auto grid grid-cols-1">
 
-		<h2 class="h2 xl:text-[clamp(32px,_3vw_+_28px,_50px)] mb-4 lg:mb-8 font-museum capitalize text-green-deep underline decoration-2 decoration-transparent group-hover:decoration-green-deep underline-offset-4 transition-colors duration-300"><?php the_field( 'title' ); ?></h2>
+		<h2 class="h2 xl:text-h2 mb-4 lg:mb-8 font-museum capitalize text-green-deep underline decoration-2 decoration-transparent group-hover:decoration-green-deep underline-offset-4 transition-colors duration-300">
+			<?php if ( $accordion_title ) : ?>
+				<?php echo esc_html( $accordion_title ); ?>
+			<?php elseif ( $is_preview ) : ?>
+				<span class="text-brand-40">Add a title in block settings.</span>
+			<?php endif; ?>
+		</h2>
 
-		<?php if ( have_rows( 'accordion_object' ) ) : ?>
+		<?php if ( $has_accordion_items ) : ?>
 			<?php $item_index = 0; ?>
 			<?php while ( have_rows( 'accordion_object' ) ) : the_row(); ?>
 				<?php
@@ -79,11 +90,11 @@ if ( ! empty( $block['align'] ) ) {
 				$content_id = $id . '-content-' . $item_index;
 				$item_index++;
 				?>
-				<div class="accordion-item border-b-[3px] border-brand-30 pt-4 lg:pt-6 <?php echo $is_first ? 'pb-8 lg:pb-12' : 'pb-4 lg:pb-6'; ?> transition-all duration-300">
+				<div class="accordion-item border-b-2 lg:border-b-[3px] border-brand-30 pt-4 lg:pt-6 <?php echo $is_first ? 'pb-8 lg:pb-12' : 'pb-4 lg:pb-6'; ?> transition-all duration-300">
 					<h3>
 						<button
 							id="<?php echo esc_attr( $heading_id ); ?>"
-							class="accordion-heading w-full <?php echo $is_first ? 'active' : ''; ?> relative text-left text-2xl 2xl:text-3xl font-normal antialiased <?php echo $is_first ? 'text-green-deep' : 'text-brand-40'; ?> cursor-pointer py-4 pr-20 hover:text-green-deep transition-colors"
+							class="accordion-heading w-full <?php echo $is_first ? 'active' : ''; ?> relative text-left text-xl 2xl:text-2xl font-normal antialiased <?php echo $is_first ? 'text-green-deep' : 'text-brand-40'; ?> cursor-pointer py-4 pr-20 hover:text-green-deep transition-colors"
 							aria-expanded="<?php echo $is_first ? 'true' : 'false'; ?>"
 							aria-controls="<?php echo esc_attr( $content_id ); ?>"
 						>
@@ -101,8 +112,14 @@ if ( ! empty( $block['align'] ) ) {
 					</div>
 				</div>
 			<?php endwhile; ?>
-		<?php else : ?>
-			<?php // No rows found ?>
+		<?php elseif ( $is_preview ) : ?>
+			<div class="accordion-item border-b-2 lg:border-b-[3px] border-brand-30 pt-4 lg:pt-6 pb-4 lg:pb-6">
+				<h3>
+					<span class="w-full relative text-left text-2xl 2xl:text-3xl font-normal antialiased text-brand-40 py-4 pr-20 block">
+						Add accordion items in block settings.
+					</span>
+				</h3>
+			</div>
 		<?php endif; ?>
 
 	</div>

@@ -36,7 +36,7 @@ if ( ! empty( $block['align'] ) ) {
 
 	<div class="container mx-auto">
 
-		<h2 class="h2 h2-line-after 2xl:text-5xl"><?php the_field( 'title' ); ?></h2>
+		<h2 class="h2 h2-line-after"><?php the_field( 'title' ); ?></h2>
 
 		<?php if ( have_rows( 'logos_links' ) ) : ?>
 			<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-16 max-sm:px-6 lg:gap-24 2xl:gap-32 items-center pt-12 pb-8 lg:py-16">

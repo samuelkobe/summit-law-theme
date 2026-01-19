@@ -61,7 +61,7 @@ module.exports = {
         "body-sm": "clamp(14px, 0.8vw + 12px, 15px)",
         // Heading sizes
         h1: "clamp(44px, 3vw + 32px, 56px)",
-        h2: "clamp(32px, 2.2vw + 24px, 40px)",
+        h2: "clamp(28px, 2vw + 24px, 36px)",
         h3: "clamp(22px, 1.4vw + 18px, 26px)",
         h4: "clamp(18px, 1.2vw + 16px, 20px)",
         h5: "clamp(16px, 1vw + 14px, 18px)",

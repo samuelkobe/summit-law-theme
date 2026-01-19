@@ -12,7 +12,7 @@ get_header();
 		<div class="md:container grid grid-cols-1 gap-8 p-6 lg:px-6 md:mx-auto">
 
 			<div class="col-span-1">
-				<h1 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]">
+				<h1 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">
 					Insights
 				</h1>
 			</div>

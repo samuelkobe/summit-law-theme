@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/hero-home-page",
+  "title": "Hero Home Page - Summit Law LLP",
+  "description": "A custom hero block for the home page.",
+  "category": "formatting",
+  "icon": "align-full-width",
+  "keywords": ["hero", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "hero_home_page.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

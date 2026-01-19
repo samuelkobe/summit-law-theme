@@ -6,6 +6,7 @@
 // Include required files
 require_once get_template_directory() . '/inc/vite.php';
 require_once get_template_directory() . '/inc/acf-blocks.php';
+require_once get_template_directory() . '/inc/service-patterns.php';
 require_once get_template_directory() . '/inc/helpers.php';
 require_once get_template_directory() . '/inc/svg-icons.php';
 require_once get_template_directory() . '/inc/class-icon-walker.php';
@@ -86,6 +87,19 @@ remove_theme_support('widgets-block-editor');
  */
 if (!function_exists('summit_customize_register')) {
   function summit_customize_register($wp_customize) {
+    // Alternate Logo (in Site Identity section alongside main logo)
+    $wp_customize->add_setting('alt_logo', [
+      'default' => '',
+      'sanitize_callback' => 'absint',
+    ]);
+    $wp_customize->add_control(new WP_Customize_Media_Control($wp_customize, 'alt_logo', [
+      'label' => __('Alternate Logo', 'summit-law-theme'),
+      'description' => __('Used for light backgrounds (e.g., when header scrolls on home page)', 'summit-law-theme'),
+      'section' => 'title_tagline',
+      'mime_type' => 'image',
+      'priority' => 9, // Just after the main logo
+    ]));
+
     // Footer Contact Section
     $wp_customize->add_section('footer_contact', [
       'title' => __('Footer Contact Info', 'summit-law-theme'),
@@ -134,25 +148,25 @@ if (!function_exists('summit_customize_register')) {
       'description' => __('The copyright text (year will be added automatically)', 'summit-law-theme'),
     ]);
 
-    // Maintained By Text
+    // Designed and maintained By Text
     $wp_customize->add_setting('footer_maintained_by', [
       'default' => 'Web Ok Solutions Inc.',
       'sanitize_callback' => 'sanitize_text_field',
     ]);
     $wp_customize->add_control('footer_maintained_by', [
-      'label' => __('Maintained By', 'summit-law-theme'),
+      'label' => __('Designed and maintained By', 'summit-law-theme'),
       'section' => 'footer_bottom',
       'type' => 'text',
       'description' => __('Company/person maintaining the site', 'summit-law-theme'),
     ]);
 
-    // Maintained By Link
+    // Designed and maintained By Link
     $wp_customize->add_setting('footer_maintained_by_link', [
       'default' => 'https://webok.ca/',
       'sanitize_callback' => 'esc_url_raw',
     ]);
     $wp_customize->add_control('footer_maintained_by_link', [
-      'label' => __('Maintained By Link', 'summit-law-theme'),
+      'label' => __('Designed and maintained By Link', 'summit-law-theme'),
       'section' => 'footer_bottom',
       'type' => 'url',
       'description' => __('URL for the maintainer', 'summit-law-theme'),
@@ -376,6 +390,72 @@ function summit_service_block_template( $args, $post_type ) {
 	return $args;
 }
 add_filter( 'register_post_type_args', 'summit_service_block_template', 10, 2 );
+
+/**
+ * Enqueue Service Editor JavaScript
+ *
+ * Loads pattern-switching logic for the Service custom post type editor.
+ * Only loads on service post type in the block editor.
+ */
+add_action( 'enqueue_block_editor_assets', function() {
+	// Only load on service post type editor
+	$screen = get_current_screen();
+	if ( ! $screen || $screen->post_type !== 'service' ) {
+		error_log( 'Service Editor: Not a service post type, skipping. Post type: ' . ( $screen ? $screen->post_type : 'no screen' ) );
+		return;
+	}
+
+	error_log( 'Service Editor: Enqueue function called for service post type' );
+
+	// Always try to load directly from src for now (simplest approach)
+	$src_path = get_template_directory() . '/src/js/service-editor.js';
+
+	if ( file_exists( $src_path ) ) {
+		wp_enqueue_script(
+			'summit-service-editor',
+			get_template_directory_uri() . '/src/js/service-editor.js',
+			[ 'wp-data', 'wp-blocks', 'wp-block-editor', 'wp-editor', 'wp-element', 'wp-plugins', 'wp-edit-post' ],
+			filemtime( $src_path ),
+			false // Load in footer
+		);
+
+		// Pass pattern content directly to JavaScript
+		wp_localize_script( 'summit-service-editor', 'summitServicePatterns', [
+			'parent' => [
+				'name'    => 'summit-law/service-parent-pattern',
+				'title'   => 'Service – Parent',
+				'content' => '<!-- wp:acf/hero-banner /-->
+
+<!-- wp:acf/breadcrumbs /-->
+
+<!-- wp:acf/service-fields-parent /-->'
+			],
+			'child' => [
+				'name'    => 'summit-law/service-child-pattern',
+				'title'   => 'Service – Child',
+				'content' => '<!-- wp:acf/hero-banner /-->
+
+<!-- wp:acf/breadcrumbs /-->
+
+<!-- wp:acf/content-group /-->
+
+<!-- wp:acf/bullet-group /-->
+
+<!-- wp:acf/bullet-group /-->
+
+<!-- wp:acf/services-areas-loop /-->
+
+<!-- wp:acf/accordion /-->
+
+<!-- wp:acf/cta /-->'
+			]
+		] );
+
+		error_log( 'Service Editor: Script enqueued from: ' . get_template_directory_uri() . '/src/js/service-editor.js' );
+	} else {
+		error_log( 'Service Editor: ERROR - Script file not found at: ' . $src_path );
+	}
+}, 10 );
 
 /**
  * Limit 'Areas' Taxonomy to Single Selection with Radio Buttons

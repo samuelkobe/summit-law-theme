@@ -9,63 +9,66 @@
 
 <article id="post-<?php the_ID(); ?>" <?php post_class( 'service-parent' ); ?>>
 
-	<header class="entry-header">
-		<h1 class="entry-title"><?php the_title(); ?></h1>
-	</header>
+	<?php the_content(); ?>
 
-	<?php if ( has_post_thumbnail() ) : ?>
-		<div class="service-hero">
-			<?php the_post_thumbnail( 'large' ); ?>
-		</div>
-	<?php endif; ?>
+	<div class="bg-brand-10 py-12 lg:py-24 xl:pb-32 px-6">
+		<!-- Other Services section -->
+		<section class="services-overview antialiased">
+			<div class="container mx-auto px-6">
+				<h2 class="h2 h2-line-after">Other Services</h2>
+				<?php
+				// Get only parent services (top-level), excluding the current service
+				$current_service_id = get_the_ID();
+				$other_service_types = get_posts( array(
+					'post_type'      => 'service',
+					'posts_per_page' => -1,
+					'post_parent'    => 0,
+					'exclude'        => array( $current_service_id ),
+					'orderby'        => 'menu_order',
+					'order'          => 'ASC'
+				) );
 
-	<div>
-		<?php the_content(); ?>
-	</div>
+				if ( $other_service_types ) : ?>
+					<div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8 2xl:gap-12 mt-6 lg:mt-10">
+						<?php foreach ( $other_service_types as $service_type ) : ?>
+							<div class="col-span-1 flex flex-col gap-4 lg:gap-6">
+								<h3 class="text-green-deep text-2xl">
+									<a href="<?php echo esc_url( get_permalink( $service_type->ID ) ); ?>" class="no-underline group hover:underline decoration-transparent hover:decoration-green-deep underline-offset-4 decoration-2.5px transition-colors duration-300">
+										<div class="inline-flex items-start gap-2">
+											<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="flex-shrink-0 fill-green-accent1 hover:fill-green-accent1 relative top-[6px]"><path d="M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z"/></svg>
+											<span class="font-hanken decoration-[2px] underline underline-offset-4 decoration-transparent group-hover:decoration-green-deep transition-colors duration-300"><?php echo esc_html( get_the_title( $service_type->ID ) ); ?></span>
+										</div>
+									</a>
+								</h3>
 
-	<?php
-	// Display child practice areas
-	$practice_areas = get_posts( array(
-		'post_type'      => 'service',
-		'posts_per_page' => -1,
-		'post_parent'    => get_the_ID(),
-		'orderby'        => 'menu_order',
-		'order'          => 'ASC'
-	) );
+								<?php
+								// Get child practice areas for this service type
+								$other_practice_areas = get_posts( array(
+									'post_type'      => 'service',
+									'posts_per_page' => -1,
+									'post_parent'    => $service_type->ID,
+									'orderby'        => 'menu_order',
+									'order'          => 'ASC'
+								) );
 
-	if ( $practice_areas ) : ?>
-		<section class="practice-areas-section">
-			<h2>Practice Areas</h2>
-			<div class="practice-areas-grid">
-				<?php foreach ( $practice_areas as $area ) : ?>
-					<article class="practice-area-card">
-						<?php if ( has_post_thumbnail( $area->ID ) ) : ?>
-							<div class="practice-area-card__image">
-								<a href="<?php echo esc_url( get_permalink( $area->ID ) ); ?>">
-									<?php echo get_the_post_thumbnail( $area->ID, 'medium' ); ?>
-								</a>
+								if ( $other_practice_areas ) : ?>
+									<ul class="flex flex-col gap-2 lg:gap-3">
+										<?php foreach ( $other_practice_areas as $area ) : ?>
+											<li>
+												<a class="font-hanken no-underline decoration-[2px] hover:underline underline-offset-4 decoration-transparent hover:decoration-green-deep transition-colors duration-300" href="<?php echo esc_url( get_permalink( $area->ID ) ); ?>">
+													<?php echo esc_html( get_the_title( $area->ID ) ); ?>
+												</a>
+											</li>
+										<?php endforeach; ?>
+									</ul>
+								<?php endif; ?>
 							</div>
-						<?php endif; ?>
-
-						<div class="practice-area-card__content">
-							<h3>
-								<a href="<?php echo esc_url( get_permalink( $area->ID ) ); ?>">
-									<?php echo esc_html( get_the_title( $area->ID ) ); ?>
-								</a>
-							</h3>
-
-							<?php if ( get_the_excerpt( $area->ID ) ) : ?>
-								<p><?php echo esc_html( get_the_excerpt( $area->ID ) ); ?></p>
-							<?php endif; ?>
-
-							<a href="<?php echo esc_url( get_permalink( $area->ID ) ); ?>" class="read-more">
-								Learn More
-							</a>
-						</div>
-					</article>
-				<?php endforeach; ?>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
 			</div>
 		</section>
-	<?php endif; ?>
+		<!-- End Other Services section -->
+	</div>
 
 </article>

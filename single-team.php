@@ -254,7 +254,7 @@ get_header(); ?>
 		<section class="bg-white min-h-[30dvh] pb-12 lg:pb-16">
 			<div class="md:container grid grid-cols-1 lg:grid-cols-12 gap-8 p-6  lg:px-6 lg:py-8">
 				<div class="lg:col-span-4">
-					<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]">Profile Summary</h2>
+					<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">Profile Summary</h2>
 				</div>
 				<div class="lg:col-span-7">
 					<p class="text-lg leading-8 xl:text-xl xl:leading-9 2xl:text-xl 2xl:leading-10 font-normal"><?php echo get_field( 'profile_summary' ); ?></p>
@@ -267,7 +267,7 @@ get_header(); ?>
 
 				<div class="md:container grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 lg:px-6 lg:py-10">
 					<div class="lg:col-span-4">
-						<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]">Focus Areas</h2>
+						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">Focus Areas</h2>
 					</div>
 					<div class="lg:col-span-7">
 							<ul class="text-lg leading-8 xl:text-xl xl:leading-9 2xl:text-xl 2xl:leading-10 font-normal list-none space-y-2">
@@ -288,7 +288,7 @@ get_header(); ?>
 
 				<div class="md:container grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 lg:px-6 lg:py-10">
 					<div class="lg:col-span-4">
-						<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]">Advocacy Affiliations</h2>
+						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">Advocacy Affiliations</h2>
 					</div>
 					<div class="lg:col-span-7">
 							<ul class="text-lg leading-8 xl:text-xl xl:leading-9 2xl:text-xl 2xl:leading-10 font-normal list-none space-y-2">
@@ -310,7 +310,7 @@ get_header(); ?>
 
 				<div class="md:container grid grid-cols-1 gap-8 p-6 lg:px-6 lg:py-16">
 					<div class="col-spam-1">
-						<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]">Selected Cases</h2>
+						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">Selected Cases</h2>
 					</div>
 					<div class="col-span-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
 						<?php foreach ( $cases as $post ) : ?>
@@ -378,7 +378,7 @@ get_header(); ?>
 
 				<div class="md:container grid grid-cols-1 gap-8 p-6 lg:px-6 lg:py-16">
 					<div class="col-spam-1">
-						<h2 class="h2 border-b-[3px] border-brand-30 w-fit pb-[10px]">Related Insights</h2>
+						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">Related Insights</h2>
 						<?php if ( get_field( 'insights_subtitle' ) ) : ?>
 							<p class="text-lg lg:text-xl text-brand-50 pt-2 lg:pt-4"><?php echo esc_html( get_field( 'insights_subtitle' ) ); ?></p>
 						<?php endif; ?>

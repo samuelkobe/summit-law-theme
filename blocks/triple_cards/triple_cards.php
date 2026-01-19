@@ -53,7 +53,7 @@ $selected_posts = $field_name ? get_field( $field_name ) : null;
 
 <div id="<?php echo esc_attr( $id ); ?>" class="<?php echo esc_attr( $classes ); ?> bg-white py-24">
 	<div class="container mx-auto">
-		<h2 class="h2 border-b-[3px] border-b-brand-30 w-fit pb-2 lg:pb-3 mb-4 lg:mb-7"><?php echo  esc_html(get_field( 'triple_card_title' )); ?></h2>
+		<h2 class="h2 border-b-2 lg:border-b-[3px] border-b-brand-30 w-fit pb-2 lg:pb-3 mb-4 lg:mb-7"><?php echo  esc_html(get_field( 'triple_card_title' )); ?></h2>
 		<p class="text-green-deep text-lg lg:text-xl mb-7 lg:mb-11 max-w-none lg:max-w-[75%]"><?php echo esc_html(get_field( 'triple_card_content' )); ?></p>
 
 		<? // Display the posts

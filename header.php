@@ -14,45 +14,59 @@ $is_home = is_front_page();
 $page_type = $is_home ? 'home' : 'default';
 ?>
 
-<header data-header data-page-type="<?php echo esc_attr($page_type); ?>" class="hidden <?php echo $is_home ? 'header--dark' : 'header--light'; ?>">
+<header data-header data-page-type="<?php echo esc_attr($page_type); ?>" class="<?php echo $is_home ? 'header--dark' : 'header--light'; ?>">
   <div class="container">
     <div class="header-inner">
 
       <!-- Logo -->
+      <?php
+      $primary_logo = summit_get_primary_logo();
+      $alt_logo = summit_get_alt_logo('logo-alt');
+      $has_primary_logo = !empty($primary_logo);
+      $has_alt_logo = !empty($alt_logo);
+      ?>
       <div class="header-logo" data-logo>
         <a href="<?php echo esc_url(home_url('/')); ?>" aria-label="<?php bloginfo('name'); ?> Home">
-          <?php if (has_custom_logo()) : ?>
-            <?php the_custom_logo(); ?>
+          <?php if ($has_primary_logo || $has_alt_logo) : ?>
+            <?php if ($has_primary_logo) : ?>
+              <span class="logo-primary"><?php echo $primary_logo; ?></span>
+            <?php endif; ?>
+            <?php if ($has_alt_logo) : ?>
+              <span class="logo-alternate"><?php echo $alt_logo; ?></span>
+            <?php endif; ?>
           <?php else : ?>
             <span><?php bloginfo('name'); ?></span>
           <?php endif; ?>
         </a>
       </div>
 
-      <!-- Primary Navigation (Desktop) -->
-      <nav class="primary-nav" aria-label="Primary Navigation">
-        <?php
-        if (has_nav_menu('primary')) {
-          wp_nav_menu([
-            'theme_location' => 'primary',
-            'container' => false,
-            'menu_class' => 'nav-menu',
-            'walker' => new Summit_Mega_Menu_Walker('desktop'),
-            'fallback_cb' => false,
-          ]);
-        }
-        ?>
-      </nav>
+      <!-- Desktop: Navigation + Search grouped on right -->
+      <div class="header-right">
+        <!-- Primary Navigation (Desktop) -->
+        <nav class="primary-nav" aria-label="Primary Navigation">
+          <?php
+          if (has_nav_menu('primary')) {
+            wp_nav_menu([
+              'theme_location' => 'primary',
+              'container' => false,
+              'menu_class' => 'nav-menu',
+              'walker' => new Summit_Mega_Menu_Walker('desktop'),
+              'fallback_cb' => false,
+            ]);
+          }
+          ?>
+        </nav>
 
-      <!-- Search Icon (Desktop) -->
-      <button
-        class="search-toggle"
-        aria-label="Open search"
-        aria-expanded="false"
-        aria-controls="search-overlay"
-        data-search-toggle>
-        <?php echo summit_get_svg_icon('search'); ?>
-      </button>
+        <!-- Search Icon (Desktop) -->
+        <button
+          class="search-toggle"
+          aria-label="Open search"
+          aria-expanded="false"
+          aria-controls="search-overlay"
+          data-search-toggle>
+          <?php echo summit_get_svg_icon('search'); ?>
+        </button>
+      </div>
 
       <!-- Hamburger Menu (Mobile) -->
       <button
