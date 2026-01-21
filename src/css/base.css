@@ -1,5 +1,6 @@
 /* Component imports must come first */
 @import "./components/navigation.css";
+@import "./components/content.css";
 
 /* Block imports */
 @import "../../blocks/starter_template/starter_template.css";

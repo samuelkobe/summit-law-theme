@@ -426,41 +426,40 @@ body.home .header--light .logo-alternate {
    ============================================================================= */
 
 /* Search overlay */
-.search-overlay {
-  @apply sticky top-0 right-0 bottom-0;
-  @apply w-full lg:w-[480px];
-  @apply bg-white shadow-2xl;
-  @apply flex items-start justify-center pt-32;
+[data-header] > .search-overlay.container {
+  @apply absolute top-0 left-0 right-0 w-full;
+  @apply flex items-center;
   @apply opacity-0 invisible;
   @apply transition-all duration-300 ease-in-out;
-  transform: translateX(100%);
+  padding-top: 0;
+  box-shadow: none;
+  text-decoration: none;
   z-index: 60;
 }
 
 .search-overlay:not([hidden]) {
   @apply opacity-100 visible;
-  transform: translateX(0);
 }
 
 /* Search form */
 .search-overlay form {
-  @apply relative w-full px-8;
+  @apply relative w-full;
 }
 
-.search-overlay input[type="search"] {
+.search-overlay input[type="search"],
+.search-overlay #search-field {
   @apply w-full px-4 py-3 pr-12;
-  @apply border-b-2 border-brand-30;
   @apply bg-transparent text-brand-black;
   @apply text-lg;
   @apply outline-none;
-  border-left: none;
-  border-right: none;
-  border-top: none;
+  border: none;
   border-radius: 0;
 }
 
-.search-overlay input[type="search"]:focus {
-  @apply border-brand-black;
+.search-overlay input[type="search"]:focus,
+.search-overlay #search-field:focus {
+  @apply outline-none;
+  border: none;
 }
 
 .search-overlay form button[type="submit"] {

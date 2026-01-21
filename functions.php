@@ -595,3 +595,40 @@ function summit_remove_area_taxonomy_from_rest( $args, $taxonomy ) {
   return $args;
 }
 add_filter( 'register_taxonomy_args', 'summit_remove_area_taxonomy_from_rest', 10, 2 );
+
+
+// =============================================================================
+// Insights Archive Filters
+// =============================================================================
+
+/**
+ * Modify the main query on the Insights (blog) archive to handle filter parameters.
+ *
+ * @param WP_Query $query The main query object.
+ */
+function summit_modify_insights_query( $query ) {
+  // Only modify front-end main query on the blog home page
+  if ( is_admin() || ! $query->is_main_query() || ! $query->is_home() ) {
+    return;
+  }
+
+  // Handle year filter
+  if ( isset( $_GET['year'] ) && ! empty( $_GET['year'] ) ) {
+    $query->set( 'year', intval( $_GET['year'] ) );
+  }
+
+  // Handle area taxonomy filter
+  if ( isset( $_GET['area'] ) && ! empty( $_GET['area'] ) ) {
+    $query->set(
+      'tax_query',
+      array(
+        array(
+          'taxonomy' => 'area',
+          'field'    => 'slug',
+          'terms'    => sanitize_text_field( $_GET['area'] ),
+        ),
+      )
+    );
+  }
+}
+add_action( 'pre_get_posts', 'summit_modify_insights_query' );

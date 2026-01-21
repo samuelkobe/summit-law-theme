@@ -87,7 +87,7 @@ $page_type = $is_home ? 'home' : 'default';
 
   <!-- Search Overlay (Desktop) -->
   <div
-    class="search-overlay"
+    class="search-overlay container"
     id="search-overlay"
     data-search-overlay
     hidden>
