@@ -80,9 +80,9 @@ export default class MegaMenu {
     if (isExpanded) {
       this.close(menu, button);
     } else {
-      // Close any open menus first
+      // Close any open menus first (but keep header styling if switching menus)
       if (this.activeMenu) {
-        this.close(this.activeMenu, this.activeButton);
+        this.close(this.activeMenu, this.activeButton, true, true); // returnFocus=true, keepHeaderStyling=true
       }
       this.open(menu, button);
     }
@@ -104,7 +104,24 @@ export default class MegaMenu {
 
       // Position the mega menu directly below the header
       const headerRect = this.header.getBoundingClientRect();
-      menu.style.top = `${headerRect.bottom}px`;
+
+      // Check if header is using sticky positioning (non-home pages at top of page)
+      // When sticky and not scrolled, we need to account for admin bar offset
+      const headerStyle = window.getComputedStyle(this.header);
+      const isSticky = headerStyle.position === 'sticky';
+      const hasAdminBar = document.body.classList.contains('admin-bar');
+      const isAtTop = window.pageYOffset === 0;
+
+      let topPosition = headerRect.bottom;
+
+      // For sticky headers at top with admin bar, subtract the admin bar height
+      // because the header's bounding rect includes the admin bar offset
+      if (isSticky && hasAdminBar && isAtTop) {
+        const adminBarHeight = window.innerWidth >= 783 ? 32 : 46;
+        topPosition = headerRect.bottom - adminBarHeight;
+      }
+
+      menu.style.top = `${topPosition}px`;
     }
 
     // Make visible first
@@ -138,8 +155,9 @@ export default class MegaMenu {
    * @param {HTMLElement} menu Menu element
    * @param {HTMLElement} button Toggle button
    * @param {boolean} returnFocus Whether to return focus to button (default true)
+   * @param {boolean} keepHeaderStyling Whether to keep has-mega-open class (when switching menus)
    */
-  close(menu, button, returnFocus = true) {
+  close(menu, button, returnFocus = true, keepHeaderStyling = false) {
     // Remove is-open to trigger slide-up animation (menu stays visible during transition)
     menu.classList.remove('is-open');
 
@@ -150,8 +168,8 @@ export default class MegaMenu {
         menu.setAttribute('hidden', '');
         menu.style.top = ''; // Clear inline position
 
-        // Remove header class after menu is fully closed
-        if (this.header) {
+        // Remove header class after menu is fully closed (unless switching to another menu)
+        if (this.header && !keepHeaderStyling && !this.activeMenu) {
           this.header.classList.remove('has-mega-open');
         }
       }

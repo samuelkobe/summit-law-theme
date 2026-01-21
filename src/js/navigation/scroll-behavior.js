@@ -99,9 +99,11 @@ export default class ScrollBehavior {
       if (currentScroll >= this.logoTransitionPoint) {
         this.header.classList.remove("header--dark");
         this.header.classList.add("header--light");
+        document.body.classList.add("header-scrolled");
       } else {
         this.header.classList.add("header--dark");
         this.header.classList.remove("header--light");
+        document.body.classList.remove("header-scrolled");
       }
     }
 
@@ -139,9 +141,11 @@ export default class ScrollBehavior {
       if (currentScroll >= this.logoTransitionPoint) {
         this.header.classList.remove("header--dark");
         this.header.classList.add("header--light");
+        document.body.classList.add("header-scrolled");
       } else {
         this.header.classList.add("header--dark");
         this.header.classList.remove("header--light");
+        document.body.classList.remove("header-scrolled");
       }
     }
 
@@ -184,6 +188,8 @@ export default class ScrollBehavior {
       if (this.isHomePage) {
         this.header.classList.remove("header--dark");
         this.header.classList.add("header--light");
+        // Remove header-scrolled on mobile since hero content doesn't have the margin there
+        document.body.classList.remove("header-scrolled");
       }
     }
 

@@ -100,14 +100,14 @@
 /* Before line: top-right corner, spans left to middle */
 .home-before-after-content::before {
   content: "";
-  @apply absolute top-8 right-0 w-1/2 h-[2px] lg:h-[3px] bg-green-accent1;
+  @apply absolute -top-2 lg:top-4 right-0 w-1/2 xl:w-[41.667%] h-[2px] lg:h-[3px] bg-green-accent1 mx-8;
   transform-origin: right center;
 }
 
 /* After line: bottom-left corner, spans right to middle */
 .home-before-after-content::after {
   content: "";
-  @apply absolute bottom-8 left-0 w-1/2 h-[2px] lg:h-[3px] bg-green-accent1;
+  @apply absolute -bottom-6 lg:bottom-8 left-0 w-1/2 h-[2px] lg:h-[3px] bg-green-accent1 mx-8;
   transform-origin: left center;
 }
 

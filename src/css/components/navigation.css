@@ -5,7 +5,6 @@
  *
  * Includes:
  * - Header (light/dark versions, hidden state)
- * - Logo (small/large versions)
  * - Desktop mega menus
  * - Mobile drawer menu
  * - Search overlay
@@ -18,8 +17,7 @@
    ============================================================================= */
 
 [data-header] {
-  @apply sticky top-0 left-0 right-0 z-50;
-  @apply transition-transform duration-1000 ease-out;
+  @apply sticky top-0 left-0 right-0 z-50 transition-transform duration-1000 ease-out;
   /* Start hidden above viewport, JS will reveal after applying correct state */
   transform: translateY(-100%);
 }
@@ -38,7 +36,12 @@
 body.home [data-header],
 body.home [data-header].header--light,
 body.home [data-header].header--dark {
-  @apply fixed;
+  @apply sticky lg:fixed;
+}
+
+/* Mobile: always white background header (must override .header--dark) */
+.header--light .container {
+  @apply max-lg:bg-white;
 }
 
 /* Header ready state - applied by JS after scroll state is determined */
@@ -46,32 +49,31 @@ body.home [data-header].header--dark {
   transform: translateY(0);
 }
 
-/* WordPress admin bar spacing - when logged in */
-.admin-bar [data-header] {
-  top: 46px; /* Mobile admin bar height */
-}
-
-@media screen and (min-width: 783px) {
-  .admin-bar [data-header] {
-    top: 32px; /* Desktop admin bar height */
-  }
-}
-
 /* Header container - matches Tailwind container */
 [data-header] > .container {
   @apply mx-auto w-full;
   @apply px-4 lg:px-8;
+  @apply relative;
+  z-index: 51; /* Ensure container stays above mobile menu */
 }
 
 /* Header inner flexbox */
 .header-inner {
-  @apply flex items-center justify-between;
-  @apply py-4 lg:py-6;
+  @apply flex items-center justify-between relative;
+  z-index: 51; /* Ensure header content stays above mobile menu (z-45) */
 }
 
 /* Right side wrapper for nav and search */
 .header-right {
   @apply hidden lg:flex items-center gap-6;
+}
+
+.header-right {
+  @apply h-28;
+}
+
+body.home .header--light .header-right {
+  @apply lg:delay-[2000ms];
 }
 
 /* =============================================================================
@@ -80,48 +82,50 @@ body.home [data-header].header--dark {
 
 /* Light header (default pages and scrolled on home) */
 .header--light {
-  @apply bg-white shadow-sm;
-  @apply transition-all duration-300 ease-out;
+  @apply bg-white shadow-sm transition-all duration-300 ease-out;
 }
 
 .header--light .nav-menu > li > button,
 .header--light .nav-menu > li > a {
-  @apply text-brand-black;
-  @apply transition-colors duration-300;
+  @apply text-brand-black transition-colors duration-300;
+}
+
+body.home .header--light .nav-menu > li > button,
+body.home .header--light .nav-menu > li > a {
+  @apply lg:delay-[950ms];
 }
 
 .header--light .search-toggle,
 .header--light .mobile-menu-toggle {
-  @apply text-brand-black;
-  @apply transition-colors duration-300;
+  @apply text-brand-black transition-colors duration-300;
+}
+
+body.home .header--light .search-toggle,
+body.home .header--light .mobile-menu-toggle {
+  @apply lg:delay-[950ms];
 }
 
 .header--light .hamburger span {
-  @apply bg-brand-black;
-  @apply transition-all duration-300;
+  @apply bg-brand-black transition-all duration-300;
 }
 
 /* Dark header (home page top) - transparent by default */
 .header--dark {
-  @apply bg-transparent;
-  @apply transition-all duration-300 ease-out;
+  @apply bg-transparent transition-all duration-300 ease-out;
 }
 
 .header--dark .nav-menu > li > button,
 .header--dark .nav-menu > li > a {
-  @apply text-white;
-  @apply transition-colors duration-300;
+  @apply text-white transition-colors duration-300;
 }
 
 .header--dark .search-toggle,
 .header--dark .mobile-menu-toggle {
-  @apply text-white;
-  @apply transition-colors duration-300;
+  @apply text-white transition-colors duration-300;
 }
 
 .header--dark .hamburger span {
-  @apply bg-white;
-  @apply transition-all duration-300;
+  @apply bg-white transition-all duration-300;
 }
 
 /* When mega menu is open, force light header style (needed for slide animation) */
@@ -152,9 +156,29 @@ body.home [data-header].header--dark {
   @apply opacity-100;
 }
 
+/* Add top padding to logo on home page when not scrolled (large logo state) */
+.header--dark [data-logo]:not(.logo--small) .logo-primary {
+  @apply xl:pt-20 transition-all duration-500 ease-out;
+}
+
+.header--dark [data-logo]:not(.logo--small) .logo-primary img {
+  @apply xl:absolute xl:w-full xl:h-auto;
+}
+
 /* Hidden state (scroll down on desktop) - must override header--ready */
 [data-header].header--hidden {
   transform: translateY(-100%);
+}
+
+/* Hero content margin transition when header switches to light mode on home page */
+@media (min-width: 1280px) {
+  body.home [data-hero-content] {
+    transition: margin 1000ms ease-out;
+  }
+
+  body.home.header-scrolled [data-hero-content] {
+    margin-top: 0 !important;
+  }
 }
 
 /* =============================================================================
@@ -171,14 +195,35 @@ body.home [data-header].header--dark {
 
 [data-logo] img {
   @apply block h-auto;
-  @apply transition-all duration-500 ease-in-out;
+}
+
+.header--light .logo-primary img,
+.header--light .logo-alternate img {
+  @apply transition-none lg:duration-[950ms] ease-in;
+}
+
+.header--dark .logo-primary img,
+.header--dark .logo-alternate img {
+  @apply lg:transition-all lg:duration-1000 ease-out;
+}
+
+body.home .header--light {
+  @apply lg:!delay-[950ms];
+}
+
+/* .header--light .logo--small .logo-alternate img {
+  @apply !delay-[2000ms];
+} */
+
+.header--light .logo--small .logo-primary img {
+  @apply !opacity-100 lg:transition-all lg:duration-500 ease-in;
 }
 
 /* Logo wrapper spans - start hidden to prevent flash */
 .logo-primary,
 .logo-alternate {
-  @apply block opacity-0;
-  @apply transition-opacity duration-300 ease-in-out;
+  @apply block;
+  /* @apply opacity-0 transition-opacity duration-300 ease-in-out; */
 }
 
 /* Position alternate logo absolutely so they can overlap during transition */
@@ -195,22 +240,23 @@ body.home [data-header].header--dark {
   @apply opacity-0;
 }
 
-/* Light header: show alternate logo, hide primary */
-.header--light .logo-primary {
-  @apply opacity-0;
+.header--light [data-logo] .logo-primary {
+  @apply pt-0 lg:transition-all lg:duration-500 ease-out;
+}
+
+body.home .header--light [data-logo] .logo-primary {
+  @apply lg:!delay-[250ms];
 }
 
 .header--light .logo-alternate {
   @apply opacity-100;
 }
 
-/* Large logo (home page top) */
-[data-logo]:not(.logo--small) img {
-  @apply w-[180px] lg:w-[240px];
+body.home .header--light .logo-alternate {
+  @apply lg:delay-[950ms];
 }
 
-/* Small logo (scrolled or default pages) */
-[data-logo].logo--small img {
+[data-logo] img {
   @apply w-[140px] lg:w-[180px];
 }
 
@@ -313,6 +359,11 @@ body.home [data-header].header--dark {
   z-index: 40; /* Below header (z-50) but above content */
 }
 
+/* Override WordPress admin bar offset - JS sets top dynamically */
+.admin-bar .mega-menu {
+  margin-top: 0 !important;
+}
+
 /* Visible state - applied immediately on open, removed after close transition */
 .mega-menu.is-visible {
   visibility: visible;
@@ -326,7 +377,7 @@ body.home [data-header].header--dark {
 
 /* Mega menu content wrapper */
 .mega-menu-content {
-  @apply container mx-auto px-8 py-8;
+  @apply container mx-auto p-8 2xl:p-10 2xl:!pt-12;
   @apply grid lg:grid-cols-3 2xl:lg:grid-cols-4 gap-8;
   /* grid-template-columns: repeat(auto-fit, minmax(250px, 4fr)); */
 }
@@ -384,17 +435,6 @@ body.home [data-header].header--dark {
   @apply transition-all duration-300 ease-in-out;
   transform: translateX(100%);
   z-index: 60;
-}
-
-/* WordPress admin bar spacing */
-.admin-bar .search-overlay {
-  top: 46px;
-}
-
-@media screen and (min-width: 783px) {
-  .admin-bar .search-overlay {
-    top: 32px;
-  }
 }
 
 .search-overlay:not([hidden]) {
@@ -486,26 +526,18 @@ body.home [data-header].header--dark {
 
 /* Mobile menu drawer */
 .mobile-menu {
-  @apply sticky top-0 right-0 bottom-0;
+  @apply fixed top-0 left-0 right-0;
   @apply w-full;
   @apply bg-white;
   @apply overflow-y-auto;
   @apply opacity-0 invisible;
   @apply transition-all duration-300 ease-in-out;
   transform: translateX(100%);
-  z-index: 60;
-  padding-top: 80px; /* Space for header */
-}
-
-/* WordPress admin bar spacing */
-.admin-bar .mobile-menu {
-  top: 46px;
-}
-
-@media screen and (min-width: 783px) {
-  .admin-bar .mobile-menu {
-    top: 32px;
-  }
+  z-index: 45; /* Below header (z-50) so header stays on top */
+  padding-top: 0px; /* Space for header */
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  border-top: 2px solid #e5e7eb; /* Tailwind brand-30 */
 }
 
 .mobile-menu:not([hidden]) {
@@ -695,4 +727,10 @@ body.home [data-header].header--dark {
 /* Prevent body scroll when overlay open */
 body.scroll-locked {
   @apply overflow-hidden;
+}
+
+/* Navigation chevron icons - override default SVG styling */
+#menu-main-menu > li.menu-item.menu-item-has-children > button > svg,
+.mobile-nav-menu > li.menu-item-has-children > button > svg {
+  @apply shadow-none fill-none stroke-green-accent1 stroke-[3px];
 }

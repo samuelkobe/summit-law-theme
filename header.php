@@ -15,8 +15,8 @@ $page_type = $is_home ? 'home' : 'default';
 ?>
 
 <header data-header data-page-type="<?php echo esc_attr($page_type); ?>" class="<?php echo $is_home ? 'header--dark' : 'header--light'; ?>">
-  <div class="container">
-    <div class="header-inner">
+  <div class="container max-lg:py-4">
+    <div class="header-inner<?php echo !$is_home ? '' : ' lg:grid lg:grid-cols-12'; ?>">
 
       <!-- Logo -->
       <?php
@@ -25,7 +25,7 @@ $page_type = $is_home ? 'home' : 'default';
       $has_primary_logo = !empty($primary_logo);
       $has_alt_logo = !empty($alt_logo);
       ?>
-      <div class="header-logo" data-logo>
+      <div class="header-logo<?php echo !$is_home ? ' logo--small' : ' lg:col-span-6'; ?>" data-logo>
         <a href="<?php echo esc_url(home_url('/')); ?>" aria-label="<?php bloginfo('name'); ?> Home">
           <?php if ($has_primary_logo || $has_alt_logo) : ?>
             <?php if ($has_primary_logo) : ?>
@@ -41,7 +41,7 @@ $page_type = $is_home ? 'home' : 'default';
       </div>
 
       <!-- Desktop: Navigation + Search grouped on right -->
-      <div class="header-right">
+      <div class="header-right<?php echo !$is_home ? '' : ' lg:col-span-6 lg:justify-self-end lg:self-start'; ?>">
         <!-- Primary Navigation (Desktop) -->
         <nav class="primary-nav" aria-label="Primary Navigation">
           <?php
@@ -115,7 +115,7 @@ $page_type = $is_home ? 'home' : 'default';
 
   <!-- Mobile Menu Drawer -->
   <div
-    class="mobile-menu"
+  class="mobile-menu container max-lg:!px-0"
     id="mobile-menu"
     data-mobile-menu
     hidden>

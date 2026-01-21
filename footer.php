@@ -44,7 +44,7 @@
             ?>
               <div class="pt-3 lg:py-0">
                 <?php if ($menu_title && $page_link_toggle === 'yes' && $page_link) : ?>
-                  <h3 class="text-xl"><a href="<?php echo esc_url($page_link); ?>" class="footer-menu-title-link fill-green-accent1 hover:fill-green-accent2"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"><path d="M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z"/></svg><?php echo esc_html($display_title); ?></a></h3>
+                  <h3 class="text-xl"><a href="<?php echo esc_url($page_link); ?>" class="footer-menu-title-link fill-green-accent1 hover:fill-green-accent2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z"/></svg><?php echo esc_html($display_title); ?></a></h3>
                 <?php else : ?>
                   <h3 class="text-green-accent1 text-xl"><?php echo esc_html($display_title); ?></h3>
                 <?php endif; ?>

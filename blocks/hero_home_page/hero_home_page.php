@@ -33,12 +33,12 @@ if ( ! empty( $block['align'] ) ) {
 </style>
 
 
-<header id="<?php echo esc_attr( $id ); ?>" class="page-header bg-green-deep lg:h-[100dvh] min-h-[240px] lg:min-h-[400px] flex items-center py-24 max-md:pt-12 <?php echo esc_attr( $classes ); ?>">
+<header id="<?php echo esc_attr( $id ); ?>" class="page-header bg-green-deep lg:h-[80dvh] xl:h-[100dvh] min-h-[240px] lg:min-h-[800px] xl:min-h-[1024px] flex items-center py-24 max-md:pt-12 <?php echo esc_attr( $classes ); ?>">
 		<section class="home-before-after-content animate-line h-full flex flex-col justify-center container mx-auto p-6 relative">
 
 			<?php // this needs to be replaced with dynamic content from ACF/WP admin ?>
 
-			<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 2xl:gap-24 items-end">
+			<div class="hero-content-grid grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 2xl:gap-24 items-end xl:mt-[20dvh]" data-hero-content>
 				<div class="col-span-1">
 
 					<?php
@@ -46,7 +46,7 @@ if ( ! empty( $block['align'] ) ) {
 					$post_title = get_the_title();
 					$is_auto_draft = $post_title === 'Auto Draft' || empty( $post_title );
 					?>
-					<h1 class="h1 font-hanken text-green-accent1 mb-4 lg:mb-10">
+					<h1 class="font-normal leading-tight tracking-[-0.02em] text-h2 3xl:text-h1 antialiased font-hanken text-green-accent1 mb-4 3xl:mb-10">
 						<?php if ( $slogan ) : ?>
 							<?php echo wp_kses_post( $slogan ); ?>
 						<?php elseif ( $is_preview && $is_auto_draft ) : ?>
@@ -94,14 +94,14 @@ if ( ! empty( $block['align'] ) ) {
 					</script>
 					<?php endif; ?>
 
-					<p class="text-white text-lg lg:text-xl">
+					<p class="text-white text-lg 3xl:text-xl">
 						<?php the_field( 'content' ); ?>
 						<?php if ( ! get_field( 'content' ) ) : ?>
 							<span class="text-brand-40">Add hero content in the block settings.</span>
 						<?php endif; ?>
 					</p>
 				</div>
-				<div class="col-span-1 p-6 lg:pl-12 2xl:pl-24 !pb-0 !pr-0">
+				<div class="col-span-1 p-6 max-lg:pl-0 lg:pl-12 2xl:pl-24 !pb-0 !pr-0 md:mt-12 lg:mt-0">
 					<?php
 					$gallery_images = get_field( 'gallery' );
 					if ( $gallery_images && is_array( $gallery_images ) ) :
