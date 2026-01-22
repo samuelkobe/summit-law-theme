@@ -1175,13 +1175,13 @@ function summit_search_document_title( $title ) {
 
 	// Build the page title portion
 	if ( $has_search_term && $has_type_filter ) {
-		$page_title = sprintf( __( 'Search: "%1$s" in %2$s', 'summit-law-theme' ), $search_term, $type_labels[ $type_filter ] );
+		$page_title = sprintf( __( 'Site Index: "%1$s" in %2$s', 'summit-law-theme' ), $search_term, $type_labels[ $type_filter ] );
 	} elseif ( $has_search_term ) {
-		$page_title = sprintf( __( 'Search: "%s"', 'summit-law-theme' ), $search_term );
+		$page_title = sprintf( __( 'Site Index: "%s"', 'summit-law-theme' ), $search_term );
 	} elseif ( $has_type_filter ) {
-		$page_title = sprintf( __( 'Search: %s', 'summit-law-theme' ), $type_labels[ $type_filter ] );
+		$page_title = sprintf( __( 'Site Index: %s', 'summit-law-theme' ), $type_labels[ $type_filter ] );
 	} else {
-		$page_title = __( 'Search', 'summit-law-theme' );
+		$page_title = __( 'Site Index', 'summit-law-theme' );
 	}
 
 	return $page_title . ' - ' . $site_name;
@@ -1306,3 +1306,77 @@ function summit_area_archive_document_title( $title ) {
 }
 add_filter( 'pre_get_document_title', 'summit_area_archive_document_title', 998 );
 add_filter( 'seopress_titles_title', 'summit_area_archive_document_title' );
+
+/**
+ * Set document title for Insights archive page (/insights/).
+ *
+ * Handles:
+ * - Base Insights archive
+ * - Area filter (?area={slug})
+ *
+ * @param string $title The current title.
+ * @return string Modified title.
+ */
+function summit_insights_archive_document_title( $title ) {
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( $_SERVER['REQUEST_URI'] ) : '';
+	$site_name   = get_bloginfo( 'name' );
+
+	// Only handle /insights/ URLs
+	if ( ! preg_match( '#/insights/?(\?|$)#', $request_uri ) ) {
+		return $title;
+	}
+
+	// Get the posts page title (if set) or default to "Insights"
+	$posts_page_id = get_option( 'page_for_posts' );
+	$base_title    = $posts_page_id ? get_the_title( $posts_page_id ) : __( 'Insights', 'summit-law-theme' );
+
+	// Check for area filter
+	$area_slug = isset( $_GET['area'] ) ? sanitize_text_field( $_GET['area'] ) : '';
+
+	if ( $area_slug ) {
+		$area_term = get_term_by( 'slug', $area_slug, 'area' );
+		if ( $area_term && ! is_wp_error( $area_term ) ) {
+			return sprintf( '%s: %s - %s', $base_title, $area_term->name, $site_name );
+		}
+	}
+
+	return $base_title . ' - ' . $site_name;
+}
+add_filter( 'pre_get_document_title', 'summit_insights_archive_document_title', 997 );
+add_filter( 'seopress_titles_title', 'summit_insights_archive_document_title' );
+
+/**
+ * Set document title for Cases archive page (/cases/).
+ *
+ * Handles:
+ * - Base Cases archive
+ * - Area filter (?area={slug})
+ *
+ * @param string $title The current title.
+ * @return string Modified title.
+ */
+function summit_cases_archive_document_title( $title ) {
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( $_SERVER['REQUEST_URI'] ) : '';
+	$site_name   = get_bloginfo( 'name' );
+
+	// Only handle /cases/ URLs (use URL matching for reliability with query params)
+	if ( ! preg_match( '#/cases/?(\?|$)#', $request_uri ) ) {
+		return $title;
+	}
+
+	$base_title = __( 'Cases', 'summit-law-theme' );
+
+	// Check for area filter
+	$area_slug = isset( $_GET['area'] ) ? sanitize_text_field( $_GET['area'] ) : '';
+
+	if ( $area_slug ) {
+		$area_term = get_term_by( 'slug', $area_slug, 'area' );
+		if ( $area_term && ! is_wp_error( $area_term ) ) {
+			return sprintf( '%s: %s - %s', $base_title, $area_term->name, $site_name );
+		}
+	}
+
+	return $base_title . ' - ' . $site_name;
+}
+add_filter( 'pre_get_document_title', 'summit_cases_archive_document_title', 996 );
+add_filter( 'seopress_titles_title', 'summit_cases_archive_document_title' );

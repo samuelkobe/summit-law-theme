@@ -36,8 +36,24 @@ export default class ScrollBehavior {
     // This runs for both mobile and desktop to set correct logo/header state
     this.applyScrollState();
 
-    // Reveal header after state is applied (prevents flash of wrong state)
-    this.header.classList.add("header--ready");
+    // Check if this is an internal navigation (same-origin referrer)
+    // Skip entrance animation for internal navigation to avoid jarring transition
+    const isInternalNavigation = this.isInternalNavigation();
+
+    if (isInternalNavigation) {
+      // Skip entrance animation for internal navigation
+      this.header.classList.add("header--no-transition");
+      this.header.classList.add("header--ready");
+      // Force reflow to ensure the no-transition class takes effect
+      this.header.offsetHeight;
+      // Re-enable transitions after a frame
+      requestAnimationFrame(() => {
+        this.header.classList.remove("header--no-transition");
+      });
+    } else {
+      // External navigation or fresh load: show entrance animation
+      this.header.classList.add("header--ready");
+    }
 
     // Always add resize listener to handle viewport changes
     window.addEventListener("resize", () => this.handleResize());
@@ -45,6 +61,24 @@ export default class ScrollBehavior {
     // Add scroll listener if on desktop
     if (!this.isMobile) {
       this.addScrollListener();
+    }
+  }
+
+  /**
+   * Check if this is an internal navigation (from same site)
+   * @returns {boolean}
+   */
+  isInternalNavigation() {
+    try {
+      const referrer = document.referrer;
+      if (!referrer) {
+        return false;
+      }
+      const referrerUrl = new URL(referrer);
+      const currentUrl = new URL(window.location.href);
+      return referrerUrl.origin === currentUrl.origin;
+    } catch (e) {
+      return false;
     }
   }
 

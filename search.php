@@ -57,7 +57,7 @@ $search_term_lower   = strtolower( trim( $search_query ) );
 $matched_post_type   = isset( $post_type_keywords[ $search_term_lower ] ) ? $post_type_keywords[ $search_term_lower ] : null;
 $is_keyword_search   = ! empty( $matched_post_type );
 
-// Get counts for each post type using the helper function
+// Get counts for each post type
 // This ensures counts include ACF meta field matches (same as main search)
 $type_counts = array();
 
@@ -70,8 +70,35 @@ if ( $is_keyword_search ) {
 		}
 		$type_counts[ $type ] = ( $type === $matched_post_type ) ? $wp_query->found_posts : 0;
 	}
+} elseif ( empty( $search_query ) ) {
+	// No search term - count all posts of each type (browse mode)
+	// Get "All Results" count from main query
+	if ( empty( $current_type ) ) {
+		$type_counts[''] = $wp_query->found_posts;
+	} else {
+		// Type filter active - need separate count for all types
+		$all_query = new WP_Query( array(
+			'post_type'      => array( 'page', 'post', 'case', 'team', 'service' ),
+			'posts_per_page' => 1,
+			'post_status'    => 'publish',
+		) );
+		$type_counts[''] = $all_query->found_posts;
+	}
+
+	// Get counts for individual post types
+	foreach ( array_keys( $post_types ) as $type ) {
+		if ( empty( $type ) ) {
+			continue;
+		}
+		$count_query = new WP_Query( array(
+			'post_type'      => $type,
+			'posts_per_page' => 1,
+			'post_status'    => 'publish',
+		) );
+		$type_counts[ $type ] = $count_query->found_posts;
+	}
 } else {
-	// Standard search: use helper function for accurate counts with meta search
+	// Standard search with a search term: use helper function for accurate counts with meta search
 	// Get "All Results" count
 	if ( empty( $current_type ) ) {
 		// No type filter - main query already has accurate count
@@ -93,10 +120,10 @@ if ( $is_keyword_search ) {
 ?>
 
 <!-- Hero Banner -->
-<header class="page-header bg-green-deep lg:h-[30dvh] min-h-[240px] lg:min-h-[320px] flex items-center py-24 max-md:pt-12">
+<header class="page-header bg-green-deep lg:h-[30dvh] min-h-[240px] lg:min-h-[320px] flex items-center pt-12 pb-20 lg:py-24">
 	<section class="banner-after-content h-full flex flex-col justify-center container mx-auto p-6 relative text-left">
 		<h1 class="h1 2xl:text-7xl text-green-accent1 mb-4 lg:mb-10">
-			<?php esc_html_e( 'Search Results', 'summit-law-theme' ); ?>
+			<?php esc_html_e( 'Site Index', 'summit-law-theme' ); ?>
 		</h1>
 		<?php if ( $search_query || $current_type ) : ?>
 			<p class="text-white text-lg lg:text-xl w-full md:w-3/4 2xl:w-2/3">

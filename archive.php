@@ -218,7 +218,7 @@ if ( $is_all_areas_mode ) {
 ?>
 
 <!-- Hero Banner -->
-<header class="page-header bg-green-deep lg:h-[30dvh] min-h-[240px] lg:min-h-[320px] flex items-center py-24 max-md:pt-12">
+<header class="page-header bg-green-deep lg:h-[30dvh] min-h-[240px] lg:min-h-[320px] flex items-center pt-12 pb-20 lg:py-24">
 	<section class="banner-after-content h-full flex flex-col justify-center container mx-auto p-6 relative text-left">
 		<h1 class="h1 2xl:text-7xl text-green-accent1 mb-4 lg:mb-10">
 			<?php echo esc_html( $archive_title ); ?>
@@ -376,7 +376,7 @@ if ( $is_all_areas_mode ) {
 
 <main id="main" class="site-main">
 
-	<section class="bg-white py-12 lg:py-24">
+	<section class="bg-white py-12 lg:pb-24 lg:pt-16">
 		<div class="container mx-auto px-6">
 
 			<?php if ( $is_taxonomy_archive ) : ?>

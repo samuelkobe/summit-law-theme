@@ -453,7 +453,7 @@
             "name": "profile_summary",
             "aria-label": "",
             "type": "textarea",
-            "instructions": "Longer description of the team member (Max 1000 characters).",
+            "instructions": "Longer description of the team member (Max 2500 characters).",
             "required": 1,
             "conditional_logic": 0,
             "wrapper": {
@@ -462,7 +462,7 @@
                 "id": ""
             },
             "default_value": "",
-            "maxlength": 1000,
+            "maxlength": 2500,
             "allow_in_bindings": 0,
             "rows": 6,
             "placeholder": "",
@@ -829,5 +829,5 @@
     "description": "",
     "show_in_rest": 0,
     "display_title": "",
-    "modified": 1767303099
+    "modified": 1769075559
 }

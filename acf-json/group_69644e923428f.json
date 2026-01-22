@@ -29,7 +29,7 @@
             "name": "content",
             "aria-label": "",
             "type": "textarea",
-            "instructions": "Add a few sentences. This is limited to a maximum of 500 characters, but truly, 250 or less will look better (optional field).",
+            "instructions": "Add a few sentences. This is limited to a maximum of 1000 characters, but truly, 250 or less will look better (optional field).",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -38,7 +38,7 @@
                 "id": ""
             },
             "default_value": "",
-            "maxlength": 500,
+            "maxlength": 1000,
             "allow_in_bindings": 0,
             "rows": 4,
             "placeholder": "",
@@ -120,7 +120,7 @@
                     "name": "content",
                     "aria-label": "",
                     "type": "textarea",
-                    "instructions": "Add a short block of text to accompany the heading (maximum 250 characters).",
+                    "instructions": "Add a short block of text to accompany the heading (maximum 350 characters).",
                     "required": 1,
                     "conditional_logic": 0,
                     "wrapper": {
@@ -129,7 +129,7 @@
                         "id": ""
                     },
                     "default_value": "",
-                    "maxlength": 250,
+                    "maxlength": 350,
                     "allow_in_bindings": 0,
                     "rows": 3,
                     "placeholder": "",
@@ -158,5 +158,5 @@
     "description": "",
     "show_in_rest": 0,
     "display_title": "",
-    "modified": 1768181586
+    "modified": 1769074845
 }

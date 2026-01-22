@@ -33,7 +33,7 @@ if ( ! empty( $block['align'] ) ) {
 </style>
 
 
-<header id="<?php echo esc_attr( $id ); ?>" class="page-header bg-green-deep lg:h-[80dvh] xl:h-[100dvh] min-h-[240px] lg:min-h-[800px] xl:min-h-[1024px] flex items-center py-24 max-md:pt-12 <?php echo esc_attr( $classes ); ?>">
+<header id="<?php echo esc_attr( $id ); ?>" class="page-header bg-green-deep lg:h-[80dvh] xl:h-[100dvh] min-h-[240px] lg:min-h-[800px] xl:min-h-[1024px] flex items-center pt-12 pb-20 lg:py-24 <?php echo esc_attr( $classes ); ?>">
 		<section class="home-before-after-content animate-line h-full flex flex-col justify-center container mx-auto p-6 relative">
 
 			<?php // this needs to be replaced with dynamic content from ACF/WP admin ?>

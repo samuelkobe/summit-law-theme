@@ -73,7 +73,7 @@ $has_accordion_items = have_rows( 'accordion_object' );
 <section id="<?php echo esc_attr( $id ); ?>" class="bg-white py-12 lg:pb-24 2xl:pt-24 2xl:pb-48 <?php echo esc_attr( $classes ); ?>">
 	<div class="md:container px-6 md:mx-auto grid grid-cols-1">
 
-		<h2 class="h2 xl:text-h2 mb-4 lg:mb-8 font-museum capitalize text-green-deep underline decoration-2 decoration-transparent group-hover:decoration-green-deep underline-offset-4 transition-colors duration-300">
+		<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px] xl:text-h2 mb-4 lg:mb-8 font-museum capitalize text-green-deep underline decoration-2 decoration-transparent group-hover:decoration-green-deep underline-offset-4 transition-colors duration-300">
 			<?php if ( $accordion_title ) : ?>
 				<?php echo esc_html( $accordion_title ); ?>
 			<?php elseif ( $is_preview ) : ?>

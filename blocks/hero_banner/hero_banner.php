@@ -33,7 +33,7 @@ if ( ! empty( $block['align'] ) ) {
 </style>
 
 
-<header id="<?php echo esc_attr( $id ); ?>" class="page-header bg-green-deep lg:h-[30dvh] min-h-[240px] lg:min-h-[400px] flex items-center py-24 max-md:pt-12 <?php echo esc_attr( $classes ); ?>">
+<header id="<?php echo esc_attr( $id ); ?>" class="page-header bg-green-deep lg:h-[30dvh] min-h-[240px] lg:min-h-[400px] flex items-center pt-12 pb-20 lg:py-24 <?php echo esc_attr( $classes ); ?>">
 		<section class="banner-after-content h-full flex flex-col justify-center container mx-auto p-6 relative">
 			<?php
 			$custom_title_enabled = get_field( 'custom_title' );

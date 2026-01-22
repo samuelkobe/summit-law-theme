@@ -143,6 +143,10 @@
   }
 
   /* Auto-apply to WordPress content areas */
+  .wp-block-spacer {
+    @apply bg-white;
+  }
+
   .entry-content h1,
   .page-content h1 {
     @apply font-museum font-normal leading-tight text-green-deep tracking-[-0.02em] text-h1;

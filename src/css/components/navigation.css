@@ -33,6 +33,10 @@
 }
 
 /* On home page, keep header fixed even when scrolled (prevents page jump when opening mega menu) */
+body.home.admin-bar [data-header] {
+  @apply lg:!mt-8;
+}
+
 body.home [data-header],
 body.home [data-header].header--light,
 body.home [data-header].header--dark {
@@ -47,6 +51,11 @@ body.home [data-header].header--dark {
 /* Header ready state - applied by JS after scroll state is determined */
 [data-header].header--ready {
   transform: translateY(0);
+}
+
+/* Skip entrance animation for internal navigation */
+[data-header].header--no-transition {
+  transition: none !important;
 }
 
 /* Header container - matches Tailwind container */
@@ -360,8 +369,8 @@ body.home .header--light .logo-alternate {
 }
 
 /* Override WordPress admin bar offset - JS sets top dynamically */
-.admin-bar .mega-menu {
-  margin-top: 0 !important;
+.home.admin-bar .mega-menu {
+  @apply lg:!-mt-8;
 }
 
 /* Visible state - applied immediately on open, removed after close transition */
@@ -688,7 +697,7 @@ body.home .header--light .logo-alternate {
 
 /* Mobile search */
 .mobile-search {
-  @apply px-6 py-6 border-t-2 border-brand-30;
+  @apply max-lg:h-[232px] px-6 py-6 border-t-2 border-brand-30;
 }
 
 .mobile-search form {

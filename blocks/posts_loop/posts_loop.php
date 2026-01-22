@@ -69,7 +69,10 @@ if ( ! empty( $block['align'] ) ) {
 					<?php while ( $posts_query->have_posts() ) : $posts_query->the_post(); ?>
 						<div class="group col-span-1 mb-6">
 							<?php if ( $show_post_image == 1 && has_post_thumbnail() ) : ?>
-								<a href="<?php the_permalink(); ?>" class="block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000">
+								<a href="<?php the_permalink(); ?>" class="relative block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000">
+									<span class="absolute top-3 left-3 z-10 bg-green-deep text-white uppercase text-xs font-semibold tracking-widest px-2.5 py-1 rounded-md">
+										<?php echo get_post_type() === 'post' ? 'Insight' : 'Case'; ?>
+									</span>
 									<?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover' ) ); ?>
 								</a>
 							<?php endif; ?>
@@ -186,7 +189,10 @@ if ( ! empty( $block['align'] ) ) {
 							?>
 							<div class="group col-span-1 mb-6">
 								<?php if ( $show_post_image == 1 && has_post_thumbnail( $post_id ) ) : ?>
-									<a href="<?php echo get_permalink( $post_id ); ?>" class="block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000">
+									<a href="<?php echo get_permalink( $post_id ); ?>" class="relative block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000">
+										<span class="absolute top-4 left-4 z-10 bg-green-deep text-white uppercase text-[9px] font-semibold tracking-widest px-2.5 py-1 rounded-md">
+											<?php echo get_post_type( $post_id ) === 'post' ? 'Insight' : 'Case'; ?>
+										</span>
 										<?php echo get_the_post_thumbnail( $post_id, 'large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover' ) ); ?>
 									</a>
 								<?php endif; ?>
@@ -270,7 +276,10 @@ if ( ! empty( $block['align'] ) ) {
 							<?php while ( $posts_query->have_posts() ) : $posts_query->the_post(); ?>
 								<div class="group col-span-1 mb-6">
 									<?php if ( $show_post_image == 1 && has_post_thumbnail() ) : ?>
-										<a href="<?php the_permalink(); ?>" class="block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000">
+										<a href="<?php the_permalink(); ?>" class="relative block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000">
+											<span class="absolute top-4 left-4 z-10 bg-green-deep text-white uppercase text-[9px] font-semibold tracking-widest px-2.5 py-1 rounded-md">
+												<?php echo get_post_type() === 'post' ? 'Insight' : 'Case'; ?>
+											</span>
 											<?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover' ) ); ?>
 										</a>
 									<?php endif; ?>

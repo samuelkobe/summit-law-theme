@@ -35,7 +35,7 @@ if ( ! empty( $block['align'] ) ) {
 <section id="<?php echo esc_attr( $id ); ?>" class="<?php echo esc_attr( $classes ); ?> bg-green-deep py-16 lg:py-24">
 	<div class="container mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 px-4 lg:px-0">
 		<div class="col-span-1 lg:col-start-2 lg:col-span-4 flex flex-col items-start justify-cente p-4">
-			<h2 class="font-museum font-normal antialiased leading-tight tracking-[-0.02em] text-[clamp(28px,_3vw_+_28px,_44px)] xl:text-h2 text-green-accent1 2xl:max-w-[75%] mb-4 lg:mb-8"><?php the_field( 'heading' ); ?></h1>
+			<h2 class="font-museum font-normal antialiased leading-tight tracking-[-0.02em] text-[clamp(28px,_3vw_+_28px,_44px)] xl:text-h2 !text-green-accent1 2xl:max-w-[75%] mb-4 lg:mb-8"><?php the_field( 'heading' ); ?></h1>
 			<p class="text-lg xl:text-xl 2xl:text-xl font-normal text-white 2xl:max-w-[75%] mb-6 lg:mb-12"><?php the_field( 'content' ); ?></p>
 			<?php $image = get_field( 'image' ); ?>
 			<?php if ( $image ) : ?>
