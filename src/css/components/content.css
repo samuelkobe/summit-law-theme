@@ -19,82 +19,141 @@
 
      Pages and services use ACF blocks which handle their own styling,
      so they do NOT use .entry-content class.
+
+     IMPORTANT: Editor styles target specific core block data-types to avoid
+     overriding styles in ACF block previews, which have their own templates.
      ============================================================================= */
 
-  .entry-content,
-  .editor-styles-wrapper {
+  .entry-content {
+    @apply text-brand-black;
+  }
+
+  /* Editor: Only apply base text color to specific core blocks, not ACF blocks */
+  .editor-styles-wrapper [data-type="core/paragraph"],
+  .editor-styles-wrapper [data-type="core/heading"],
+  .editor-styles-wrapper [data-type="core/list"],
+  .editor-styles-wrapper [data-type="core/quote"],
+  .editor-styles-wrapper [data-type="core/table"],
+  .editor-styles-wrapper [data-type="core/code"] {
     @apply text-brand-black;
   }
 
   /* Headings - use theme typography */
-  .entry-content h1,
-  .editor-styles-wrapper h1 {
+  /* Frontend */
+  .entry-content h1 {
     @apply h1 mb-6 mt-12;
   }
-  .entry-content h1:first-child,
-  .editor-styles-wrapper h1:first-child {
+  .entry-content h1:first-child {
     @apply mt-0;
   }
 
-  .entry-content h2,
-  .editor-styles-wrapper h2 {
+  .entry-content h2 {
     @apply h2 mb-5 mt-10;
   }
-  .entry-content h2:first-child,
-  .editor-styles-wrapper h2:first-child {
+  .entry-content h2:first-child {
     @apply mt-0;
   }
 
-  .entry-content h3,
-  .editor-styles-wrapper h3 {
+  .entry-content h3 {
     @apply h3 mb-4 mt-8;
   }
-  .entry-content h3:first-child,
-  .editor-styles-wrapper h3:first-child {
+  .entry-content h3:first-child {
     @apply mt-0;
   }
 
-  .entry-content h4,
-  .editor-styles-wrapper h4 {
+  .entry-content h4 {
     @apply h4 mb-3 mt-6;
   }
-  .entry-content h4:first-child,
-  .editor-styles-wrapper h4:first-child {
+  .entry-content h4:first-child {
     @apply mt-0;
   }
 
-  .entry-content h5,
-  .editor-styles-wrapper h5 {
+  .entry-content h5 {
     @apply h5 mb-3 mt-6;
   }
-  .entry-content h5:first-child,
-  .editor-styles-wrapper h5:first-child {
+  .entry-content h5:first-child {
     @apply mt-0;
   }
 
-  .entry-content h6,
-  .editor-styles-wrapper h6 {
+  .entry-content h6 {
     @apply h6 mb-2 mt-4;
   }
-  .entry-content h6:first-child,
-  .editor-styles-wrapper h6:first-child {
+  .entry-content h6:first-child {
+    @apply mt-0;
+  }
+
+  /* Editor: Headings for core blocks only */
+  .editor-styles-wrapper [data-type="core/heading"] h1 {
+    @apply h1 mb-6 mt-12;
+  }
+  .editor-styles-wrapper [data-type="core/heading"]:first-child h1 {
+    @apply mt-0;
+  }
+
+  .editor-styles-wrapper [data-type="core/heading"] h2 {
+    @apply h2 mb-5 mt-10;
+  }
+  .editor-styles-wrapper [data-type="core/heading"]:first-child h2 {
+    @apply mt-0;
+  }
+
+  .editor-styles-wrapper [data-type="core/heading"] h3 {
+    @apply h3 mb-4 mt-8;
+  }
+  .editor-styles-wrapper [data-type="core/heading"]:first-child h3 {
+    @apply mt-0;
+  }
+
+  .editor-styles-wrapper [data-type="core/heading"] h4 {
+    @apply h4 mb-3 mt-6;
+  }
+  .editor-styles-wrapper [data-type="core/heading"]:first-child h4 {
+    @apply mt-0;
+  }
+
+  .editor-styles-wrapper [data-type="core/heading"] h5 {
+    @apply h5 mb-3 mt-6;
+  }
+  .editor-styles-wrapper [data-type="core/heading"]:first-child h5 {
+    @apply mt-0;
+  }
+
+  .editor-styles-wrapper [data-type="core/heading"] h6 {
+    @apply h6 mb-2 mt-4;
+  }
+  .editor-styles-wrapper [data-type="core/heading"]:first-child h6 {
     @apply mt-0;
   }
 
   /* Paragraphs */
-  .entry-content p,
-  .editor-styles-wrapper p {
+  /* Frontend */
+  .entry-content p {
     @apply mb-6 leading-relaxed;
   }
 
-  .entry-content p:last-child,
-  .editor-styles-wrapper p:last-child {
+  .entry-content p:last-child {
+    @apply mb-0;
+  }
+
+  /* Editor: Paragraphs for core blocks only */
+  .editor-styles-wrapper [data-type="core/paragraph"] p {
+    @apply mb-6 leading-relaxed;
+  }
+
+  .editor-styles-wrapper [data-type="core/paragraph"]:last-child p {
     @apply mb-0;
   }
 
   /* Links */
-  .entry-content a:not(.btn):not(.wp-block-button__link),
-  .editor-styles-wrapper a:not(.btn):not(.wp-block-button__link):not(.components-button) {
+  /* Frontend */
+  .entry-content a:not(.btn):not(.wp-block-button__link) {
+    @apply text-green-deep underline decoration-2 underline-offset-2 hover:text-brand-black transition-colors duration-300;
+  }
+
+  /* Editor: Links in core paragraph blocks only - NOT ACF blocks */
+  .editor-styles-wrapper [data-type="core/paragraph"] a:not(.btn):not(.wp-block-button__link):not(.components-button),
+  .editor-styles-wrapper [data-type="core/list"] a:not(.btn):not(.wp-block-button__link):not(.components-button),
+  .editor-styles-wrapper [data-type="core/quote"] a:not(.btn):not(.wp-block-button__link):not(.components-button) {
     @apply text-green-deep underline decoration-2 underline-offset-2 hover:text-brand-black transition-colors duration-300;
   }
 
@@ -186,71 +245,112 @@
      BLOCKQUOTES
      ============================================================================= */
 
+  /* Frontend */
   .entry-content blockquote,
-  .entry-content .wp-block-quote,
-  .editor-styles-wrapper blockquote,
-  .editor-styles-wrapper .wp-block-quote {
+  .entry-content .wp-block-quote {
     @apply border-l-4 border-green-accent1 pl-6 py-2 my-8;
   }
 
   .entry-content blockquote p,
-  .entry-content .wp-block-quote p,
-  .editor-styles-wrapper blockquote p,
-  .editor-styles-wrapper .wp-block-quote p {
+  .entry-content .wp-block-quote p {
     @apply text-xl lg:text-2xl text-green-deep mb-4 italic;
   }
 
   .entry-content blockquote p:last-child,
-  .entry-content .wp-block-quote p:last-child,
-  .editor-styles-wrapper blockquote p:last-child,
-  .editor-styles-wrapper .wp-block-quote p:last-child {
+  .entry-content .wp-block-quote p:last-child {
     @apply mb-0;
   }
 
   .entry-content blockquote cite,
-  .entry-content .wp-block-quote cite,
-  .editor-styles-wrapper blockquote cite,
+  .entry-content .wp-block-quote cite {
+    @apply text-base not-italic text-brand-40 block mt-4;
+  }
+
+  /* Editor: Only core quote blocks */
+  .editor-styles-wrapper [data-type="core/quote"] blockquote,
+  .editor-styles-wrapper .wp-block-quote {
+    @apply border-l-4 border-green-accent1 pl-6 py-2 my-8;
+  }
+
+  .editor-styles-wrapper [data-type="core/quote"] blockquote p,
+  .editor-styles-wrapper .wp-block-quote p {
+    @apply text-xl lg:text-2xl text-green-deep mb-4 italic;
+  }
+
+  .editor-styles-wrapper [data-type="core/quote"] blockquote p:last-child,
+  .editor-styles-wrapper .wp-block-quote p:last-child {
+    @apply mb-0;
+  }
+
+  .editor-styles-wrapper [data-type="core/quote"] blockquote cite,
   .editor-styles-wrapper .wp-block-quote cite {
     @apply text-base not-italic text-brand-40 block mt-4;
   }
 
-  /* Pullquote */
-  .entry-content .wp-block-pullquote,
+  /* Pullquote - Frontend */
+  .entry-content .wp-block-pullquote {
+    @apply border-t-4 border-b-4 border-green-accent1 py-8 my-12 text-center;
+  }
+
+  .entry-content .wp-block-pullquote blockquote {
+    @apply border-0 pl-0;
+  }
+
+  .entry-content .wp-block-pullquote p {
+    @apply text-2xl lg:text-3xl font-museum text-green-deep;
+  }
+
+  /* Pullquote - Editor */
   .editor-styles-wrapper .wp-block-pullquote {
     @apply border-t-4 border-b-4 border-green-accent1 py-8 my-12 text-center;
   }
 
-  .entry-content .wp-block-pullquote blockquote,
   .editor-styles-wrapper .wp-block-pullquote blockquote {
     @apply border-0 pl-0;
   }
 
-  .entry-content .wp-block-pullquote p,
   .editor-styles-wrapper .wp-block-pullquote p {
     @apply text-2xl lg:text-3xl font-museum text-green-deep;
   }
 
   /* =============================================================================
      IMAGES & FIGURES
+
+     Note: Editor styles only target core/image blocks specifically.
+     ACF blocks handle their own image styling.
      ============================================================================= */
 
-  .entry-content img,
-  .editor-styles-wrapper img {
+  .entry-content img {
     @apply rounded-lg;
   }
 
-  .entry-content figure,
-  .editor-styles-wrapper figure {
+  /* Editor: Only apply to core/image blocks */
+  .editor-styles-wrapper [data-type="core/image"] img {
+    @apply rounded-lg;
+  }
+
+  .entry-content figure {
     @apply my-8;
   }
 
-  .entry-content figure:first-child,
-  .editor-styles-wrapper figure:first-child {
+  /* Editor: Only apply to core/image blocks */
+  .editor-styles-wrapper [data-type="core/image"] {
+    @apply my-8;
+  }
+
+  .entry-content figure:first-child {
     @apply mt-0;
   }
 
-  .entry-content figcaption,
-  .editor-styles-wrapper figcaption {
+  .editor-styles-wrapper [data-type="core/image"]:first-child {
+    @apply mt-0;
+  }
+
+  .entry-content figcaption {
+    @apply text-sm text-brand-40 mt-2 text-center;
+  }
+
+  .editor-styles-wrapper [data-type="core/image"] figcaption {
     @apply text-sm text-brand-40 mt-2 text-center;
   }
 
@@ -295,24 +395,38 @@
      SEPARATOR / HR
      ============================================================================= */
 
+  /* Frontend */
   .entry-content hr,
-  .entry-content .wp-block-separator,
-  .editor-styles-wrapper hr,
+  .entry-content .wp-block-separator {
+    @apply border-t-2 border-brand-30 my-12;
+  }
+
+  .entry-content .wp-block-separator.is-style-wide {
+    @apply border-t-4 border-green-accent1;
+  }
+
+  .entry-content .wp-block-separator.is-style-dots {
+    @apply border-0 text-center;
+  }
+
+  .entry-content .wp-block-separator.is-style-dots::before {
+    content: "···";
+    @apply text-brand-40 text-3xl tracking-[0.5em];
+  }
+
+  /* Editor: Only core separator blocks */
   .editor-styles-wrapper .wp-block-separator {
     @apply border-t-2 border-brand-30 my-12;
   }
 
-  .entry-content .wp-block-separator.is-style-wide,
   .editor-styles-wrapper .wp-block-separator.is-style-wide {
     @apply border-t-4 border-green-accent1;
   }
 
-  .entry-content .wp-block-separator.is-style-dots,
   .editor-styles-wrapper .wp-block-separator.is-style-dots {
     @apply border-0 text-center;
   }
 
-  .entry-content .wp-block-separator.is-style-dots::before,
   .editor-styles-wrapper .wp-block-separator.is-style-dots::before {
     content: "···";
     @apply text-brand-40 text-3xl tracking-[0.5em];
@@ -322,29 +436,45 @@
      TABLES
      ============================================================================= */
 
+  /* Frontend */
   .entry-content table,
-  .entry-content .wp-block-table table,
-  .editor-styles-wrapper table,
+  .entry-content .wp-block-table table {
+    @apply w-full border-collapse mb-8;
+  }
+
+  .entry-content th {
+    @apply bg-green-deep text-white text-left p-3 font-semibold;
+  }
+
+  .entry-content td {
+    @apply border-b border-brand-30 p-3;
+  }
+
+  .entry-content tr:hover td {
+    @apply bg-brand-10;
+  }
+
+  .entry-content .wp-block-table figcaption {
+    @apply text-sm text-brand-40 mt-2;
+  }
+
+  /* Editor: Only core table blocks */
   .editor-styles-wrapper .wp-block-table table {
     @apply w-full border-collapse mb-8;
   }
 
-  .entry-content th,
-  .editor-styles-wrapper th {
+  .editor-styles-wrapper .wp-block-table th {
     @apply bg-green-deep text-white text-left p-3 font-semibold;
   }
 
-  .entry-content td,
-  .editor-styles-wrapper td {
+  .editor-styles-wrapper .wp-block-table td {
     @apply border-b border-brand-30 p-3;
   }
 
-  .entry-content tr:hover td,
-  .editor-styles-wrapper tr:hover td {
+  .editor-styles-wrapper .wp-block-table tr:hover td {
     @apply bg-brand-10;
   }
 
-  .entry-content .wp-block-table figcaption,
   .editor-styles-wrapper .wp-block-table figcaption {
     @apply text-sm text-brand-40 mt-2;
   }
@@ -353,20 +483,34 @@
      CODE BLOCKS
      ============================================================================= */
 
-  .entry-content code,
-  .editor-styles-wrapper code {
+  /* Frontend */
+  .entry-content code {
     @apply bg-brand-10 px-1.5 py-0.5 rounded text-sm text-green-deep;
     font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
       monospace;
   }
 
-  .entry-content pre,
-  .editor-styles-wrapper pre {
+  .entry-content pre {
     @apply bg-brand-black text-white p-6 rounded-lg overflow-x-auto mb-8;
   }
 
-  .entry-content pre code,
-  .editor-styles-wrapper pre code {
+  .entry-content pre code {
+    @apply bg-transparent p-0 text-white;
+  }
+
+  /* Editor: Only core code blocks */
+  .editor-styles-wrapper .wp-block-code code {
+    @apply bg-brand-10 px-1.5 py-0.5 rounded text-sm text-green-deep;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+      monospace;
+  }
+
+  .editor-styles-wrapper .wp-block-code pre,
+  .editor-styles-wrapper .wp-block-preformatted pre {
+    @apply bg-brand-black text-white p-6 rounded-lg overflow-x-auto mb-8;
+  }
+
+  .editor-styles-wrapper .wp-block-code pre code {
     @apply bg-transparent p-0 text-white;
   }
 

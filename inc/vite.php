@@ -219,24 +219,11 @@ function summit_enqueue_editor_assets() {
       max-width: none;
     }
 
-    /* Override WordPress block editor default image styles */
-    /* This allows Tailwind utilities to work on images in ACF blocks */
-    .block-editor__container img {
+    /* Override WordPress block editor default image styles for CORE blocks only */
+    /* ACF blocks should NOT get these overrides - they use their own Tailwind styling */
+    .block-editor__container [data-type="core/image"] img {
       max-width: none !important;
       height: auto !important;
-    }
-
-    /* Ensure Tailwind utilities apply to images in blocks */
-    [data-type^="acf/"] img.w-full {
-      width: 100% !important;
-    }
-
-    [data-type^="acf/"] img.h-full {
-      height: 100% !important;
-    }
-
-    [data-type^="acf/"] img.object-cover {
-      object-fit: cover !important;
     }
   ';
 
