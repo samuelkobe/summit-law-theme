@@ -425,61 +425,102 @@ body.home .header--light .logo-alternate {
    DESKTOP SEARCH
    ============================================================================= */
 
-/* Search overlay */
-[data-header] > .search-overlay.container {
-  @apply absolute top-0 left-0 right-0 w-full;
-  @apply flex items-center;
+/* Search backdrop - 20% opacity overlay when search is open */
+.search-backdrop {
+  @apply fixed inset-0 w-full h-full;
   @apply opacity-0 invisible;
-  @apply transition-all duration-300 ease-in-out;
-  padding-top: 0;
-  box-shadow: none;
-  text-decoration: none;
-  z-index: 60;
+  @apply transition-opacity duration-300 ease-out;
+  background-color: rgba(41, 39, 37, 0.5); /* brand-black #292725 at 20% */
+  z-index: 55; /* Below search overlay (z-60) but above header (z-50) */
+  cursor: pointer;
 }
 
-.search-overlay:not([hidden]) {
+.search-backdrop:not([hidden]) {
   @apply opacity-100 visible;
 }
 
-/* Search form */
-.search-overlay form {
-  @apply relative w-full;
+/* Search overlay - slides down from above header */
+.search-overlay {
+  @apply fixed flex items-center h-28 left-0 right-0 w-full;
+  @apply bg-white shadow-lg;
+  @apply transition-transform duration-300 ease-out;
+  top: 0;
+  transform: translateY(-100%);
+  z-index: 60; /* Above header (z-50) so it covers nav items */
+}
+
+/* Account for WordPress admin bar */
+.admin-bar .search-overlay {
+  top: 32px;
+}
+
+@media (max-width: 782px) {
+  .admin-bar .search-overlay {
+    top: 46px;
+  }
+}
+
+/* Open state - slide down into view */
+.search-overlay:not([hidden]) {
+  transform: translateY(0);
+}
+
+/* Inner container - flex row with form and close button */
+.search-overlay-inner {
+  @apply flex h-full items-center justify-between px-4 lg:px-8 py-6;
+}
+
+/* Search form - takes most of the width */
+.search-overlay-form {
+  @apply relative flex-1;
+  @apply mr-4;
 }
 
 .search-overlay input[type="search"],
 .search-overlay #search-field {
   @apply w-full px-4 py-3 pr-12;
-  @apply bg-transparent text-brand-black;
-  @apply text-lg;
+  @apply bg-brand-10 text-brand-black;
+  @apply text-lg rounded-lg;
   @apply outline-none;
   border: none;
-  border-radius: 0;
 }
 
 .search-overlay input[type="search"]:focus,
 .search-overlay #search-field:focus {
-  @apply outline-none;
+  @apply outline-none ring-2 ring-green-deep;
   border: none;
 }
 
-.search-overlay form button[type="submit"] {
-  @apply absolute right-8 top-1/2;
+.search-overlay input[type="search"]::placeholder,
+.search-overlay #search-field::placeholder {
+  @apply text-brand-40;
+}
+
+/* Submit button inside form */
+.search-overlay .search-submit {
+  @apply absolute right-3 top-1/2;
   transform: translateY(-50%);
   @apply p-2;
   @apply text-brand-black;
+  @apply transition-colors duration-300;
   background: none;
   border: none;
   cursor: pointer;
 }
 
-.search-overlay form button[type="submit"] svg {
+.search-overlay .search-submit:hover {
+  @apply text-green-deep;
+}
+
+.search-overlay .search-submit svg {
   @apply w-5 h-5;
 }
 
-/* Search close button */
+/* Search close button - positioned on far right */
 .search-close {
-  @apply absolute top-8 right-8;
+  @apply flex-shrink-0;
   @apply w-10 h-10 p-2;
+  @apply flex items-center justify-center;
   @apply text-brand-black;
   @apply transition-colors duration-300;
   background: none;
@@ -488,7 +529,7 @@ body.home .header--light .logo-alternate {
 }
 
 .search-close:hover {
-  @apply opacity-80;
+  @apply text-green-deep;
 }
 
 .search-close svg {

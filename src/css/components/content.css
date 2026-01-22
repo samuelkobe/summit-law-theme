@@ -12,6 +12,13 @@
 @layer components {
   /* =============================================================================
      ENTRY CONTENT - Core Block Styling
+
+     These styles apply to .entry-content which is used on:
+     - single.php (insights) - narrow max-w-3xl container
+     - single-case.php (cases) - narrow max-w-3xl container
+
+     Pages and services use ACF blocks which handle their own styling,
+     so they do NOT use .entry-content class.
      ============================================================================= */
 
   .entry-content,

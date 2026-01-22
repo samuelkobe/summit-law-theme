@@ -11,7 +11,7 @@ get_header();
 
 <main id="main" class="site-main team-archive">
 
-	<header class="page-header bg-green-deep lg:h-[40dvh] min-h[240px] lg:min-h-[400px] 2xl:min-h-[480px] flex items-center py-24 max-md:pt-12">
+	<header class="page-header bg-green-deep lg:h-[30dvh] min-h[240px] lg:min-h-[400px] 2xl:min-h-[480px] flex items-center py-24 max-md:pt-12">
 		<section class="banner-after-content h-full flex flex-col justify-center container mx-auto p-6 relative">
 			<h1 class="h1 2xl:text-7xl text-green-accent1 mb-4 lg:mb-10">
 				<?php post_type_archive_title(); ?>
@@ -217,11 +217,14 @@ get_header();
 			</div>
 
 						<?php
-			// Pagination
+			// Pagination with SVG chevrons
+			$chevron_left  = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="inline-block rotate-180"><path d="M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z"/></svg>';
+			$chevron_right = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" class="inline-block"><path d="M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z"/></svg>';
+
 			the_posts_pagination( array(
 				'mid_size'  => 2,
-				'prev_text' => __( '← Previous', 'summit-law-theme' ),
-				'next_text' => __( 'Next →', 'summit-law-theme' ),
+				'prev_text' => $chevron_left . ' ' . __( 'Previous', 'summit-law-theme' ),
+				'next_text' => __( 'Next', 'summit-law-theme' ) . ' ' . $chevron_right,
 				'class'     => 'mt-12',
 			) );
 			?>

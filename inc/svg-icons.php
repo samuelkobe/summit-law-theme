@@ -23,7 +23,7 @@ if (!function_exists('summit_get_svg_icon')) {
 
     $args = wp_parse_args($args, $defaults);
 
-    $class = $args['class'] ? ' class="' . esc_attr($args['class']) . ' hover:fill-brand-black hover:shadow-lg transition-all duration-300"' : '';
+    $class = $args['class'] ? ' class="' . esc_attr($args['class']) . ' transition-colors duration-300"' : '';
     $aria_hidden = $args['aria-hidden'] ? ' aria-hidden="' . esc_attr($args['aria-hidden']) . '"' : '';
     $width = $args['width'] ? ' width="' . esc_attr($args['width']) . '"' : '';
     $height = $args['height'] ? ' height="' . esc_attr($args['height']) . '"' : '';

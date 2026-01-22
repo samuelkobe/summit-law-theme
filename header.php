@@ -85,33 +85,6 @@ $page_type = $is_home ? 'home' : 'default';
     </div>
   </div>
 
-  <!-- Search Overlay (Desktop) -->
-  <div
-    class="search-overlay container"
-    id="search-overlay"
-    data-search-overlay
-    hidden>
-    <div class="container">
-      <form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>">
-        <label for="search-field" class="sr-only">Search</label>
-        <input
-          type="search"
-          id="search-field"
-          name="s"
-          placeholder="Search..."
-          data-search-input>
-        <button type="submit" aria-label="Submit search">
-          <?php echo summit_get_svg_icon('search'); ?>
-        </button>
-      </form>
-      <button
-        class="search-close"
-        aria-label="Close search"
-        data-search-close>
-        <?php echo summit_get_svg_icon('close'); ?>
-      </button>
-    </div>
-  </div>
 
   <!-- Mobile Menu Drawer -->
   <div
@@ -150,3 +123,38 @@ $page_type = $is_home ? 'home' : 'default';
     </nav>
   </div>
 </header>
+
+<!-- Search Backdrop (Desktop) - Closes search when clicked -->
+<div
+  class="search-backdrop hidden lg:block"
+  data-search-backdrop
+  hidden
+  aria-hidden="true"></div>
+
+<!-- Search Overlay (Desktop) - Slides down from above header -->
+<div
+  class="search-overlay hidden lg:block"
+  id="search-overlay"
+  data-search-overlay
+  hidden>
+  <div class="search-overlay-inner container mx-auto">
+    <form role="search" method="get" action="<?php echo esc_url(home_url('/')); ?>" class="search-overlay-form">
+      <label for="search-field" class="sr-only">Search</label>
+      <input
+        type="search"
+        id="search-field"
+        name="s"
+        placeholder="Search..."
+        data-search-input>
+      <button type="submit" aria-label="Submit search" class="search-submit">
+        <?php echo summit_get_svg_icon('search'); ?>
+      </button>
+    </form>
+    <button
+      class="search-close"
+      aria-label="Close search"
+      data-search-close>
+      <?php echo summit_get_svg_icon('close'); ?>
+    </button>
+  </div>
+</div>

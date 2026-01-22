@@ -1,6 +1,7 @@
 /* Component imports must come first */
 @import "./components/navigation.css";
 @import "./components/content.css";
+@import "./components/search.css";
 
 /* Block imports */
 @import "../../blocks/starter_template/starter_template.css";

@@ -16,6 +16,7 @@ export default class SearchOverlay {
   constructor() {
     this.toggleButton = document.querySelector('[data-search-toggle]');
     this.overlay = document.querySelector('[data-search-overlay]');
+    this.backdrop = document.querySelector('[data-search-backdrop]');
     this.closeButton = document.querySelector('[data-search-close]');
     this.searchInput = document.querySelector('[data-search-input]');
     this.mobileSearchInput = document.querySelector('[data-mobile-search-input]');
@@ -43,6 +44,11 @@ export default class SearchOverlay {
       this.overlay.addEventListener('click', (e) => this.handleOutsideClick(e));
     }
 
+    // Close on backdrop click
+    if (this.backdrop) {
+      this.backdrop.addEventListener('click', () => this.closeOverlay());
+    }
+
     // Close on Escape
     document.addEventListener('keydown', (e) => this.handleEscape(e));
   }
@@ -57,6 +63,11 @@ export default class SearchOverlay {
 
     // Show overlay
     this.overlay.removeAttribute('hidden');
+
+    // Show backdrop
+    if (this.backdrop) {
+      this.backdrop.removeAttribute('hidden');
+    }
 
     // Update ARIA
     this.toggleButton.setAttribute('aria-expanded', 'true');
@@ -84,6 +95,11 @@ export default class SearchOverlay {
 
     // Hide overlay
     this.overlay.setAttribute('hidden', '');
+
+    // Hide backdrop
+    if (this.backdrop) {
+      this.backdrop.setAttribute('hidden', '');
+    }
 
     // Update ARIA
     this.toggleButton.setAttribute('aria-expanded', 'false');

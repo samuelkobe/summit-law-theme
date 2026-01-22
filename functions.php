@@ -607,15 +607,21 @@ add_filter( 'register_taxonomy_args', 'summit_remove_area_taxonomy_from_rest', 1
  * @param WP_Query $query The main query object.
  */
 function summit_modify_insights_query( $query ) {
-  // Only modify front-end main query on the blog home page
-  if ( is_admin() || ! $query->is_main_query() || ! $query->is_home() ) {
+  // Only modify front-end main query
+  if ( is_admin() || ! $query->is_main_query() ) {
     return;
   }
 
-  // Handle year filter
-  if ( isset( $_GET['year'] ) && ! empty( $_GET['year'] ) ) {
-    $query->set( 'year', intval( $_GET['year'] ) );
+  // Check if we're on the insights archive (by URL or by WordPress detection)
+  $request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( $_SERVER['REQUEST_URI'] ) : '';
+  $is_insights_archive = $query->is_home() || preg_match( '#/insights/?(\?|$)#', $request_uri );
+
+  if ( ! $is_insights_archive ) {
+    return;
   }
+
+  // Ensure we're querying posts (insights)
+  $query->set( 'post_type', 'post' );
 
   // Handle area taxonomy filter
   if ( isset( $_GET['area'] ) && ! empty( $_GET['area'] ) ) {
@@ -632,3 +638,671 @@ function summit_modify_insights_query( $query ) {
   }
 }
 add_action( 'pre_get_posts', 'summit_modify_insights_query' );
+
+/**
+ * Modify the main query on the Cases archive to handle filter parameters.
+ *
+ * @param WP_Query $query The main query object.
+ */
+function summit_modify_cases_query( $query ) {
+	// Only modify front-end main query
+	if ( is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+
+	// Check if we're on the cases archive (by URL or by WordPress detection)
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( $_SERVER['REQUEST_URI'] ) : '';
+	$is_cases_archive = $query->is_post_type_archive( 'case' ) || preg_match( '#/cases/?(\?|$)#', $request_uri );
+
+	if ( ! $is_cases_archive ) {
+		return;
+	}
+
+	// Ensure we're querying cases
+	$query->set( 'post_type', 'case' );
+
+	// Handle area taxonomy filter
+	if ( isset( $_GET['area'] ) && ! empty( $_GET['area'] ) ) {
+		$query->set(
+			'tax_query',
+			array(
+				array(
+					'taxonomy' => 'area',
+					'field'    => 'slug',
+					'terms'    => sanitize_text_field( $_GET['area'] ),
+				),
+			)
+		);
+	}
+}
+add_action( 'pre_get_posts', 'summit_modify_cases_query' );
+
+/**
+ * Handle post_type filter on taxonomy archives.
+ *
+ * Allows filtering taxonomy archives (like /area/defamation/) by post type
+ * using a query parameter (e.g., ?post_type=case).
+ *
+ * @param WP_Query $query The main query object.
+ */
+function summit_modify_taxonomy_archive_query( $query ) {
+	// Only modify main query on frontend taxonomy archives
+	if ( is_admin() || ! $query->is_main_query() || ! $query->is_tax( 'area' ) ) {
+		return;
+	}
+
+	// Check for result_type filter in URL (prefer result_type, fall back to type for flexibility)
+	$result_type_filter = '';
+	if ( isset( $_GET['result_type'] ) ) {
+		$result_type_filter = sanitize_text_field( $_GET['result_type'] );
+	} elseif ( isset( $_GET['type'] ) ) {
+		$result_type_filter = sanitize_text_field( $_GET['type'] );
+	}
+
+	// Valid post types for filtering
+	$valid_types = array( 'post', 'case' );
+
+	if ( $result_type_filter && in_array( $result_type_filter, $valid_types, true ) ) {
+		// Filter to specific post type
+		$query->set( 'post_type', $result_type_filter );
+	} else {
+		// Default: show both posts and cases
+		$query->set( 'post_type', array( 'post', 'case' ) );
+	}
+}
+add_action( 'pre_get_posts', 'summit_modify_taxonomy_archive_query' );
+
+/**
+ * Handle "All Areas" mode URL (/area/) to prevent 404.
+ *
+ * When accessing /area/ without a specific term slug, WordPress doesn't
+ * recognize it as a valid URL and triggers a 404. This filter intercepts
+ * that and sets up a proper archive query.
+ *
+ * @param WP_Query $query The main query object.
+ */
+function summit_handle_all_areas_url( $query ) {
+	if ( is_admin() || ! $query->is_main_query() ) {
+		return;
+	}
+
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( $_SERVER['REQUEST_URI'] ) : '';
+
+	// Check for /area/ without a specific term (All Areas mode)
+	if ( preg_match( '#/area/?(\?|$)#', $request_uri ) && ! preg_match( '#/area/[^/\?]+#', $request_uri ) ) {
+		// This is "All Areas" mode - set up a query for all posts and cases
+		$query->is_404     = false;
+		$query->is_archive = true;
+		$query->is_home    = false;
+
+		// Set up the query to fetch posts and cases
+		$query->set( 'post_type', array( 'post', 'case' ) );
+		$query->set( 'posts_per_page', 12 );
+
+		// Apply result_type filter if set
+		$result_type = '';
+		if ( isset( $_GET['result_type'] ) ) {
+			$result_type = sanitize_text_field( $_GET['result_type'] );
+		} elseif ( isset( $_GET['type'] ) ) {
+			$result_type = sanitize_text_field( $_GET['type'] );
+		}
+
+		if ( $result_type === 'post' ) {
+			$query->set( 'post_type', 'post' );
+		} elseif ( $result_type === 'case' ) {
+			$query->set( 'post_type', 'case' );
+		}
+	}
+}
+add_action( 'pre_get_posts', 'summit_handle_all_areas_url', 1 );
+
+/**
+ * Force archive.php template for area taxonomy even with post_type parameter.
+ *
+ * When ?post_type=case is added to a taxonomy URL like /area/defamation/,
+ * WordPress may try to load a different template. This filter ensures
+ * the archive.php template is used when we detect an area term in the URL.
+ *
+ * @param string $template The path to the template file.
+ * @return string Modified template path.
+ */
+function summit_force_archive_templates( $template ) {
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( $_SERVER['REQUEST_URI'] ) : '';
+
+	// Force archive-case.php for /cases/ URLs (even with ?area= parameter)
+	if ( preg_match( '#/cases/?(\?|$)#', $request_uri ) ) {
+		$case_template = locate_template( 'archive-case.php' );
+		if ( $case_template ) {
+			return $case_template;
+		}
+	}
+
+	// Force home.php for /insights/ URLs (even with ?area= parameter)
+	if ( preg_match( '#/insights/?(\?|$)#', $request_uri ) ) {
+		$home_template = locate_template( 'home.php' );
+		if ( $home_template ) {
+			return $home_template;
+		}
+	}
+
+	// Force archive.php for /area/ URLs (both with and without a specific term)
+	// This handles "All Areas" mode when accessed via /area/ or /area/?result_type=case
+	if ( preg_match( '#/area/?(\?|$)#', $request_uri ) && ! preg_match( '#/area/[^/\?]+#', $request_uri ) ) {
+		// /area/ without a specific term - "All Areas" mode
+		// Set up query flags to prevent 404
+		global $wp_query;
+		$wp_query->is_404    = false;
+		$wp_query->is_archive = true;
+
+		$archive_template = locate_template( 'archive.php' );
+		if ( $archive_template ) {
+			return $archive_template;
+		}
+	}
+
+	// Force archive.php for /area/{term-slug} URLs
+	if ( preg_match( '#/area/([^/\?]+)#', $request_uri, $matches ) ) {
+		$term_slug = $matches[1];
+		$term      = get_term_by( 'slug', $term_slug, 'area' );
+
+		if ( $term && ! is_wp_error( $term ) ) {
+			// Set up the queried object for the template
+			global $wp_query;
+			$wp_query->queried_object    = $term;
+			$wp_query->queried_object_id = $term->term_id;
+			$wp_query->is_tax            = true;
+			$wp_query->is_archive        = true;
+
+			// Return archive.php template
+			$archive_template = locate_template( 'archive.php' );
+			if ( $archive_template ) {
+				return $archive_template;
+			}
+		}
+	}
+
+	return $template;
+}
+add_filter( 'template_include', 'summit_force_archive_templates', 99 );
+
+// =============================================================================
+// Enhanced Search Functionality
+// =============================================================================
+
+/**
+ * Extend search to include custom post types and ACF fields.
+ *
+ * Makes search "smarter" by:
+ * 1. Including page, post (insights), case, team, and service post types
+ * 2. Searching ACF custom fields (title, content, meta fields)
+ * 3. Supporting post type filtering via URL parameter
+ * 4. Weighting results by relevance
+ * 5. Detecting post type name searches (e.g., "team", "insights")
+ *
+ * @param WP_Query $query The main query object.
+ */
+function summit_modify_search_query( $query ) {
+	// Only modify front-end main search queries
+	if ( is_admin() || ! $query->is_main_query() || ! $query->is_search() ) {
+		return;
+	}
+
+	// Define searchable post types
+	$searchable_types = array( 'page', 'post', 'case', 'team', 'service' );
+
+	// Get search term for post type name detection
+	$search_term = strtolower( trim( $query->get( 's' ) ) );
+
+	// Map search terms to post types (singular and plural forms)
+	$post_type_keywords = array(
+		'team'       => 'team',
+		'teams'      => 'team',
+		'team member' => 'team',
+		'team members' => 'team',
+		'insight'    => 'post',
+		'insights'   => 'post',
+		'blog'       => 'post',
+		'blogs'      => 'post',
+		'post'       => 'post',
+		'posts'      => 'post',
+		'case'       => 'case',
+		'cases'      => 'case',
+		'service'    => 'service',
+		'services'   => 'service',
+		'page'       => 'page',
+		'pages'      => 'page',
+	);
+
+	// Check if search term matches a post type keyword
+	$matched_post_type = isset( $post_type_keywords[ $search_term ] ) ? $post_type_keywords[ $search_term ] : null;
+
+	// Check for post type filter from URL
+	if ( isset( $_GET['type'] ) && ! empty( $_GET['type'] ) ) {
+		$requested_type = sanitize_text_field( $_GET['type'] );
+		if ( in_array( $requested_type, $searchable_types, true ) ) {
+			$query->set( 'post_type', $requested_type );
+		} else {
+			$query->set( 'post_type', $searchable_types );
+		}
+	} elseif ( $matched_post_type ) {
+		// Search term matches a post type name - return all of that type
+		$query->set( 'post_type', $matched_post_type );
+		// Clear the search term so we get ALL posts of this type
+		$query->set( 's', '' );
+		// Store original search term for display purposes
+		$query->set( 'summit_original_search', $search_term );
+	} else {
+		// Search all post types by default
+		$query->set( 'post_type', $searchable_types );
+	}
+
+	// Set posts per page for search results
+	$query->set( 'posts_per_page', 12 );
+}
+add_action( 'pre_get_posts', 'summit_modify_search_query' );
+
+/**
+ * Extend search to include ACF custom fields.
+ *
+ * This joins the postmeta table and searches in meta_value fields,
+ * allowing searches to match content stored in ACF fields.
+ *
+ * @param string   $join  The JOIN clause of the query.
+ * @param WP_Query $query The WP_Query instance.
+ * @return string Modified JOIN clause.
+ */
+function summit_search_join_meta( $join, $query ) {
+	global $wpdb;
+
+	if ( ! is_admin() && $query->is_main_query() && $query->is_search() ) {
+		$join .= " LEFT JOIN {$wpdb->postmeta} AS summit_meta ON ({$wpdb->posts}.ID = summit_meta.post_id) ";
+	}
+
+	return $join;
+}
+add_filter( 'posts_join', 'summit_search_join_meta', 10, 2 );
+
+/**
+ * Modify search WHERE clause to include ACF meta fields.
+ *
+ * Searches in:
+ * - Post title
+ * - Post content
+ * - Post excerpt
+ * - ACF meta values (for fields like team short_description, role, etc.)
+ *
+ * @param string   $where The WHERE clause of the query.
+ * @param WP_Query $query The WP_Query instance.
+ * @return string Modified WHERE clause.
+ */
+function summit_search_where_meta( $where, $query ) {
+	global $wpdb;
+
+	if ( ! is_admin() && $query->is_main_query() && $query->is_search() ) {
+		$search_term = $query->get( 's' );
+
+		if ( ! empty( $search_term ) ) {
+			// Escape the search term for LIKE queries
+			$like_term = '%' . $wpdb->esc_like( $search_term ) . '%';
+
+			// Define ACF fields to search in
+			$acf_fields = array(
+				'short_description', // Team member short description
+				'role',              // Team member role
+				'email',             // Team member email
+				'phone',             // Team member phone
+				'affiliations',      // Team affiliations
+				'education',         // Team education
+			);
+
+			// Build meta key conditions
+			$meta_key_conditions = array();
+			foreach ( $acf_fields as $field ) {
+				$meta_key_conditions[] = $wpdb->prepare( "summit_meta.meta_key = %s", $field );
+			}
+
+			// Also allow searching any non-internal meta keys (those not starting with _)
+			$meta_key_conditions[] = "summit_meta.meta_key NOT LIKE '\_%'";
+
+			$meta_key_where = implode( ' OR ', $meta_key_conditions );
+
+			// Modify WHERE to include meta search
+			$where = preg_replace(
+				"/\(\s*{$wpdb->posts}.post_title\s+LIKE\s*(\'[^\']+\')\s*\)/",
+				"(
+					{$wpdb->posts}.post_title LIKE $1
+					OR {$wpdb->posts}.post_excerpt LIKE $1
+					OR (
+						summit_meta.meta_value LIKE $1
+						AND ({$meta_key_where})
+					)
+				)",
+				$where
+			);
+		}
+	}
+
+	return $where;
+}
+add_filter( 'posts_where', 'summit_search_where_meta', 10, 2 );
+
+/**
+ * Remove duplicate results from meta join search.
+ *
+ * @param string   $distinct The DISTINCT clause of the query.
+ * @param WP_Query $query    The WP_Query instance.
+ * @return string Modified DISTINCT clause.
+ */
+function summit_search_distinct( $distinct, $query ) {
+	if ( ! is_admin() && $query->is_main_query() && $query->is_search() ) {
+		return 'DISTINCT';
+	}
+	return $distinct;
+}
+add_filter( 'posts_distinct', 'summit_search_distinct', 10, 2 );
+
+/**
+ * Count search results including ACF meta field matches.
+ *
+ * This helper function performs a direct SQL count query with the same
+ * JOIN and WHERE logic as the main search filters. Use this for accurate
+ * counts in secondary queries (like sidebar type counts).
+ *
+ * @param string       $search_term The search term.
+ * @param string|array $post_type   The post type(s) to search.
+ * @return int The count of matching posts.
+ */
+function summit_count_search_results( $search_term, $post_type = '' ) {
+	global $wpdb;
+
+	if ( empty( $search_term ) ) {
+		return 0;
+	}
+
+	// Build post type condition
+	if ( is_array( $post_type ) ) {
+		$post_types_sql = "'" . implode( "','", array_map( 'esc_sql', $post_type ) ) . "'";
+		$post_type_where = "AND {$wpdb->posts}.post_type IN ({$post_types_sql})";
+	} elseif ( ! empty( $post_type ) ) {
+		$post_type_where = $wpdb->prepare( "AND {$wpdb->posts}.post_type = %s", $post_type );
+	} else {
+		$post_type_where = "AND {$wpdb->posts}.post_type IN ('page', 'post', 'case', 'team', 'service')";
+	}
+
+	// Escape the search term for LIKE queries
+	$like_term = '%' . $wpdb->esc_like( $search_term ) . '%';
+
+	// Define ACF fields to search in (same as summit_search_where_meta)
+	$acf_fields = array(
+		'short_description',
+		'role',
+		'email',
+		'phone',
+		'affiliations',
+		'education',
+	);
+
+	// Build meta key conditions
+	$meta_key_conditions = array();
+	foreach ( $acf_fields as $field ) {
+		$meta_key_conditions[] = $wpdb->prepare( "summit_meta.meta_key = %s", $field );
+	}
+	$meta_key_conditions[] = "summit_meta.meta_key NOT LIKE '\_%'";
+	$meta_key_where = implode( ' OR ', $meta_key_conditions );
+
+	// Build the full query
+	$sql = $wpdb->prepare(
+		"SELECT COUNT(DISTINCT {$wpdb->posts}.ID)
+		FROM {$wpdb->posts}
+		LEFT JOIN {$wpdb->postmeta} AS summit_meta ON ({$wpdb->posts}.ID = summit_meta.post_id)
+		WHERE {$wpdb->posts}.post_status = 'publish'
+		{$post_type_where}
+		AND (
+			{$wpdb->posts}.post_title LIKE %s
+			OR {$wpdb->posts}.post_content LIKE %s
+			OR {$wpdb->posts}.post_excerpt LIKE %s
+			OR (
+				summit_meta.meta_value LIKE %s
+				AND ({$meta_key_where})
+			)
+		)",
+		$like_term,
+		$like_term,
+		$like_term,
+		$like_term
+	);
+
+	return (int) $wpdb->get_var( $sql );
+}
+
+/**
+ * Order search results by relevance or role hierarchy.
+ *
+ * For team results, orders by role hierarchy (partner > associate > clerk > assistant).
+ * For other searches, prioritizes:
+ * 1. Exact title matches
+ * 2. Title contains search term
+ * 3. Content/excerpt matches
+ * 4. Meta field matches
+ *
+ * @param string   $orderby The ORDER BY clause of the query.
+ * @param WP_Query $query   The WP_Query instance.
+ * @return string Modified ORDER BY clause.
+ */
+function summit_search_orderby( $orderby, $query ) {
+	global $wpdb;
+
+	if ( ! is_admin() && $query->is_main_query() && $query->is_search() ) {
+		$post_type   = $query->get( 'post_type' );
+		$search_term = $query->get( 's' );
+
+		// Check if filtering/searching for team only
+		$is_team_only = ( $post_type === 'team' ) ||
+						( isset( $_GET['type'] ) && $_GET['type'] === 'team' );
+
+		if ( $is_team_only ) {
+			// Order team members by role hierarchy, then alphabetically by title
+			// This requires a subquery to get the role meta value
+			$orderby = "(
+				SELECT CASE summit_role.meta_value
+					WHEN 'partner' THEN 1
+					WHEN 'associate' THEN 2
+					WHEN 'clerk' THEN 3
+					WHEN 'assistant' THEN 4
+					ELSE 5
+				END
+				FROM {$wpdb->postmeta} AS summit_role
+				WHERE summit_role.post_id = {$wpdb->posts}.ID
+				AND summit_role.meta_key = 'role'
+				LIMIT 1
+			) ASC,
+			{$wpdb->posts}.post_title ASC";
+		} elseif ( ! empty( $search_term ) ) {
+			$like_term  = '%' . $wpdb->esc_like( $search_term ) . '%';
+			$exact_term = $wpdb->esc_like( $search_term );
+
+			// Custom relevance scoring
+			$orderby = $wpdb->prepare(
+				"(CASE
+					WHEN {$wpdb->posts}.post_title = %s THEN 1
+					WHEN {$wpdb->posts}.post_title LIKE %s THEN 2
+					WHEN {$wpdb->posts}.post_excerpt LIKE %s THEN 3
+					WHEN {$wpdb->posts}.post_content LIKE %s THEN 4
+					ELSE 5
+				END) ASC,
+				{$wpdb->posts}.post_date DESC",
+				$exact_term,
+				$like_term,
+				$like_term,
+				$like_term
+			);
+		}
+	}
+
+	return $orderby;
+}
+add_filter( 'posts_orderby', 'summit_search_orderby', 10, 2 );
+
+/**
+ * Customize document title for search results page.
+ *
+ * Uses SEOPress filter to override title for search pages,
+ * avoiding issues with empty search terms being wrapped in quotes.
+ *
+ * @param string $title The document title.
+ * @return string Modified title.
+ */
+function summit_search_document_title( $title ) {
+	// Only handle search pages - check for 's' parameter in URL
+	if ( ! is_search() && ! isset( $_GET['s'] ) ) {
+		return $title;
+	}
+
+	$search_term = isset( $_GET['s'] ) ? trim( sanitize_text_field( $_GET['s'] ) ) : '';
+	$type_filter = isset( $_GET['type'] ) ? sanitize_text_field( $_GET['type'] ) : '';
+	$site_name   = get_bloginfo( 'name' );
+
+	$type_labels = array(
+		'page'    => __( 'Pages', 'summit-law-theme' ),
+		'post'    => __( 'Insights', 'summit-law-theme' ),
+		'case'    => __( 'Cases', 'summit-law-theme' ),
+		'team'    => __( 'Team Members', 'summit-law-theme' ),
+		'service' => __( 'Services', 'summit-law-theme' ),
+	);
+
+	$has_search_term = strlen( $search_term ) > 0;
+	$has_type_filter = ! empty( $type_filter ) && isset( $type_labels[ $type_filter ] );
+
+	// Build the page title portion
+	if ( $has_search_term && $has_type_filter ) {
+		$page_title = sprintf( __( 'Search: "%1$s" in %2$s', 'summit-law-theme' ), $search_term, $type_labels[ $type_filter ] );
+	} elseif ( $has_search_term ) {
+		$page_title = sprintf( __( 'Search: "%s"', 'summit-law-theme' ), $search_term );
+	} elseif ( $has_type_filter ) {
+		$page_title = sprintf( __( 'Search: %s', 'summit-law-theme' ), $type_labels[ $type_filter ] );
+	} else {
+		$page_title = __( 'Search', 'summit-law-theme' );
+	}
+
+	return $page_title . ' - ' . $site_name;
+}
+// Hook into SEOPress title filter (used when SEOPress is active)
+add_filter( 'seopress_titles_title', 'summit_search_document_title' );
+
+/**
+ * Fallback for when SEOPress is not active.
+ * Uses pre_get_document_title with maximum priority.
+ */
+function summit_search_pre_document_title_fallback( $title ) {
+	// Only run if SEOPress is not active
+	if ( function_exists( 'seopress_init' ) ) {
+		return $title;
+	}
+
+	// Only handle search pages
+	if ( ! is_search() && ! isset( $_GET['s'] ) ) {
+		return $title;
+	}
+
+	// summit_search_document_title already includes site name
+	return summit_search_document_title( '' );
+}
+add_filter( 'pre_get_document_title', 'summit_search_pre_document_title_fallback', 999 );
+
+/**
+ * Set document title for area archive pages (/area/ and /area/{term}/).
+ *
+ * Handles:
+ * - All Areas mode (/area/)
+ * - Specific area pages (/area/{term}/)
+ * - Result type filters (?result_type=post or ?result_type=case)
+ * - No Results indication when filtering returns zero results
+ *
+ * @param string $title The document title.
+ * @return string Modified title.
+ */
+function summit_area_archive_document_title( $title ) {
+	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( $_SERVER['REQUEST_URI'] ) : '';
+	$site_name   = get_bloginfo( 'name' );
+
+	// Check for result type filter
+	$result_type = '';
+	if ( isset( $_GET['result_type'] ) ) {
+		$result_type = sanitize_text_field( $_GET['result_type'] );
+	} elseif ( isset( $_GET['type'] ) ) {
+		$result_type = sanitize_text_field( $_GET['type'] );
+	}
+
+	// Check for /area/ without a specific term (All Areas mode)
+	if ( preg_match( '#/area/?(\?|$)#', $request_uri ) && ! preg_match( '#/area/[^/\?]+#', $request_uri ) ) {
+		// Count posts for "No Results" check
+		if ( $result_type ) {
+			$count_query = new WP_Query( array(
+				'post_type'      => $result_type === 'post' ? 'post' : 'case',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+			) );
+			$has_results = $count_query->found_posts > 0;
+
+			if ( $result_type === 'post' ) {
+				$page_title = $has_results
+					? __( 'Insights: All Areas', 'summit-law-theme' )
+					: __( 'Insights: All Areas - No Results', 'summit-law-theme' );
+			} else {
+				$page_title = $has_results
+					? __( 'Cases: All Areas', 'summit-law-theme' )
+					: __( 'Cases: All Areas - No Results', 'summit-law-theme' );
+			}
+		} else {
+			$page_title = __( 'All Areas', 'summit-law-theme' );
+		}
+
+		return $page_title . ' - ' . $site_name;
+	}
+
+	// Check for /area/{term-slug} (specific area page)
+	if ( preg_match( '#/area/([^/\?]+)#', $request_uri, $matches ) ) {
+		$term_slug = $matches[1];
+		$term      = get_term_by( 'slug', $term_slug, 'area' );
+
+		if ( $term && ! is_wp_error( $term ) ) {
+			$area_name = $term->name;
+
+			if ( $result_type ) {
+				// Count posts/cases in this specific area
+				$count_query = new WP_Query( array(
+					'post_type'      => $result_type === 'post' ? 'post' : 'case',
+					'posts_per_page' => 1,
+					'fields'         => 'ids',
+					'tax_query'      => array(
+						array(
+							'taxonomy' => 'area',
+							'field'    => 'term_id',
+							'terms'    => $term->term_id,
+						),
+					),
+				) );
+				$has_results = $count_query->found_posts > 0;
+
+				if ( $result_type === 'post' ) {
+					$page_title = $has_results
+						? sprintf( __( 'Insights: %s', 'summit-law-theme' ), $area_name )
+						: sprintf( __( 'Insights: %s - No Results', 'summit-law-theme' ), $area_name );
+				} else {
+					$page_title = $has_results
+						? sprintf( __( 'Cases: %s', 'summit-law-theme' ), $area_name )
+						: sprintf( __( 'Cases: %s - No Results', 'summit-law-theme' ), $area_name );
+				}
+			} else {
+				// No result type filter - just show area name
+				$page_title = $area_name;
+			}
+
+			return $page_title . ' - ' . $site_name;
+		}
+	}
+
+	return $title;
+}
+add_filter( 'pre_get_document_title', 'summit_area_archive_document_title', 998 );
+add_filter( 'seopress_titles_title', 'summit_area_archive_document_title' );
