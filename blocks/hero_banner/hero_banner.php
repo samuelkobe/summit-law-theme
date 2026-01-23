@@ -41,7 +41,7 @@ if ( ! empty( $block['align'] ) ) {
 			$post_title           = get_the_title();
 			$is_auto_draft        = $post_title === 'Auto Draft' || empty( $post_title );
 			?>
-			<h1 class="h1 2xl:text-7xl text-green-accent1 mb-4 lg:mb-10">
+			<h1 class="h1 2xl:text-7xl !text-green-accent1 mb-4 lg:mb-10">
 				<?php if ( $custom_title_enabled == 1 ) : ?>
 					<?php if ( $custom_title ) : ?>
 						<?php echo esc_html( $custom_title ); ?>

@@ -633,4 +633,113 @@
     background-repeat: no-repeat;
     background-position: right 12px center;
   }
+
+  /* =============================================================================
+     PAGE CONTENT - Core Block Container Scoping
+
+     For pages and services that mix ACF blocks with core blocks.
+     Core blocks get container treatment, ACF blocks pass through unchanged.
+     ACF blocks output <section> or <header> elements which are not targeted.
+     ============================================================================= */
+
+  .page-content > p,
+  .page-content > h1,
+  .page-content > h2,
+  .page-content > h3,
+  .page-content > h4,
+  .page-content > h5,
+  .page-content > h6,
+  .page-content > ul:not(.wp-block-gallery),
+  .page-content > ol,
+  .page-content > blockquote,
+  .page-content > .wp-block-quote,
+  .page-content > .wp-block-pullquote,
+  .page-content > figure,
+  .page-content > .wp-block-image,
+  .page-content > .wp-block-table,
+  .page-content > .wp-block-code,
+  .page-content > pre,
+  .page-content > hr,
+  .page-content > .wp-block-separator,
+  .page-content > .wp-block-buttons,
+  .page-content > .wp-block-columns,
+  .page-content > .wp-block-group:not(.alignfull):not(.alignwide),
+  .page-content > .wp-block-cover:not(.alignfull):not(.alignwide),
+  .page-content > .wp-block-media-text:not(.alignfull):not(.alignwide),
+  .page-content > .wp-block-embed,
+  .page-content > .wp-block-video {
+    @apply container mx-auto py-6;
+  }
+
+  /* Typography styling for core blocks in page-content */
+  .page-content > p,
+  .page-content > h1,
+  .page-content > h2,
+  .page-content > h3,
+  .page-content > h4,
+  .page-content > h5,
+  .page-content > h6,
+  .page-content > ul,
+  .page-content > ol,
+  .page-content > blockquote {
+    @apply text-brand-black;
+  }
+
+  .page-content > h1 {
+    @apply h1 mb-6;
+  }
+
+  .page-content > h2 {
+    @apply h2 mb-5;
+  }
+
+  .page-content > h3 {
+    @apply h3 mb-4;
+  }
+
+  .page-content > h4 {
+    @apply h4 mb-3;
+  }
+
+  .page-content > h5 {
+    @apply h5 mb-3;
+  }
+
+  .page-content > h6 {
+    @apply h6 mb-2;
+  }
+
+  .page-content > p {
+    @apply mb-6 leading-relaxed text-lg;
+  }
+
+  .page-content > ul:not(.wp-block-gallery) {
+    @apply mb-6 pl-0 list-none space-y-2;
+  }
+
+  .page-content > ul:not(.wp-block-gallery) li::before {
+    content: "";
+    @apply inline-block w-2 h-2 bg-green-accent1 rounded-full mr-3 relative -top-[2px];
+  }
+
+  .page-content > ol {
+    @apply mb-6 pl-0 list-none space-y-2;
+    counter-reset: item;
+  }
+
+  .page-content > ol li {
+    counter-increment: item;
+  }
+
+  .page-content > ol li::before {
+    content: counter(item) ".";
+    @apply inline-block w-6 font-semibold text-green-deep mr-2;
+  }
+
+  /* Links in page-content core blocks */
+  .page-content > p a:not(.btn):not(.wp-block-button__link),
+  .page-content > ul a:not(.btn):not(.wp-block-button__link),
+  .page-content > ol a:not(.btn):not(.wp-block-button__link) {
+    @apply text-green-deep underline decoration-2 underline-offset-2 hover:text-brand-black transition-colors duration-300;
+  }
 }

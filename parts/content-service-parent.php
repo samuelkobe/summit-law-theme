@@ -7,7 +7,7 @@
  */
 ?>
 
-<article id="post-<?php the_ID(); ?>" <?php post_class( 'service-parent' ); ?>>
+<article id="post-<?php the_ID(); ?>" <?php post_class( 'service-parent page-content' ); ?>>
 
 	<?php the_content(); ?>
 

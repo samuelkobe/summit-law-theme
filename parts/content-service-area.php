@@ -9,7 +9,7 @@
 $parent_id = wp_get_post_parent_id( get_the_ID() );
 ?>
 
-<article id="post-<?php the_ID(); ?>" <?php post_class( 'service-area' ); ?>>
+<article id="post-<?php the_ID(); ?>" <?php post_class( 'service-area page-content' ); ?>>
 
 	<?php the_content(); ?>
 
