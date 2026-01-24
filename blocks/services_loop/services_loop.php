@@ -72,7 +72,7 @@ if ( ! empty( $block['align'] ) ) {
 						'post_type'      => 'service',
 						'posts_per_page' => -1,
 						'post_parent'    => $service_type->ID,
-						'orderby'        => 'menu_order',
+						'orderby'        => 'title',
 						'order'          => 'ASC'
 					) );
 

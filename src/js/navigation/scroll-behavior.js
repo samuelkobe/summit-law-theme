@@ -119,6 +119,13 @@ export default class ScrollBehavior {
       return;
     }
 
+    // Desktop only: Immediate scroll detection for hero before line
+    if (currentScroll > 0) {
+      document.body.classList.add("page-scrolled");
+    } else {
+      document.body.classList.remove("page-scrolled");
+    }
+
     // Desktop only: Logo resize (home page only)
     if (this.isHomePage && this.logo) {
       if (currentScroll >= this.logoTransitionPoint) {
@@ -160,6 +167,13 @@ export default class ScrollBehavior {
    */
   handleScroll() {
     const currentScroll = window.pageYOffset;
+
+    // Immediate scroll detection for hero before line
+    if (currentScroll > 0) {
+      document.body.classList.add("page-scrolled");
+    } else {
+      document.body.classList.remove("page-scrolled");
+    }
 
     // Logo resize (home page only)
     if (this.isHomePage && this.logo) {

@@ -24,6 +24,19 @@ if ( ! empty( $block['className'] ) ) {
 if ( ! empty( $block['align'] ) ) {
     $classes .= ' align' . $block['align'];
 }
+
+// Determine title to display - check for hero_banner's custom title first
+$hero_custom_title_enabled = get_field( 'custom_title' ); // From hero_banner block
+$hero_custom_title         = get_field( 'title' );        // From hero_banner block
+$post_title                = get_the_title();
+$is_auto_draft             = $post_title === 'Auto Draft' || empty( $post_title );
+
+// Use hero's custom title if enabled and set, otherwise use post title
+if ( $hero_custom_title_enabled && $hero_custom_title ) {
+    $breadcrumb_title = $hero_custom_title;
+} else {
+    $breadcrumb_title = $post_title;
+}
 ?>
 
 <style type="text/css">
@@ -116,10 +129,50 @@ if ( ! empty( $block['align'] ) ) {
 
 				<!-- Current Page -->
 				<li aria-current="page" class="text-green-deep">
-					<?php echo esc_html( get_the_title() ); ?>
+					<?php if ( $is_preview && $is_auto_draft && ! $hero_custom_title_enabled ) : ?>
+						<span class="breadcrumb-current-title text-brand-40" data-block-id="<?php echo esc_attr( $block['id'] ); ?>">Page Title</span>
+					<?php else : ?>
+						<span class="breadcrumb-current-title" data-block-id="<?php echo esc_attr( $block['id'] ); ?>"><?php echo esc_html( $breadcrumb_title ); ?></span>
+					<?php endif; ?>
 				</li>
 			</ol>
 		</nav>
+
+		<?php if ( $is_preview && ! $hero_custom_title_enabled ) : ?>
+		<script>
+		(function() {
+			const blockId = '<?php echo esc_js( $block['id'] ); ?>';
+			const titleElement = document.querySelector('.breadcrumb-current-title[data-block-id="' + blockId + '"]');
+
+			if (!titleElement || !window.wp || !window.wp.data) return;
+
+			const { subscribe, select } = window.wp.data;
+			let lastTitle = '';
+
+			const updateTitle = () => {
+				const currentTitle = select('core/editor')?.getEditedPostAttribute('title') || '';
+
+				if (currentTitle !== lastTitle) {
+					lastTitle = currentTitle;
+
+					if (currentTitle && currentTitle !== 'Auto Draft') {
+						titleElement.textContent = currentTitle;
+						titleElement.classList.remove('text-brand-40');
+					} else {
+						titleElement.textContent = 'Page Title';
+						titleElement.classList.add('text-brand-40');
+					}
+				}
+			};
+
+			// Initial check
+			updateTitle();
+
+			// Subscribe to changes
+			subscribe(updateTitle);
+		})();
+		</script>
+		<?php endif; ?>
 		<div class="py-4 md:py-8 flex flex-row gap-x-4">
 			<span class="text-base lowercase hidden lg:block">Share</span>
 			<ul class="social-share flex flex-row items-center gap-2">

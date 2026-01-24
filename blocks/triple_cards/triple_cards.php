@@ -64,7 +64,7 @@ $selected_posts = $field_name ? get_field( $field_name ) : null;
 						<a class="group text-green-deep text-2xl xl:text-3xl no-underline hover:underline" href="<?php echo esc_url( get_permalink( $selected_post->ID ) ); ?>">
 							<?php if ( has_post_thumbnail( $selected_post->ID ) ) : ?>
 								<div class="triple-card__wrapper mb-4 md:w-[80%] relative">
-									<div class="triple-card__image aspect-[4/5] overflow-hidden relative rounded-lg shadow-md lg:group-hover:shadow-xl lg:group-hover:-translate-y-1 lg:group-hover:scale-[1.025] transition-all duration-500">
+									<div class="triple-card__image aspect-[4/5] overflow-hidden relative shadow-md lg:group-hover:shadow-xl lg:group-hover:-translate-y-1 lg:group-hover:scale-[1.025] transition-all duration-500">
 										<?php echo get_the_post_thumbnail( $selected_post->ID, 'full', array( 'class' => 'w-full h-full object-cover' ) ); ?>
 									</div>
 									<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 72 72" class="w-12 md:w-16 xl:w-[72px] lg:group-hover:-translate-y-4 transition-transform duration-500 delay-200 flex-shrink-0 absolute bottom-8 right-8 md:-right-8 z-10">

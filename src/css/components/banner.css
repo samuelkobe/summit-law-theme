@@ -102,6 +102,15 @@
   content: "";
   @apply absolute -top-2 lg:top-4 right-0 w-1/2 xl:w-[41.667%] h-[2px] lg:h-[3px] bg-green-accent1 mx-8;
   transform-origin: right center;
+  @apply transition-opacity duration-300;
+}
+
+/* Fade out before line immediately on scroll (desktop only) */
+@media (min-width: 1024px) {
+  .page-scrolled .home-before-after-content.animate-line::before,
+  .page-scrolled .home-before-after-content.show-line::before {
+    @apply opacity-0;
+  }
 }
 
 /* After line: bottom-left corner, spans right to middle */

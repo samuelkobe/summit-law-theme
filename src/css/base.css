@@ -147,55 +147,66 @@
     @apply bg-white;
   }
 
-  .entry-content h1,
-  .page-content h1 {
+  /* Heading styles - scoped to DIRECT children only to avoid overriding ACF blocks */
+  .entry-content > h1,
+  .page-content > h1 {
     @apply font-museum font-normal leading-tight text-green-deep tracking-[-0.02em] text-h1;
   }
 
-  .entry-content h2,
-  .page-content h2 {
+  .entry-content > h2,
+  .page-content > h2 {
     @apply font-museum font-normal leading-tight text-green-deep tracking-[-0.015em] text-h2;
   }
 
-  .entry-content h3,
-  .page-content h3 {
+  .entry-content > h3,
+  .page-content > h3 {
     @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.01em] text-h3;
   }
 
-  .entry-content h4,
-  .page-content h4 {
+  .entry-content > h4,
+  .page-content > h4 {
     @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.005em] text-h4;
   }
 
-  .entry-content h5,
-  .page-content h5 {
+  .entry-content > h5,
+  .page-content > h5 {
     @apply font-hanken font-medium leading-snug text-brand-black text-h5;
   }
 
-  .entry-content h6,
-  .page-content h6 {
+  .entry-content > h6,
+  .page-content > h6 {
     @apply font-hanken font-semibold uppercase leading-snug tracking-wider text-brand-black text-h6;
   }
 }
 
 @layer components {
-  /* WordPress Content Area Typography */
-  .entry-content p,
-  .page-content p {
+  /* WordPress Content Area Typography - scoped to DIRECT children only */
+  .entry-content > p,
+  .page-content > p {
     @apply leading-relaxed;
   }
 
-  /* Links - Default (light backgrounds) */
-  /* Only apply to links within content areas, not all links globally */
-  .entry-content a:not(.btn),
-  .page-content a:not(.btn),
-  p a:not(.btn) {
+  /* Links - Only apply to CORE BLOCKS within entry-content/page-content */
+  /* Uses direct child selectors to avoid styling links inside ACF blocks */
+  .entry-content > p a:not(.btn),
+  .entry-content > ul a:not(.btn),
+  .entry-content > ol a:not(.btn),
+  .entry-content > blockquote a:not(.btn),
+  .page-content > p a:not(.btn),
+  .page-content > ul a:not(.btn),
+  .page-content > ol a:not(.btn),
+  .page-content > blockquote a:not(.btn) {
     @apply underline text-green-deep decoration-[0.08em] underline-offset-[0.15em] transition-colors duration-300;
   }
 
-  .entry-content a:not(.btn):hover,
-  .page-content a:not(.btn):hover,
-  p a:not(.btn):hover {
+  .entry-content > p a:not(.btn):hover,
+  .entry-content > ul a:not(.btn):hover,
+  .entry-content > ol a:not(.btn):hover,
+  .entry-content > blockquote a:not(.btn):hover,
+  .page-content > p a:not(.btn):hover,
+  .page-content > ul a:not(.btn):hover,
+  .page-content > ol a:not(.btn):hover,
+  .page-content > blockquote a:not(.btn):hover {
     @apply text-brand-black;
   }
 

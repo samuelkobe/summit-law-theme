@@ -74,7 +74,7 @@ body.home [data-header].header--dark {
 
 /* Right side wrapper for nav and search */
 .header-right {
-  @apply hidden lg:flex items-center gap-6;
+  @apply hidden lg:flex items-center gap-2;
 }
 
 .header-right {
@@ -286,7 +286,7 @@ body.home .header--light .logo-alternate {
 }
 
 .search-toggle {
-  @apply flex items-center justify-center w-10 h-10 p-2;
+  @apply flex items-center justify-end w-10 h-10 p-2 pr-0;
   @apply transition-colors duration-300;
   background: none;
   border: none;

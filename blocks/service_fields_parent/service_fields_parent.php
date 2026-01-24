@@ -55,7 +55,7 @@ if ( ! empty( $block['align'] ) ) {
 					'post_type'      => 'service',
 					'posts_per_page' => -1,
 					'post_parent'    => $current_service_id,
-					'orderby'        => 'menu_order',
+					'orderby'        => 'title',
 					'order'          => 'ASC'
 				) );
 
@@ -81,6 +81,7 @@ if ( ! empty( $block['align'] ) ) {
 	</section>
 	<!-- End Service Areas section -->
 
+	<?php if ( get_field( 'info_toggle' ) == 1 ) : ?>
 	<!-- Info section -->
 	<?php
 	$info_title            = get_field( 'title' );
@@ -121,6 +122,7 @@ if ( ! empty( $block['align'] ) ) {
 		</div>
 	</section>
 	<!-- End Info section -->
+	<?php endif; ?>
 			
 	<?php if ( get_field( 'show_team_members_toggle' ) == 1 ) : ?>
 	<!-- Team section -->

@@ -37,14 +37,28 @@
             while (have_rows('menu_group_settings', 'term_' . $menu_id)) : the_row();
               $menu_title = get_sub_field('title');
               $page_link_toggle = get_sub_field('page_link_toggle');
+              $link_type = get_sub_field('link_type'); // true (1) = custom_link, false (0) = page_link
               $page_link = get_sub_field('page_link');
+              $custom_link = get_sub_field('custom_link');
+
+              // Determine which link to use based on link_type
+              $title_link = null;
+              if ($page_link_toggle === 'yes') {
+                if ($link_type && $custom_link) {
+                  // link_type is true/1: use custom_link
+                  $title_link = $custom_link;
+                } elseif (!$link_type && $page_link) {
+                  // link_type is false/0: use page_link
+                  $title_link = $page_link;
+                }
+              }
 
               // Use "Menu" as default title if no custom title provided
               $display_title = $menu_title ? $menu_title : 'Menu';
             ?>
               <div class="pt-3 lg:py-0">
-                <?php if ($menu_title && $page_link_toggle === 'yes' && $page_link) : ?>
-                  <h3 class="text-xl"><a href="<?php echo esc_url($page_link); ?>" class="footer-menu-title-link fill-green-accent1 hover:fill-green-accent2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z"/></svg><?php echo esc_html($display_title); ?></a></h3>
+                <?php if ($menu_title && $title_link) : ?>
+                  <h3 class="text-xl"><a href="<?php echo esc_url($title_link); ?>" class="footer-menu-title-link fill-green-accent1 hover:fill-green-accent2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path d="M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z"/></svg><?php echo esc_html($display_title); ?></a></h3>
                 <?php else : ?>
                   <h3 class="text-green-accent1 text-xl"><?php echo esc_html($display_title); ?></h3>
                 <?php endif; ?>

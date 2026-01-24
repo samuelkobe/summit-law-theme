@@ -19,7 +19,7 @@
             "default_value": "",
             "maxlength": 50,
             "allow_in_bindings": 0,
-            "placeholder": "ie. What we do",
+            "placeholder": "ie. Related Areas",
             "prepend": "",
             "append": ""
         },
@@ -61,5 +61,5 @@
     "description": "",
     "show_in_rest": 0,
     "display_title": "",
-    "modified": 1768572042
+    "modified": 1769212635
 }

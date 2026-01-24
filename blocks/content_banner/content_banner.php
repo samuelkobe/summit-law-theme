@@ -73,7 +73,7 @@ if ( ! empty( $block['align'] ) ) {
 							$image_desktop = wp_get_attachment_image_src( $image_id, 'full' );
 							?>
 							<img
-								class="w-full h-auto max-w-full aspect-video object-cover rounded-lg shadow-lg relative z-0"
+								class="w-full h-auto max-w-full aspect-video object-cover shadow-lg relative z-0"
 								src="<?php echo esc_url( $image_tablet[0] ); ?>"
 								srcset="<?php echo esc_url( $image_mobile[0] ); ?> <?php echo $image_mobile[1]; ?>w,
 										<?php echo esc_url( $image_tablet[0] ); ?> <?php echo $image_tablet[1]; ?>w,

@@ -171,7 +171,7 @@
                             "name": "content",
                             "aria-label": "",
                             "type": "textarea",
-                            "instructions": "Add a short block of text to accompany the heading (maximum 250 characters).",
+                            "instructions": "Add a short block of text to accompany the heading (maximum 500 characters).",
                             "required": 1,
                             "conditional_logic": 0,
                             "wrapper": {
@@ -180,7 +180,7 @@
                                 "id": ""
                             },
                             "default_value": "",
-                            "maxlength": 250,
+                            "maxlength": 500,
                             "allow_in_bindings": 0,
                             "rows": 3,
                             "placeholder": "",
@@ -211,5 +211,5 @@
     "description": "",
     "show_in_rest": 0,
     "display_title": "",
-    "modified": 1769074828
+    "modified": 1769206610
 }

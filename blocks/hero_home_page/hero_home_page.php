@@ -116,7 +116,7 @@ if ( ! empty( $block['align'] ) ) {
 							<img
 								src="<?php echo esc_url( $image_url ); ?>"
 								alt="<?php echo esc_attr( $random_image['alt'] ); ?>"
-								class="w-full h-auto aspect-video object-cover rounded-lg shadow-lg overflow-hidden"
+								class="w-full h-auto aspect-video object-cover shadow-lg overflow-hidden"
 							/>
 							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 72 72" class="w-12 md:w-16 xl:w-[72px] lg:group-hover:-translate-y-4 transition-transform duration-500 delay-200 flex-shrink-0 absolute top-8 md:-top-8 left-8 md:left-16 z-10">
 								<path class="fill-green-accent1" d="M39.2,0L0,40.5v6.9L45.9,0h-6.7Z"/>
@@ -133,7 +133,7 @@ if ( ! empty( $block['align'] ) ) {
 							</svg>
 						</div>
 					<?php elseif ( $is_preview ) : ?>
-						<div class="hero-gallery-placeholder bg-green-accent1/20 rounded-lg aspect-[4/3] flex items-center justify-center">
+						<div class="hero-gallery-placeholder bg-green-accent1/20 aspect-[4/3] flex items-center justify-center">
 							<span class="text-brand-40 text-center px-4">Add gallery images in block settings.</span>
 						</div>
 					<?php endif; ?>

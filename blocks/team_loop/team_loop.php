@@ -101,10 +101,10 @@ if ( ! empty( $block['align'] ) ) {
 
 					<a href="<?php the_permalink(); ?>" class="group block">
 						<?php if ( has_post_thumbnail() ) : ?>
-							<div class="bg-brand-black rounded-lg w-full overflow-hidden mb-2 lg:mb-4 group-hover:shadow-lg transition-shadow duration-1000">
+							<div class="bg-brand-black w-full overflow-hidden mb-2 lg:mb-4 group-hover:shadow-lg transition-shadow duration-1000">
 								<?php the_post_thumbnail( 'large', array( 'class' => 'aspect-image sm:aspect-video object-contain' ) ); ?>
 							<?php else : ?>
-								<div class="bg-green-deep rounded-lg w-full overflow-hidden mb-2 lg:mb-4 group-hover:shadow-lg transition-shadow duration-1000">
+								<div class="bg-green-deep w-full overflow-hidden mb-2 lg:mb-4 group-hover:shadow-lg transition-shadow duration-1000">
 								<div class="aspect-image sm:aspect-video object-contain flex items-center justify-center p-20">
 									<?php
 									$custom_logo_id = get_theme_mod( 'custom_logo' );

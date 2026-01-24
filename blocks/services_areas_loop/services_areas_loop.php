@@ -41,7 +41,7 @@ if ( $parent_id ) {
         'posts_per_page' => -1,
         'post_parent'    => $parent_id,
         'exclude'        => array( $current_post_id ),
-        'orderby'        => 'menu_order',
+        'orderby'        => 'title',
         'order'          => 'ASC'
     ) );
 }

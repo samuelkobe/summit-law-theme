@@ -71,6 +71,35 @@
                     "layout": "horizontal"
                 },
                 {
+                    "key": "field_6973f62119568",
+                    "label": "Link Type?",
+                    "name": "link_type",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_6933a8c064c14",
+                                "operator": "==",
+                                "value": "yes"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "33",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "allow_in_bindings": 0,
+                    "ui_on_text": "Custom",
+                    "ui_off_text": "Page Link",
+                    "ui": 1
+                },
+                {
                     "key": "field_6933a3cf0635f",
                     "label": "Page Link",
                     "name": "page_link",
@@ -88,11 +117,16 @@
                                 "field": "field_6933a8c064c14",
                                 "operator": "==",
                                 "value": "yes"
+                            },
+                            {
+                                "field": "field_6973f62119568",
+                                "operator": "!=",
+                                "value": "1"
                             }
                         ]
                     ],
                     "wrapper": {
-                        "width": "33",
+                        "width": "",
                         "class": "",
                         "id": ""
                     },
@@ -107,6 +141,41 @@
                     "multiple": 0,
                     "allow_null": 0,
                     "allow_in_bindings": 0
+                },
+                {
+                    "key": "field_6973f6c41956b",
+                    "label": "Custom Link",
+                    "name": "custom_link",
+                    "aria-label": "",
+                    "type": "url",
+                    "instructions": "Give the menu a page link for visitor to visit if they click on this Menu Title. This will be located over the menu items list.",
+                    "required": 0,
+                    "conditional_logic": [
+                        [
+                            {
+                                "field": "field_69339d25c4b32",
+                                "operator": "!=empty"
+                            },
+                            {
+                                "field": "field_6933a8c064c14",
+                                "operator": "==",
+                                "value": "yes"
+                            },
+                            {
+                                "field": "field_6973f62119568",
+                                "operator": "==",
+                                "value": "1"
+                            }
+                        ]
+                    ],
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "allow_in_bindings": 0,
+                    "placeholder": ""
                 }
             ]
         }
@@ -158,5 +227,5 @@
     "description": "",
     "show_in_rest": 0,
     "display_title": "",
-    "modified": 1765306540
+    "modified": 1769207585
 }
