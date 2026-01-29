@@ -53,14 +53,14 @@ if ( $parent_id ) {
 	}
 </style>
 
-<section id="<?php echo esc_attr( $id ); ?>" class="services-overview bg-white py-12 lg:py-24 antialiased <?php echo esc_attr( $classes ); ?>">
+<section id="<?php echo esc_attr( $id ); ?>" class="services-overview bg-white block-white antialiased <?php echo esc_attr( $classes ); ?>">
 	<div class="container mx-auto px-6">
 		<?php if ( $sibling_areas || $is_preview ) : ?>
 
 			<div class="service-type grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
 
 				<div class="col-span-1 lg:col-span-4">
-					<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">
+					<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]">
 						<?php if ( $title ) : ?>
 							<?php echo esc_html( $title ); ?>
 						<?php elseif ( $is_preview ) : ?>

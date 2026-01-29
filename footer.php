@@ -1,4 +1,4 @@
-<footer>
+<footer role="contentinfo">
   <section class="bg-green-deep py-6 lg:py-16">
     <div class="footer-grid">
       <div class="mb-0 lg:mb-8 xl:mb-0">

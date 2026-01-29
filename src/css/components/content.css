@@ -642,15 +642,12 @@
      ACF blocks output <section> or <header> elements which are not targeted.
      ============================================================================= */
 
-  .page-content > p,
   .page-content > h1,
   .page-content > h2,
   .page-content > h3,
   .page-content > h4,
   .page-content > h5,
   .page-content > h6,
-  .page-content > ul:not(.wp-block-gallery),
-  .page-content > ol,
   .page-content > blockquote,
   .page-content > .wp-block-quote,
   .page-content > .wp-block-pullquote,
@@ -669,6 +666,19 @@
   .page-content > .wp-block-embed,
   .page-content > .wp-block-video {
     @apply container mx-auto py-6;
+  }
+
+  /* Paragraphs get container but tighter spacing */
+  .page-content > p {
+    @apply container mx-auto px-4 lg:px-6;
+  }
+
+  /* First core block element gets top padding */
+  .page-content > p:first-child,
+  .page-content > h1:first-child,
+  .page-content > h2:first-child,
+  .page-content > h3:first-child {
+    @apply pt-6;
   }
 
   /* Typography styling for core blocks in page-content */
@@ -710,30 +720,54 @@
   }
 
   .page-content > p {
-    @apply mb-6 leading-relaxed text-lg;
+    @apply mb-4 leading-relaxed text-lg;
   }
 
+  /* First paragraph after heading or at start gets top padding */
+  .page-content > h1 + p,
+  .page-content > h2 + p,
+  .page-content > h3 + p,
+  .page-content > h4 + p,
+  .page-content > h5 + p,
+  .page-content > h6 + p {
+    @apply pt-0;
+  }
+
+  /* Last paragraph before another block type gets extra bottom margin */
+  .page-content > p:last-child {
+    @apply mb-0 pb-6;
+  }
+
+  /* Unordered lists - match custom block styling */
   .page-content > ul:not(.wp-block-gallery) {
-    @apply mb-6 pl-0 list-none space-y-2;
+    @apply container mx-auto px-4 lg:px-6 mb-6 pl-0 list-none space-y-3;
   }
 
-  .page-content > ul:not(.wp-block-gallery) li::before {
+  .page-content > ul:not(.wp-block-gallery) > li {
+    @apply flex items-start gap-3;
+  }
+
+  .page-content > ul:not(.wp-block-gallery) > li::before {
     content: "";
-    @apply inline-block w-2 h-2 bg-green-accent1 rounded-full mr-3 relative -top-[2px];
+    @apply block w-[12px] h-[3px] bg-green-accent1 flex-shrink-0;
+    margin-top: 0.7em;
   }
 
+  /* Ordered lists - match custom block styling */
   .page-content > ol {
-    @apply mb-6 pl-0 list-none space-y-2;
+    @apply container mx-auto px-4 lg:px-6 mb-6 pl-0 list-none space-y-3;
     counter-reset: item;
   }
 
-  .page-content > ol li {
+  .page-content > ol > li {
+    @apply flex items-start gap-3;
     counter-increment: item;
   }
 
-  .page-content > ol li::before {
+  .page-content > ol > li::before {
     content: counter(item) ".";
-    @apply inline-block w-6 font-semibold text-green-deep mr-2;
+    @apply text-green-deep font-semibold flex-shrink-0;
+    min-width: 1.5em;
   }
 
   /* Links in page-content core blocks */
@@ -741,5 +775,19 @@
   .page-content > ul a:not(.btn):not(.wp-block-button__link),
   .page-content > ol a:not(.btn):not(.wp-block-button__link) {
     @apply text-green-deep underline decoration-2 underline-offset-2 hover:text-brand-black transition-colors duration-300;
+  }
+
+  /* =============================================================================
+     BULLET GROUP BLOCK
+     ============================================================================= */
+
+  /* Bullet Group - First in consecutive group gets top padding */
+  .bullet-group-first {
+    @apply pt-6 lg:pt-12;
+  }
+
+  /* Bullet Group - Last in consecutive group gets bottom padding */
+  .bullet-group-last {
+    @apply pb-6 lg:pb-12;
   }
 }

@@ -133,10 +133,16 @@ class Summit_Mega_Menu_Walker extends Walker_Nav_Menu {
       $output .= '<li' . $class_names . '>';
 
       if ($has_children) {
-        // Parent item with mega menu - use button
+        // Parent item with mega menu - link + toggle button
         $menu_id = 'mega-menu-' . $item->ID;
-        $output .= '<button aria-expanded="false" aria-controls="' . esc_attr($menu_id) . '" data-mega-toggle>';
+
+        // Link to parent page
+        $output .= '<a href="' . esc_url($item->url) . '">';
         $output .= esc_html($item->title);
+        $output .= '</a>';
+
+        // Chevron button for mega menu toggle
+        $output .= '<button aria-expanded="false" aria-controls="' . esc_attr($menu_id) . '" data-mega-toggle aria-label="' . esc_attr('Open ' . $item->title . ' menu') . '" title="' . esc_attr('Open ' . $item->title . ' menu') . '">';
         $output .= summit_get_svg_icon('chevron-down', ['class' => 'chevron']);
         $output .= '</button>';
       } else {
@@ -214,10 +220,16 @@ class Summit_Mega_Menu_Walker extends Walker_Nav_Menu {
       $output .= '<li' . $class_names . '>';
 
       if ($has_children) {
-        // Parent item with submenu - use button
+        // Parent item with submenu - link + toggle button
         $submenu_id = 'mobile-submenu-' . $item->ID;
-        $output .= '<button aria-expanded="false" aria-controls="' . esc_attr($submenu_id) . '" data-mobile-submenu-toggle>';
+
+        // Link to parent page
+        $output .= '<a href="' . esc_url($item->url) . '">';
         $output .= esc_html($item->title);
+        $output .= '</a>';
+
+        // Chevron button for submenu toggle
+        $output .= '<button aria-expanded="false" aria-controls="' . esc_attr($submenu_id) . '" data-mobile-submenu-toggle aria-label="' . esc_attr('Open ' . $item->title . ' submenu') . '" title="' . esc_attr('Open ' . $item->title . ' submenu') . '">';
         $output .= summit_get_svg_icon('chevron-down', ['class' => 'chevron']);
         $output .= '</button>';
       } else {

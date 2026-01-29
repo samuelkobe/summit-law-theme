@@ -33,12 +33,12 @@ if ( ! empty( $block['align'] ) ) {
 </style>
 
 
-<section id="<?php echo esc_attr( $id ); ?>" class="bg-white w-full min-h-[800px] py-12 lg:pb-24 lg:pt-16 max-md:pt-2 <?php echo esc_attr( $classes ); ?>">
+<section id="<?php echo esc_attr( $id ); ?>" class="bg-white block-white w-full min-h-[800px] lg:pt-16 max-md:pt-2 <?php echo esc_attr( $classes ); ?>">
 	<div class="team-grid container mx-auto px-4 pb-16">
 
 	<?php
 		// Custom query to order by ACF Role field
-		$role_order = array( 'partner', 'associate', 'clerk', 'assistant' );
+		$role_order = array( 'partner', 'associate', 'clerk', 'assistant', 'admin' );
 
 		// Get all team members
 		$team_args = array(

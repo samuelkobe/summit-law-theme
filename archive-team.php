@@ -96,7 +96,7 @@ get_header();
 
 <?php
 		// Custom query to order by ACF Role field
-		$role_order = array( 'partner', 'associate', 'clerk', 'assistant' );
+		$role_order = array( 'partner', 'associate', 'clerk', 'assistant', 'admin' );
 
 		// Get all team members
 		$team_args = array(

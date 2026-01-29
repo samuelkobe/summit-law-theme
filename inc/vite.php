@@ -152,6 +152,30 @@ function summit_add_type_module($tag, $handle, $src) {
 add_filter('script_loader_tag', 'summit_add_type_module', 10, 3);
 
 /**
+ * Make main CSS non-render-blocking
+ *
+ * Uses media="print" with onload swap technique to load CSS asynchronously.
+ * Includes noscript fallback for users without JavaScript.
+ */
+function summit_async_css($tag, $handle, $href, $media) {
+  // Only apply to main CSS on frontend (not admin)
+  if ($handle !== 'summit-main-css' || is_admin()) {
+    return $tag;
+  }
+
+  // Replace with async loading pattern
+  $async_tag = sprintf(
+    '<link rel="preload" href="%s" as="style" onload="this.onload=null;this.rel=\'stylesheet\'">' . "\n" .
+    '<noscript><link rel="stylesheet" href="%s"></noscript>' . "\n",
+    esc_url($href),
+    esc_url($href)
+  );
+
+  return $async_tag;
+}
+add_filter('style_loader_tag', 'summit_async_css', 10, 4);
+
+/**
  * Enqueue Vite assets in the block editor
  *
  * For simplicity, we always load the built CSS file (not dev server)
@@ -237,3 +261,80 @@ add_action('enqueue_block_assets', 'summit_enqueue_editor_assets');
  * Remove old enqueue function to avoid conflicts
  */
 remove_action('wp_enqueue_scripts', 'summit_enqueue_assets');
+
+/**
+ * Add preload hints for critical fonts
+ *
+ * Preloading fonts improves LCP by allowing the browser to discover
+ * font files before CSS is parsed. Only runs when dist/fonts exists.
+ */
+function summit_add_font_preloads() {
+  // Check if fonts directory exists (more reliable than dev server check)
+  $fonts_dir = get_template_directory() . '/dist/fonts';
+  if (!is_dir($fonts_dir)) {
+    return;
+  }
+
+  $fonts = [
+    'HankenGrotesk-VariableFont_wght.woff2',
+    'PPMuseum-Regular.woff2',
+  ];
+
+  foreach ($fonts as $font) {
+    $font_path = $fonts_dir . '/' . $font;
+    if (file_exists($font_path)) {
+      $font_url = get_template_directory_uri() . '/dist/fonts/' . $font;
+      echo '<link rel="preload" href="' . esc_url($font_url) . '" as="font" type="font/woff2" crossorigin="anonymous">' . "\n";
+    }
+  }
+}
+add_action('wp_head', 'summit_add_font_preloads', 1);
+
+/**
+ * Add critical inline CSS
+ *
+ * Prevents FOUC when main CSS loads asynchronously.
+ * Includes font-face declarations and essential layout styles.
+ */
+function summit_add_critical_css() {
+  // Only add on frontend
+  if (is_admin()) {
+    return;
+  }
+
+  $fonts_uri = get_template_directory_uri() . '/dist/fonts';
+  ?>
+  <style id="summit-critical-css">
+    /* Critical font-face declarations */
+    @font-face {
+      font-family: "Hanken Grotesk";
+      src: url("<?php echo esc_url($fonts_uri); ?>/HankenGrotesk-VariableFont_wght.woff2") format("woff2");
+      font-weight: 100 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "PP Museum";
+      src: url("<?php echo esc_url($fonts_uri); ?>/PPMuseum-Regular.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    /* Critical layout styles */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { line-height: 1.5; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      font-family: "Hanken Grotesk", system-ui, -apple-system, sans-serif;
+      background-color: #fff;
+      color: #1a1a1a;
+    }
+    img, video { max-width: 100%; height: auto; }
+    /* Prevent layout shift for header */
+    [data-header] { min-height: 80px; }
+    /* Hide content until CSS loads to prevent FOUC */
+    .no-js body { visibility: visible; }
+  </style>
+  <?php
+}
+add_action('wp_head', 'summit_add_critical_css', 2);

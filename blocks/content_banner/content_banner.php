@@ -43,7 +43,7 @@ if ( ! empty( $block['align'] ) ) {
 				
 				<div class="flex flex-col justify-between gap-y-8 lg:col-span-4">
 					<div class="flex flex-col gap-y-4 lg:gap-y-8 2xl:gap-y-12">
-						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]"><?php the_sub_field( 'title' ); ?></h2>
+						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]"><?php the_sub_field( 'title' ); ?></h2>
 						<p class="font-normal text-base 2xl:text-lg lg:max-w-[75%] 2xl:max-w-[60%]"><?php the_sub_field( 'content' ); ?></p>
 					</div>
 					<?php if ( $button ) : ?>
@@ -80,7 +80,7 @@ if ( ! empty( $block['align'] ) ) {
 										<?php echo esc_url( $image_desktop[0] ); ?> <?php echo $image_desktop[1]; ?>w"
 								sizes="800px"
 								alt="<?php echo esc_attr( $image_alt ); ?>"
-								loading="lazy"
+								loading="eager"
 							/>
 							<svg class="w-12 md:w-16 2xl:w-24 flex-shrink-0 absolute bottom-8 2xl:bottom-12 right-8 md:-right-8 2xl:-right-12 z-1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 72 72">
 								<path class="fill-green-accent1" d="M39.2,0L0,40.5v6.9L45.9,0h-6.7Z"/>

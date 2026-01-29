@@ -20,7 +20,8 @@
                 "partner": "Partner",
                 "associate": "Associate",
                 "clerk": "Law Clerk",
-                "assistant": "Legal Assistant"
+                "assistant": "Legal Assistant",
+                "admin": "Administration"
             },
             "default_value": "partner",
             "return_format": "array",
@@ -829,5 +830,5 @@
     "description": "",
     "show_in_rest": 0,
     "display_title": "",
-    "modified": 1769075559
+    "modified": 1769649262
 }

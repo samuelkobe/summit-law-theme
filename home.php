@@ -255,7 +255,7 @@ if ( $current_area_name ) {
 
 					<!-- Results Header -->
 					<div class="flex flex-wrap items-center justify-between gap-4 mb-8">
-						<h2 class="h3 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">
+						<h2 class="h3 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]">
 							<?php
 							global $wp_query;
 							$found = $wp_query->found_posts;
@@ -274,7 +274,7 @@ if ( $current_area_name ) {
 
 								<article class="group col-span-1 mb-6">
 
-									<a href="<?php the_permalink(); ?>" class="block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000">
+									<a href="<?php the_permalink(); ?>" class="block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000" aria-label="<?php echo esc_attr( get_the_title() ); ?>">
 										<?php if ( has_post_thumbnail() ) : ?>
 											<?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-auto aspect-[13/8] object-cover' ) ); ?>
 										<?php else : ?>

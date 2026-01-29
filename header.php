@@ -14,6 +14,11 @@ $is_home = is_front_page();
 $page_type = $is_home ? 'home' : 'default';
 ?>
 
+<!-- Skip link for keyboard navigation -->
+<a href="#main" class="skip-link absolute left-4 -top-full focus:top-4 z-[100] px-4 py-2 rounded no-underline font-semibold transition-all <?php echo $is_home ? 'bg-green-accent1 text-green-deep focus:ring-2 focus:ring-white' : 'bg-green-deep text-white focus:ring-2 focus:ring-green-accent1'; ?>">
+  Skip to main content
+</a>
+
 <header data-header data-page-type="<?php echo esc_attr($page_type); ?>" class="<?php echo $is_home ? 'header--dark' : 'header--light'; ?>">
   <div class="container max-lg:py-4">
     <div class="header-inner<?php echo !$is_home ? '' : ' lg:grid lg:grid-cols-12'; ?>">

@@ -32,27 +32,32 @@ export default class ScrollBehavior {
       return;
     }
 
-    // Apply initial state based on current scroll position (for page refresh while scrolled)
-    // This runs for both mobile and desktop to set correct logo/header state
-    this.applyScrollState();
-
     // Check if this is an internal navigation (same-origin referrer)
     // Skip entrance animation for internal navigation to avoid jarring transition
     const isInternalNavigation = this.isInternalNavigation();
 
-    if (isInternalNavigation) {
-      // Skip entrance animation for internal navigation
+    // Check if page is already scrolled (e.g., page refresh while scrolled)
+    const isAlreadyScrolled = window.pageYOffset > this.logoTransitionPoint;
+
+    // If already scrolled or internal navigation, skip transitions to avoid flash
+    if (isInternalNavigation || isAlreadyScrolled) {
       this.header.classList.add("header--no-transition");
-      this.header.classList.add("header--ready");
       // Force reflow to ensure the no-transition class takes effect
       this.header.offsetHeight;
-      // Re-enable transitions after a frame
+    }
+
+    // Apply initial state based on current scroll position (for page refresh while scrolled)
+    // This runs for both mobile and desktop to set correct logo/header state
+    this.applyScrollState();
+
+    // Add header--ready class after state is applied
+    this.header.classList.add("header--ready");
+
+    // Re-enable transitions after a frame if they were disabled
+    if (isInternalNavigation || isAlreadyScrolled) {
       requestAnimationFrame(() => {
         this.header.classList.remove("header--no-transition");
       });
-    } else {
-      // External navigation or fresh load: show entrance animation
-      this.header.classList.add("header--ready");
     }
 
     // Always add resize listener to handle viewport changes

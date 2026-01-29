@@ -34,7 +34,7 @@ if ( ! empty( $block['align'] ) ) {
 
 <!-- <div class="block bg-red-800 text-white text-4xl p-4 font-normal text-center">I am the <span class="font-black uppercase">parent service</span> field block (remove this notice before launch).</div> -->
 
-<div id="<?php echo esc_attr( $id ); ?>" class="bg-white grid grid-cols-1 gap-y-12 lg:gap-y-24 xl:gap-y-32 2xl:gap-y-48 py-12 lg:py-24 xl:pb-32 2xl:pb-48 <?php echo esc_attr( $classes ); ?>">
+<div id="<?php echo esc_attr( $id ); ?>" class="bg-white block-white grid grid-cols-1 gap-y-12 lg:gap-y-24 xl:gap-y-32 2xl:gap-y-48 xl:pb-32 2xl:pb-48 <?php echo esc_attr( $classes ); ?>">
 	
 	<!-- Service Areas section -->
 	<section class="services-overview bg-white antialiased">
@@ -43,7 +43,7 @@ if ( ! empty( $block['align'] ) ) {
 			<div class="service-type grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
 
 				<div class="col-span-1 lg:col-span-4">
-					<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">Areas</h2>
+					<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]">Areas</h2>
 				</div>
 
 				<?php

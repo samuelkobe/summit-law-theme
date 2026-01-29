@@ -32,7 +32,7 @@ if ( ! empty( $block['align'] ) ) {
 	}
 </style>
 
-<section id="<?php echo esc_attr( $id ); ?>" class="services-overview bg-white py-12 lg:py-24 antialiased <?php echo esc_attr( $classes ); ?>">
+<section id="<?php echo esc_attr( $id ); ?>" class="services-overview bg-white block-white antialiased <?php echo esc_attr( $classes ); ?>">
 	<div class="container mx-auto px-6">
 		<?php
 		// Get only parent services (the 3 main types)
@@ -50,7 +50,7 @@ if ( ! empty( $block['align'] ) ) {
 				<div class="service-type grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 mb-12 lg:mb-24 2xl:mb-32 last:mb-0">
 
 					<div class="col-span-1 lg:col-span-4">
-						<h2>
+						<h2 class="lg:transform lg:translate-y-6">
 							<a class="group text-green-deep text-2xl md:text-3xl 2xl:text-4xl no-underline hover:underline" href="<?php echo esc_url( get_permalink( $service_type->ID ) ); ?>">
 								<div class="inline-flex items-start gap-2">
 									<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="flex-shrink-0 fill-green-accent1 hover:fill-green-accent1 relative top-2"><path d="M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z"/></svg>

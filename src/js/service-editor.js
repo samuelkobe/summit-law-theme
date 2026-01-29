@@ -7,18 +7,10 @@
  * @package Summit_Law_Theme
  */
 
-console.log('Service Editor: Script file loaded');
-
 (function(wp) {
-	console.log('Service Editor: Checking WordPress packages...', { wp });
-
 	if (!wp || !wp.data || !wp.blocks) {
-		console.error('Service Editor: WordPress data/blocks packages not available');
-		console.error('Service Editor: Available:', { wp, data: wp?.data, blocks: wp?.blocks });
 		return;
 	}
-
-	console.log('Service Editor: WordPress packages available!');
 
 	const { select, dispatch, subscribe } = wp.data;
 	const { parse } = wp.blocks;
@@ -55,15 +47,10 @@ console.log('Service Editor: Script file loaded');
 			return;
 		}
 
-		console.log('Service Editor: Parent changed from', lastParentId, 'to', currentParentId);
 		lastParentId = currentParentId;
 
 		// 4. Check if post has been saved with custom content
 		// We only auto-switch on brand new unsaved posts (auto-draft status)
-		// TODO: When implementing real ACF block patterns (Phase 5), revisit this logic to:
-		//       - Allow switching on saved posts that only contain pattern blocks
-		//       - Detect modified ACF field values vs defaults
-		//       - Create whitelist of allowed pattern blocks for better detection
 		const postStatus = select('core/editor')?.getEditedPostAttribute('status');
 		const blocks = select('core/block-editor')?.getBlocks() || [];
 
@@ -102,22 +89,13 @@ console.log('Service Editor: Script file loaded');
 		const isSafeToSwitch = isAutoDraft || (onlyHasPatternContent && blocks.length > 0);
 
 		if (!isSafeToSwitch) {
-			console.log('Service Editor: Post has custom content, skipping auto-pattern');
-			console.log('Service Editor: Post status:', postStatus);
-			console.log('Service Editor: All blocks:', blocks.map(b => b.name));
-			console.log('Service Editor: Only has pattern content:', onlyHasPatternContent);
 			return;
 		}
-
-		console.log('Service Editor: Allowing pattern swap');
-		console.log('Service Editor: Reason - isAutoDraft:', isAutoDraft, 'onlyHasPatternContent:', onlyHasPatternContent);
 
 		// 5. Determine which pattern to use
 		const patternName = currentParentId
 			? 'summit-law/service-child-pattern'
 			: 'summit-law/service-parent-pattern';
-
-		console.log('Service Editor: Applying pattern:', patternName);
 
 		// 6. Apply the pattern
 		applyPattern(patternName);
@@ -132,10 +110,6 @@ console.log('Service Editor: Script file loaded');
 		isApplyingPattern = true;
 
 		try {
-			// Get pattern content from localized data (passed from PHP)
-			console.log('Service Editor: Looking for pattern:', patternName);
-			console.log('Service Editor: Available patterns from PHP:', window.summitServicePatterns);
-
 			let pattern = null;
 
 			// Determine which pattern to use based on name
@@ -146,13 +120,9 @@ console.log('Service Editor: Script file loaded');
 			}
 
 			if (!pattern) {
-				console.error('Service Editor: Pattern not found:', patternName);
-				console.error('Service Editor: Available patterns:', window.summitServicePatterns);
 				isApplyingPattern = false;
 				return;
 			}
-
-			console.log('Service Editor: Found pattern:', pattern);
 
 			// Clear existing blocks
 			const blocks = select('core/block-editor')?.getBlocks() || [];
@@ -164,7 +134,6 @@ console.log('Service Editor: Script file loaded');
 			const parsedBlocks = parse(pattern.content);
 			if (parsedBlocks && parsedBlocks.length > 0) {
 				dispatch('core/block-editor')?.insertBlocks(parsedBlocks);
-				console.log('Service Editor: Pattern applied successfully');
 
 				// Clean up any empty paragraphs that WordPress auto-added
 				setTimeout(() => {
@@ -174,13 +143,10 @@ console.log('Service Editor: Script file loaded');
 							const content = block.attributes?.content || '';
 							if (content.trim() === '') {
 								dispatch('core/block-editor')?.removeBlock(block.clientId);
-								console.log('Service Editor: Removed auto-added empty paragraph');
 							}
 						}
 					});
 				}, 50);
-			} else {
-				console.error('Service Editor: Failed to parse pattern content');
 			}
 		} catch (error) {
 			console.error('Service Editor: Error applying pattern:', error);
@@ -200,33 +166,24 @@ console.log('Service Editor: Script file loaded');
 
 	const initialize = () => {
 		initAttempts++;
-		console.log(`Service Editor: Initialize called (attempt ${initAttempts}/${MAX_INIT_ATTEMPTS})`);
 
 		// Wait for editor to be fully loaded
 		if (!select('core/editor') || !select('core/block-editor')) {
 			if (initAttempts < MAX_INIT_ATTEMPTS) {
-				console.log('Service Editor: Stores not ready, retrying in 100ms...');
 				setTimeout(initialize, 100);
-			} else {
-				console.error('Service Editor: Stores never became ready, giving up');
 			}
 			return;
 		}
 
-		console.log('Service Editor: Stores are ready');
-
 		const postType = select('core/editor')?.getCurrentPostType();
-		console.log('Service Editor: Current post type:', postType);
 
 		// If post type is null, wait and retry (post data not loaded yet)
 		if (postType === null && initAttempts < MAX_INIT_ATTEMPTS) {
-			console.log('Service Editor: Post type is null, waiting for post data to load...');
 			setTimeout(initialize, 100);
 			return;
 		}
 
 		if (postType !== 'service') {
-			console.log('Service Editor: Not a service post type, exiting');
 			return;
 		}
 
@@ -234,44 +191,29 @@ console.log('Service Editor: Script file loaded');
 		const rawInitialParentId = select('core/editor')?.getEditedPostAttribute('parent');
 		const initialParentId = rawInitialParentId || 0;
 
-		console.log('Service Editor: ✅ Initialized for service post type');
-		console.log('Service Editor: Initial parent ID:', initialParentId);
-
 		// Apply pattern immediately if this is a new post
-		const blocks = select('core/block-editor')?.getBlocks() || [];
-		const postId = select('core/editor')?.getCurrentPostId();
 		const postStatus = select('core/editor')?.getEditedPostAttribute('status');
-
-		console.log('Service Editor: Post ID:', postId);
-		console.log('Service Editor: Post status:', postStatus);
-		console.log('Service Editor: Number of blocks:', blocks.length);
-		console.log('Service Editor: Blocks:', blocks.map(b => b.name));
 
 		// Apply pattern only on brand new auto-draft posts
 		// Once a post is saved, we preserve all content
 		const isAutoDraft = postStatus === 'auto-draft';
 
 		if (isAutoDraft) {
-			console.log('Service Editor: 🎯 New unsaved post detected, applying initial pattern');
-
 			// Determine which pattern to use based on initial parent
 			const patternName = initialParentId
 				? 'summit-law/service-child-pattern'
 				: 'summit-law/service-parent-pattern';
 
-			console.log('Service Editor: Applying initial pattern:', patternName);
 			applyPattern(patternName);
 
 			// Set lastParentId AFTER initial pattern application
 			lastParentId = initialParentId;
 		} else {
-			console.log('Service Editor: Post has been saved, preserving existing content');
 			// Still set lastParentId for existing posts
 			lastParentId = initialParentId;
 		}
 
 		// Subscribe to editor changes
-		console.log('Service Editor: Subscribing to editor changes');
 		subscribe(maybeApplyPattern);
 	};
 
@@ -281,7 +223,6 @@ console.log('Service Editor: Script file loaded');
 	const registerHelpPanel = () => {
 		// Only register if we have the required APIs
 		if (!registerPlugin || !PluginDocumentSettingPanel) {
-			console.log('Service Editor: Plugin API not available, skipping help panel');
 			return;
 		}
 
@@ -365,21 +306,15 @@ console.log('Service Editor: Script file loaded');
 			render: HelpPanel,
 			icon: null
 		});
-
-		console.log('Service Editor: Help panel registered');
 	};
 
 	// Start initialization when DOM is ready
-	console.log('Service Editor: Setting up initialization, document.readyState:', document.readyState);
-
 	if (document.readyState === 'loading') {
-		console.log('Service Editor: Waiting for DOMContentLoaded');
 		document.addEventListener('DOMContentLoaded', () => {
 			initialize();
 			registerHelpPanel();
 		});
 	} else {
-		console.log('Service Editor: DOM already ready, initializing now');
 		initialize();
 		registerHelpPanel();
 	}

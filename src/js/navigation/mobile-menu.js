@@ -27,14 +27,8 @@ export default class MobileMenu {
    */
   init() {
     if (!this.toggle || !this.menu) {
-      console.log('MobileMenu: Toggle or menu not found', {
-        toggle: !!this.toggle,
-        menu: !!this.menu
-      });
       return;
     }
-
-    console.log(`MobileMenu: Initialized with ${this.submenuToggles.length} submenu toggles`);
 
     // Mobile menu drawer toggle
     this.toggle.addEventListener('click', () => this.toggleMenu());
@@ -135,15 +129,26 @@ export default class MobileMenu {
     }
 
     const isExpanded = button.getAttribute('aria-expanded') === 'true';
+    const currentLabel = button.getAttribute('aria-label');
 
     if (isExpanded) {
       // Close submenu
       submenu.setAttribute('hidden', '');
       button.setAttribute('aria-expanded', 'false');
+      // Update aria-label and title
+      if (currentLabel) {
+        button.setAttribute('aria-label', currentLabel.replace('Close', 'Open'));
+        button.setAttribute('title', currentLabel.replace('Close', 'Open'));
+      }
     } else {
       // Open submenu
       submenu.removeAttribute('hidden');
       button.setAttribute('aria-expanded', 'true');
+      // Update aria-label and title
+      if (currentLabel) {
+        button.setAttribute('aria-label', currentLabel.replace('Open', 'Close'));
+        button.setAttribute('title', currentLabel.replace('Open', 'Close'));
+      }
     }
   }
 
@@ -158,6 +163,12 @@ export default class MobileMenu {
       if (submenu) {
         submenu.setAttribute('hidden', '');
         toggle.setAttribute('aria-expanded', 'false');
+        // Reset aria-label and title to "Open" state
+        const currentLabel = toggle.getAttribute('aria-label');
+        if (currentLabel) {
+          toggle.setAttribute('aria-label', currentLabel.replace('Close', 'Open'));
+          toggle.setAttribute('title', currentLabel.replace('Close', 'Open'));
+        }
       }
     });
   }

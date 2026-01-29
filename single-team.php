@@ -148,14 +148,19 @@ get_header(); ?>
 			</div>
 		</section>
 
+		<?php
+		// Get Team page URL (similar to how Services works in breadcrumbs block)
+		$team_page = get_page_by_path( 'team' );
+		$team_url = $team_page ? get_permalink( $team_page->ID ) : home_url( '/team/' );
+		?>
 		<section class="bg-white">
-																	
+
 			<div class="container mx-auto flex flex-col md:flex-row md:justify-between">
 				<nav aria-label="Breadcrumb" class="hidden md:block py-8">
 					<ol class="flex items-center gap-2 text-sm font-semibold">
 						<li>
 							<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="text-brand-40 hover:text-green-deep transition-colors">
-								Summit Law
+								Summit Law LLP
 							</a>
 						</li>
 						<li aria-hidden="true">
@@ -164,7 +169,7 @@ get_header(); ?>
 							</svg>
 						</li>
 						<li>
-							<a href="<?php echo esc_url( get_post_type_archive_link( 'team' ) ); ?>" class="text-brand-40 hover:text-green-deep transition-colors">
+							<a href="<?php echo esc_url( $team_url ); ?>" class="text-brand-40 hover:text-green-deep transition-colors">
 								Team
 							</a>
 						</li>
@@ -254,23 +259,23 @@ get_header(); ?>
 		<section class="bg-white min-h-[30dvh] pb-12 lg:pb-16">
 			<div class="md:container grid grid-cols-1 lg:grid-cols-12 gap-8 p-6  lg:px-6 lg:py-8">
 				<div class="lg:col-span-4">
-					<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">Profile Summary</h2>
+					<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]">Profile Summary</h2>
 				</div>
 				<div class="lg:col-span-7">
-					<p class="text-lg leading-8 xl:text-xl xl:leading-9 2xl:text-xl 2xl:leading-10 font-normal"><?php echo get_field( 'profile_summary' ); ?></p>
+					<p class="text-base xl:text-lg font-normal"><?php echo get_field( 'profile_summary' ); ?></p>
 				</div>
 			</div>
 	
 
 
-		<?php if ( have_rows( 'areas' ) ) : ?>
+		<?php if ( have_rows( 'areas' ) && $role && in_array( $role['value'], array( 'partner', 'associate' ) ) ) : ?>
 
 				<div class="md:container grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 lg:px-6 lg:py-10">
 					<div class="lg:col-span-4">
-						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">Focus Areas</h2>
+						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]">Focus Areas</h2>
 					</div>
 					<div class="lg:col-span-7">
-							<ul class="text-lg leading-8 xl:text-xl xl:leading-9 2xl:text-xl 2xl:leading-10 font-normal list-none space-y-2">
+							<ul class="text-base leading-7 xl:text-lg xl:leading-8 2xl:text-lg 2xl:leading-9 font-normal list-none space-y-2">
 								<?php while ( have_rows( 'areas' ) ) : the_row(); ?>
 									<li class="flex items-start before:top-4 xl:before:top-[18px] 2xl:before:top-5 before:relative gap-5 before:content-[''] before:block before:w-[15px] before:h-[3px] before:bg-green-accent1 before:flex-shrink-0">
 										<?php the_sub_field( 'area_name' ); ?>
@@ -280,18 +285,16 @@ get_header(); ?>
 					</div>
 				</div>
 
-		<?php else : ?>
-			<?php // No rows found ?>
 		<?php endif; ?>
 
-		<?php if ( have_rows( 'affiliations' ) ) : ?>
+		<?php if ( have_rows( 'affiliations' ) && $role && in_array( $role['value'], array( 'partner', 'associate' ) ) ) : ?>
 
 				<div class="md:container grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 lg:px-6 lg:py-10">
 					<div class="lg:col-span-4">
-						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">Advocacy Affiliations</h2>
+						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]">Advocacy Affiliations</h2>
 					</div>
 					<div class="lg:col-span-7">
-							<ul class="text-lg leading-8 xl:text-xl xl:leading-9 2xl:text-xl 2xl:leading-10 font-normal list-none space-y-2">
+							<ul class="text-base leading-7 xl:text-lg xl:leading-8 2xl:text-lg 2xl:leading-9 font-normal list-none space-y-2">
 								<?php while ( have_rows( 'affiliations' ) ) : the_row(); ?>
 									<li class="flex items-start before:top-[14px] xl:before:top-[18px] 2xl:before:top-5 before:relative gap-4 lg:gap-5 before:content-[''] before:block before:w-[15px] before:h-[3px] before:bg-green-accent1 before:flex-shrink-0">
 										<?php the_sub_field( 'affiliation_title' ); ?>
@@ -301,8 +304,6 @@ get_header(); ?>
 					</div>
 				</div>
 
-		<?php else : ?>
-			<?php // No rows found ?>
 		<?php endif; ?>
 
 		<?php $cases = get_field( 'cases' ); ?>
@@ -310,7 +311,7 @@ get_header(); ?>
 
 				<div class="md:container grid grid-cols-1 gap-8 p-6 lg:px-6 lg:py-16">
 					<div class="col-spam-1">
-						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">Selected Cases</h2>
+						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]">Selected Cases</h2>
 					</div>
 					<div class="col-span-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
 						<?php foreach ( $cases as $post ) : ?>
@@ -378,7 +379,7 @@ get_header(); ?>
 
 				<div class="md:container grid grid-cols-1 gap-8 p-6 lg:px-6 lg:py-16">
 					<div class="col-spam-1">
-						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">Related Insights</h2>
+						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]">Related Insights</h2>
 						<?php if ( get_field( 'insights_subtitle' ) ) : ?>
 							<p class="text-lg lg:text-xl text-brand-50 pt-2 lg:pt-4"><?php echo esc_html( get_field( 'insights_subtitle' ) ); ?></p>
 						<?php endif; ?>
@@ -388,7 +389,7 @@ get_header(); ?>
 							<?php setup_postdata ( $post ); ?>
 							<div class="group col-span-1 mb-6">
 								<?php if ( has_post_thumbnail() ) : ?>
-									<a href="<?php the_permalink(); ?>" class="block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000">
+									<a href="<?php the_permalink(); ?>" class="block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000" aria-label="<?php echo esc_attr( get_the_title() ); ?>">
 										<?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover' ) ); ?>
 									</a>
 								<?php endif; ?>
@@ -516,7 +517,7 @@ get_header(); ?>
 						<article class="insight-card bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
 
 							<?php if ( has_post_thumbnail() ) : ?>
-								<a href="<?php the_permalink(); ?>" class="block aspect-[16/9] overflow-hidden">
+								<a href="<?php the_permalink(); ?>" class="block aspect-[16/9] overflow-hidden" aria-label="<?php echo esc_attr( get_the_title() ); ?>">
 									<?php the_post_thumbnail( 'medium', array( 'class' => 'w-full h-full object-cover hover:scale-105 transition-transform duration-300' ) ); ?>
 								</a>
 							<?php endif; ?>

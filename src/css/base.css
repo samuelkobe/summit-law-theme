@@ -2,18 +2,25 @@
 @import "./components/navigation.css";
 @import "./components/content.css";
 @import "./components/search.css";
-
-/* Block imports */
-@import "../../blocks/starter_template/starter_template.css";
-@import "../../blocks/triple_cards/triple_cards.css";
-@import "../../blocks/bullet_group/bullet_group.css";
-@import "../../blocks/form/form.css";
+@import "./components/blocks.css";
+@import "./components/form.css";
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  /* Smooth scroll for anchor links (respects user preference for reduced motion) */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
   /* Global body styles */
   body {
     @apply bg-white;
@@ -22,6 +29,24 @@
     font-size: clamp(16px, 1vw + 14px, 18px);
     line-height: 1.6;
     /* color removed - use Tailwind utilities instead */
+  }
+
+  /* Global focus styles - accent1 green for all interactive elements */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible {
+    @apply outline-2 outline-offset-2 outline-green-accent1;
+    outline-style: solid;
+  }
+
+  /* Override for inputs that should use deep green (better contrast on light backgrounds) */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    @apply outline-green-deep;
   }
   /* PP Museum - Multiple weights */
   @font-face {

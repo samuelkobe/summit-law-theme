@@ -17,7 +17,7 @@
    ============================================================================= */
 
 [data-header] {
-  @apply sticky top-0 left-0 right-0 z-50 transition-transform duration-1000 ease-out;
+  @apply sticky top-0 left-0 right-0 z-50 transition-transform duration-500 ease-out;
   /* Start hidden above viewport, JS will reveal after applying correct state */
   transform: translateY(-100%);
 }
@@ -53,9 +53,21 @@ body.home [data-header].header--dark {
   transform: translateY(0);
 }
 
-/* Skip entrance animation for internal navigation */
-[data-header].header--no-transition {
+/* Skip entrance animation for internal navigation or page refresh while scrolled */
+[data-header].header--no-transition,
+[data-header].header--no-transition *,
+[data-header].header--no-transition .nav-menu > li > button,
+[data-header].header--no-transition .nav-menu > li > a,
+[data-header].header--no-transition .search-toggle,
+[data-header].header--no-transition .mobile-menu-toggle,
+[data-header].header--no-transition .hamburger span,
+[data-header].header--no-transition .logo-primary,
+[data-header].header--no-transition .logo-alternate,
+[data-header].header--no-transition .logo-primary img,
+[data-header].header--no-transition .logo-alternate img,
+[data-header].header--no-transition [data-logo] {
   transition: none !important;
+  transition-delay: 0ms !important;
 }
 
 /* Header container - matches Tailwind container */
@@ -101,7 +113,7 @@ body.home .header--light .header-right {
 
 body.home .header--light .nav-menu > li > button,
 body.home .header--light .nav-menu > li > a {
-  @apply lg:delay-[950ms];
+  @apply lg:delay-[1450ms];
 }
 
 .header--light .search-toggle,
@@ -111,7 +123,7 @@ body.home .header--light .nav-menu > li > a {
 
 body.home .header--light .search-toggle,
 body.home .header--light .mobile-menu-toggle {
-  @apply lg:delay-[950ms];
+  @apply lg:delay-[1450ms];
 }
 
 .header--light .hamburger span {
@@ -208,16 +220,16 @@ body.home .header--light .mobile-menu-toggle {
 
 .header--light .logo-primary img,
 .header--light .logo-alternate img {
-  @apply transition-none lg:duration-[950ms] ease-in;
+  @apply transition-none lg:duration-[1450ms] ease-in;
 }
 
 .header--dark .logo-primary img,
 .header--dark .logo-alternate img {
-  @apply lg:transition-all lg:duration-1000 ease-out;
+  @apply lg:transition-all lg:duration-[1500ms] ease-out;
 }
 
 body.home .header--light {
-  @apply lg:!delay-[950ms];
+  @apply lg:!delay-[1450ms];
 }
 
 /* .header--light .logo--small .logo-alternate img {
@@ -225,7 +237,7 @@ body.home .header--light {
 } */
 
 .header--light .logo--small .logo-primary img {
-  @apply !opacity-100 lg:transition-all lg:duration-500 ease-in;
+  @apply !opacity-100 lg:transition-all lg:duration-1000 ease-in;
 }
 
 /* Logo wrapper spans - start hidden to prevent flash */
@@ -250,11 +262,11 @@ body.home .header--light {
 }
 
 .header--light [data-logo] .logo-primary {
-  @apply pt-0 lg:transition-all lg:duration-500 ease-out;
+  @apply pt-0 lg:transition-all lg:duration-1000 ease-out;
 }
 
 body.home .header--light [data-logo] .logo-primary {
-  @apply lg:!delay-[250ms];
+  @apply lg:!delay-[750ms];
 }
 
 .header--light .logo-alternate {
@@ -262,7 +274,7 @@ body.home .header--light [data-logo] .logo-primary {
 }
 
 body.home .header--light .logo-alternate {
-  @apply lg:delay-[950ms];
+  @apply lg:delay-[1450ms];
 }
 
 [data-logo] img {
@@ -326,25 +338,44 @@ body.home .header--light .logo-alternate {
   @apply static;
 }
 
-/* Top level links & buttons */
-.nav-menu > li > button,
+/* Parent items with children - flex layout for link + button */
+.nav-menu > li.menu-item-has-children {
+  @apply flex items-center;
+}
+
+/* Top level links */
 .nav-menu > li > a {
-  @apply flex items-center gap-2 px-4 py-2;
+  @apply flex items-center px-4 py-2;
   @apply no-underline font-medium tracking-[0.01em];
   @apply transition-colors duration-300;
-  background: none;
-  border: none;
   cursor: pointer;
   font-size: 16px;
 }
 
-.nav-menu > li > button:hover,
+/* Links in parent items - reduce right padding since button follows */
+.nav-menu > li.menu-item-has-children > a {
+  @apply pr-1;
+}
+
 .nav-menu > li > a:hover {
   @apply opacity-80;
 }
 
-/* Chevron icon in buttons */
-.nav-menu > li > button svg {
+/* Chevron toggle button (for parent items with mega menu) */
+.nav-menu > li > button[data-mega-toggle] {
+  @apply flex items-center justify-center p-2;
+  @apply transition-colors duration-300;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.nav-menu > li > button[data-mega-toggle]:hover {
+  @apply opacity-80;
+}
+
+/* Chevron icon in toggle buttons */
+.nav-menu > li > button[data-mega-toggle] svg {
   @apply w-4 h-4;
   @apply transition-transform duration-300;
 }
@@ -607,23 +638,12 @@ body.home .header--light .logo-alternate {
   @apply border-b border-brand-20;
 }
 
-/* Mobile parent items (with submenus) */
-.mobile-nav-menu > li > button {
-  @apply w-full flex items-center justify-between;
-  @apply px-6 py-4;
-  @apply text-left text-brand-black font-medium;
-  @apply transition-colors duration-300;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
+/* Mobile parent items with children - flex layout for link + button, wrap for submenu */
+.mobile-nav-menu > li.menu-item-has-children {
+  @apply flex flex-wrap items-center justify-between;
 }
 
-.mobile-nav-menu > li > button:active {
-  @apply bg-brand-10;
-}
-
-/* Mobile top level links (no submenu) */
+/* Mobile top level links */
 .mobile-nav-menu > li > a {
   @apply block px-6 py-4;
   @apply text-brand-black font-medium no-underline;
@@ -631,12 +651,32 @@ body.home .header--light .logo-alternate {
   font-size: 18px;
 }
 
+/* Links in parent items - flex grow to fill available space */
+.mobile-nav-menu > li.menu-item-has-children > a {
+  @apply flex-1;
+}
+
 .mobile-nav-menu > li > a:active {
   @apply bg-brand-10;
 }
 
-/* Chevron in mobile parent items */
-.mobile-nav-menu > li > button svg {
+/* Chevron toggle button (for parent items with submenu) */
+.mobile-nav-menu > li > button[data-mobile-submenu-toggle] {
+  @apply flex items-center justify-center;
+  @apply px-6 py-4;
+  @apply text-brand-black;
+  @apply transition-colors duration-300;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mobile-nav-menu > li > button[data-mobile-submenu-toggle]:active {
+  @apply bg-brand-10;
+}
+
+/* Chevron in mobile toggle buttons */
+.mobile-nav-menu > li > button[data-mobile-submenu-toggle] svg {
   @apply w-5 h-5;
   @apply transition-transform duration-300;
 }
@@ -647,7 +687,7 @@ body.home .header--light .logo-alternate {
 
 /* Mobile submenu */
 .mobile-submenu {
-  @apply bg-brand-10;
+  @apply w-full bg-brand-10;
   @apply max-h-0 overflow-hidden;
   @apply transition-all duration-300 ease-in-out;
 }
@@ -738,6 +778,12 @@ body.home .header--light .logo-alternate {
 [data-header] a:focus-visible {
   @apply outline-2 outline-offset-2 outline-green-deep;
   outline-style: solid;
+}
+
+/* Dark header (home page) - use light accent color for visibility */
+.header--dark button:focus-visible,
+.header--dark a:focus-visible {
+  @apply outline-green-accent1;
 }
 
 /* Focus within mega menu */

@@ -9,8 +9,6 @@ import BannerAnimation from './banner-animation.js';
 import BulletGroupStyling from './bullet-group.js';
 
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('Summit Law Theme loaded');
-
   // Initialize navigation modules
   new MegaMenu();
   new MobileMenu();
@@ -30,4 +28,21 @@ document.addEventListener("submit", (e) => {
   if (!form) return;
   const firstError = form.querySelector("[data-error]");
   if (firstError) firstError.focus();
+});
+
+// Escape key blurs focused element (when no overlay is open)
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+
+  // Don't interfere if an overlay/menu is open (they have their own handlers)
+  const mobileMenuOpen = document.querySelector('[data-mobile-menu]:not([hidden])');
+  const searchOpen = document.querySelector('.search-overlay:not([hidden])');
+  const megaMenuOpen = document.querySelector('.mega-menu.is-open');
+
+  if (mobileMenuOpen || searchOpen || megaMenuOpen) return;
+
+  // Blur the currently focused element
+  if (document.activeElement && document.activeElement !== document.body) {
+    document.activeElement.blur();
+  }
 });

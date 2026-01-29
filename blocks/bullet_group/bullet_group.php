@@ -43,7 +43,7 @@ $has_bullet_points = have_rows( 'bullet_points' );
 
 		<div class="md:container grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 lg:px-6 lg:py-10">
 			<div class="lg:col-span-4">
-				<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">
+				<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]">
 					<?php if ( $title ) : ?>
 						<?php echo esc_html( $title ); ?>
 					<?php elseif ( $is_preview ) : ?>

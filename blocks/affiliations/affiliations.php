@@ -32,7 +32,7 @@ if ( ! empty( $block['align'] ) ) {
 	}
 </style>
 
-<section id="<?php echo esc_attr( $id ); ?>" class="py-16 lg:py-24 <?php echo esc_attr( $classes ); ?>">
+<section id="<?php echo esc_attr( $id ); ?>" class="bg-white block-white <?php echo esc_attr( $classes ); ?>">
 
 	<div class="container mx-auto">
 
@@ -44,7 +44,7 @@ if ( ! empty( $block['align'] ) ) {
 					<?php $logo = get_sub_field( 'logo' ); ?>
 					<?php if ( $logo ) : ?>
 						<div class="col-span-1">
-							<a class="" href="<?php the_sub_field( 'link' ); ?>" target="_blank" rel="noopener noreferrer">
+							<a href="<?php the_sub_field( 'link' ); ?>" target="_blank" rel="noopener noreferrer" aria-label="<?php echo esc_attr( $logo['alt'] ?: $logo['title'] ); ?>">
 								<img class="aspect-image object-contain max-w-full" src="<?php echo esc_url( $logo['url'] ); ?>" alt="<?php echo esc_attr( $logo['alt'] ); ?>" />
 							</a>
 						</div>

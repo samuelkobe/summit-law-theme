@@ -51,7 +51,7 @@ $selected_posts = $field_name ? get_field( $field_name ) : null;
 	}
 </style>
 
-<div id="<?php echo esc_attr( $id ); ?>" class="<?php echo esc_attr( $classes ); ?> bg-white py-24">
+<section id="<?php echo esc_attr( $id ); ?>" class="<?php echo esc_attr( $classes ); ?> bg-white block-white">
 	<div class="container mx-auto">
 		<h2 class="h2 border-b-2 lg:border-b-[3px] border-b-brand-30 w-fit pb-2 lg:pb-3 mb-4 lg:mb-7"><?php echo  esc_html(get_field( 'triple_card_title' )); ?></h2>
 		<p class="text-green-deep text-lg lg:text-xl mb-7 lg:mb-11 max-w-none lg:max-w-[75%]"><?php echo esc_html(get_field( 'triple_card_content' )); ?></p>
@@ -64,7 +64,7 @@ $selected_posts = $field_name ? get_field( $field_name ) : null;
 						<a class="group text-green-deep text-2xl xl:text-3xl no-underline hover:underline" href="<?php echo esc_url( get_permalink( $selected_post->ID ) ); ?>">
 							<?php if ( has_post_thumbnail( $selected_post->ID ) ) : ?>
 								<div class="triple-card__wrapper mb-4 md:w-[80%] relative">
-									<div class="triple-card__image aspect-[4/5] overflow-hidden relative shadow-md lg:group-hover:shadow-xl lg:group-hover:-translate-y-1 lg:group-hover:scale-[1.025] transition-all duration-500">
+									<div class="triple-card__image aspect-[4/5] overflow-hidden relative shadow-md lg:group-hover:shadow-lg lg:group-hover:-translate-y-1 lg:group-hover:scale-[1.025] transition-all duration-500">
 										<?php echo get_the_post_thumbnail( $selected_post->ID, 'full', array( 'class' => 'w-full h-full object-cover' ) ); ?>
 									</div>
 									<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 72 72" class="w-12 md:w-16 xl:w-[72px] lg:group-hover:-translate-y-4 transition-transform duration-500 delay-200 flex-shrink-0 absolute bottom-8 right-8 md:-right-8 z-10">
@@ -93,4 +93,4 @@ $selected_posts = $field_name ? get_field( $field_name ) : null;
 			</div>
 		<?php endif; ?>
 	</div>
-</div>
+</section>

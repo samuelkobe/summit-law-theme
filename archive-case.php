@@ -246,7 +246,7 @@ if ( $current_area_name ) {
 
 					<!-- Results Header -->
 					<div class="flex flex-wrap items-center justify-between gap-4 mb-8">
-						<h2 class="h3 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">
+						<h2 class="h3 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]">
 							<?php
 							global $wp_query;
 							$found = $wp_query->found_posts;

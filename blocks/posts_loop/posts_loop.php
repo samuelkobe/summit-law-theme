@@ -1,8 +1,8 @@
 <?php
 /**
- * Block template file: mini_banner.php
+ * Block template file: posts_loop.php
  *
- * Mini Banner Block Template.
+ * Posts Loop Block Template.
  *
  * @param   array $block The block settings and attributes.
  * @param   string $content The block inner HTML (empty).
@@ -11,13 +11,13 @@
  */
 
 // Create id attribute allowing for custom "anchor" value.
-$id = 'mini_banner-' . $block['id'];
+$id = 'posts_loop-' . $block['id'];
 if ( ! empty($block['anchor'] ) ) {
     $id = $block['anchor'];
 }
 
 // Create class attribute allowing for custom "className" and "align" values.
-$classes = 'block-mini_banner';
+$classes = 'block-posts_loop';
 if ( ! empty( $block['className'] ) ) {
     $classes .= ' ' . $block['className'];
 }
@@ -32,9 +32,9 @@ if ( ! empty( $block['align'] ) ) {
 	}
 </style>
 
-<section id="<?php echo esc_attr( $id ); ?>" class="bg-white py-12 lg:py-24 <?php echo esc_attr( $classes ); ?>">
+<section id="<?php echo esc_attr( $id ); ?>" class="bg-white block-white <?php echo esc_attr( $classes ); ?>">
 
-	<div class="md:container grid grid-cols-1 gap-8 p-6 lg:px-6 md:mx-auto">
+	<div class="md:container grid grid-cols-1 gap-8 px-6 md:mx-auto">
 
 			<?php
 		// Get the post type selection from ACF button group
@@ -59,7 +59,7 @@ if ( ! empty( $block['align'] ) ) {
 			if ( $posts_query->have_posts() ) : ?>
 
 				<div class="col-span-1">
-					<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]">Recent Insights & Cases</h2>
+					<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]">Recent Insights & Cases</h2>
 					<?php if ( get_field( 'posts_subtitle' ) ) : ?>
 						<p class="text-lg lg:text-xl text-brand-50 pt-2 lg:pt-4"><?php echo esc_html( get_field( 'posts_subtitle' ) ); ?></p>
 					<?php endif; ?>
@@ -69,7 +69,7 @@ if ( ! empty( $block['align'] ) ) {
 					<?php while ( $posts_query->have_posts() ) : $posts_query->the_post(); ?>
 						<div class="group col-span-1 mb-6">
 							<?php if ( $show_post_image == 1 && has_post_thumbnail() ) : ?>
-								<a href="<?php the_permalink(); ?>" class="relative block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000">
+								<a href="<?php the_permalink(); ?>" class="relative block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000" aria-label="<?php echo esc_attr( get_the_title() ); ?>">
 									<span class="absolute top-3 left-3 z-10 bg-green-deep text-white uppercase text-xs font-semibold tracking-widest px-2.5 py-1 rounded-md">
 										<?php echo get_post_type() === 'post' ? 'Insight' : 'Case'; ?>
 									</span>
@@ -175,7 +175,7 @@ if ( ! empty( $block['align'] ) ) {
 				if ( ! empty( $posts_to_display ) ) : ?>
 
 					<div class="col-span-1">
-						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]"><?php echo esc_html( $heading ); ?></h2>
+						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]"><?php echo esc_html( $heading ); ?></h2>
 						<?php if ( get_field( 'posts_subtitle' ) ) : ?>
 							<p class="text-lg lg:text-xl text-brand-50 pt-2 lg:pt-4"><?php echo esc_html( get_field( 'posts_subtitle' ) ); ?></p>
 						<?php endif; ?>
@@ -189,7 +189,7 @@ if ( ! empty( $block['align'] ) ) {
 							?>
 							<div class="group col-span-1 mb-6">
 								<?php if ( $show_post_image == 1 && has_post_thumbnail( $post_id ) ) : ?>
-									<a href="<?php echo get_permalink( $post_id ); ?>" class="relative block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000">
+									<a href="<?php echo get_permalink( $post_id ); ?>" class="relative block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000" aria-label="<?php echo esc_attr( get_the_title( $post_id ) ); ?>">
 										<span class="absolute top-4 left-4 z-10 bg-green-deep text-white uppercase text-[9px] font-semibold tracking-widest px-2.5 py-1 rounded-md">
 											<?php echo get_post_type( $post_id ) === 'post' ? 'Insight' : 'Case'; ?>
 										</span>
@@ -266,7 +266,7 @@ if ( ! empty( $block['align'] ) ) {
 					if ( $posts_query->have_posts() ) : ?>
 
 						<div class="col-span-1">
-							<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[10px]"><?php echo esc_html( $heading ); ?></h2>
+							<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]"><?php echo esc_html( $heading ); ?></h2>
 							<?php if ( get_field( 'posts_subtitle' ) ) : ?>
 								<p class="text-lg lg:text-xl text-brand-50 pt-2 lg:pt-4"><?php echo esc_html( get_field( 'posts_subtitle' ) ); ?></p>
 							<?php endif; ?>
@@ -276,7 +276,7 @@ if ( ! empty( $block['align'] ) ) {
 							<?php while ( $posts_query->have_posts() ) : $posts_query->the_post(); ?>
 								<div class="group col-span-1 mb-6">
 									<?php if ( $show_post_image == 1 && has_post_thumbnail() ) : ?>
-										<a href="<?php the_permalink(); ?>" class="relative block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000">
+										<a href="<?php the_permalink(); ?>" class="relative block mb-1 rounded-lg overflow-hidden group-hover:shadow-lg transition-shadow duration-1000" aria-label="<?php echo esc_attr( get_the_title() ); ?>">
 											<span class="absolute top-4 left-4 z-10 bg-green-deep text-white uppercase text-[9px] font-semibold tracking-widest px-2.5 py-1 rounded-md">
 												<?php echo get_post_type() === 'post' ? 'Insight' : 'Case'; ?>
 											</span>

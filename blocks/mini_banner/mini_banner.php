@@ -32,9 +32,9 @@ if ( ! empty( $block['align'] ) ) {
 	}
 </style>
 
-<section id="<?php echo esc_attr( $id ); ?>" class="bg-white py-12 lg:py-24 <?php echo esc_attr( $classes ); ?>">
+<section id="<?php echo esc_attr( $id ); ?>" class="bg-white block-white <?php echo esc_attr( $classes ); ?>">
 
-	<div class="md:container grid grid-cols-1 gap-8 p-6 lg:px-6 md:mx-auto">
+	<div class="md:container grid grid-cols-1 gap-8 px-6 md:mx-auto">
 
 			<div class="flex flex-col justify-between gap-y-8 col-span-1">
 				<?php
@@ -71,7 +71,7 @@ if ( ! empty( $block['align'] ) ) {
 									<?php echo esc_url( $image_desktop[0] ); ?> <?php echo $image_desktop[1]; ?>w"
 							sizes="1920px"
 							alt="<?php echo esc_attr( $image_alt ); ?>"
-							loading="lazy"
+							loading="eager"
 						/>
 						<svg class="w-12 md:w-16 2xl:w-24 flex-shrink-0 absolute bottom-8 2xl:bottom-12 right-8 md:-right-8 2xl:-right-12 z-1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 72 72">
 							<path class="fill-green-accent1" d="M39.2,0L0,40.5v6.9L45.9,0h-6.7Z"/>

@@ -32,7 +32,7 @@ if ( ! empty( $block['align'] ) ) {
 	}
 </style>
 
-<section id="<?php echo esc_attr( $id ); ?>" class="services-overview bg-white py-12 lg:py-24 antialiased <?php echo esc_attr( $classes ); ?>">
+<section id="<?php echo esc_attr( $id ); ?>" class="services-overview bg-white block-white antialiased <?php echo esc_attr( $classes ); ?>">
 	<div class="container mx-auto px-6">
 		<span class="block bg-blue-800 text-white text-4xl p-2 font-bold">I am the child service field block (REMOVE).</span>
 	</div>

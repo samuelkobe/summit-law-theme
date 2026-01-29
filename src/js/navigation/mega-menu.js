@@ -32,12 +32,8 @@ export default class MegaMenu {
    */
   init() {
     if (this.toggleButtons.length === 0) {
-      console.log('MegaMenu: No toggle buttons found');
       return;
     }
-
-    console.log(`MegaMenu: Found ${this.toggleButtons.length} toggle buttons`);
-    console.log(`MegaMenu: Found ${this.menus.length} mega menus`);
 
     // Add click listeners to toggle buttons
     this.toggleButtons.forEach(button => {
@@ -64,14 +60,7 @@ export default class MegaMenu {
     const menuId = button.getAttribute('aria-controls');
     const menu = document.getElementById(menuId);
 
-    console.log('MegaMenu: Button clicked', {
-      menuId,
-      menuFound: !!menu,
-      buttonText: button.textContent.trim()
-    });
-
     if (!menu) {
-      console.error(`MegaMenu: Menu not found with ID: ${menuId}`);
       return;
     }
 
@@ -133,8 +122,13 @@ export default class MegaMenu {
     // Now trigger the fade-in animation
     menu.classList.add('is-open');
 
-    // Update ARIA
+    // Update ARIA and title
     button.setAttribute('aria-expanded', 'true');
+    const currentTitle = button.getAttribute('title');
+    if (currentTitle) {
+      button.setAttribute('title', currentTitle.replace('Open', 'Close'));
+      button.setAttribute('aria-label', currentTitle.replace('Open', 'Close'));
+    }
 
     // Set active menu
     this.activeMenu = menu;
@@ -175,8 +169,13 @@ export default class MegaMenu {
       }
     }, { once: true });
 
-    // Update ARIA
+    // Update ARIA and title
     button.setAttribute('aria-expanded', 'false');
+    const currentTitle = button.getAttribute('title');
+    if (currentTitle) {
+      button.setAttribute('title', currentTitle.replace('Close', 'Open'));
+      button.setAttribute('aria-label', currentTitle.replace('Close', 'Open'));
+    }
 
     // Release focus trap
     if (this.activeTrap) {
