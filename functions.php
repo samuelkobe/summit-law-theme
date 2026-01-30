@@ -83,6 +83,124 @@ add_filter('use_widgets_block_editor', '__return_false');
 remove_theme_support('widgets-block-editor');
 
 /**
+ * Custom Manager Role
+ *
+ * Creates a "Manager" role with all Editor capabilities plus:
+ * - edit_theme_options (access to Appearance > Menus and Appearance > Customize)
+ *
+ * Explicitly denied:
+ * - switch_themes (no access to Appearance > Themes or Appearance > Design)
+ *
+ * The role is only created once (on theme activation or first load).
+ * To update capabilities, increment the version number.
+ */
+function summit_add_manager_role() {
+	$version = 2; // Increment this to update the role capabilities
+	$option_name = 'summit_manager_role_version';
+
+	// Only run if version has changed
+	if ( get_option( $option_name ) >= $version ) {
+		return;
+	}
+
+	// Remove old role if it exists (to update capabilities)
+	remove_role( 'manager' );
+
+	// Get the editor role to copy its capabilities
+	$editor = get_role( 'editor' );
+
+	if ( ! $editor ) {
+		return;
+	}
+
+	// Start with all editor capabilities
+	$manager_caps = $editor->capabilities;
+
+	// Add additional capabilities for Manager
+	$manager_caps['edit_theme_options'] = true; // Access to Menus and Customizer
+
+	// Explicitly deny theme switching (removes Themes and Design from Appearance menu)
+	$manager_caps['switch_themes'] = false;
+
+	// Create the Manager role
+	add_role(
+		'manager',
+		__( 'Manager', 'summit-law-theme' ),
+		$manager_caps
+	);
+
+	// Update version so we don't run this again
+	update_option( $option_name, $version );
+}
+add_action( 'after_setup_theme', 'summit_add_manager_role' );
+
+/**
+ * Restrict Manager Role Appearance Menu Access
+ *
+ * Removes Themes and Site Editor (Design) submenu pages from the
+ * Appearance menu for users with the Manager role.
+ *
+ * The Manager role has edit_theme_options capability (for Menus/Customizer)
+ * but should NOT access Themes or the Site Editor.
+ */
+function summit_restrict_manager_appearance_menu() {
+	// Get current user
+	$user = wp_get_current_user();
+
+	// Only apply to users with 'manager' role (not administrators)
+	if ( ! in_array( 'manager', (array) $user->roles, true ) ) {
+		return;
+	}
+
+	// Remove Themes submenu (themes.php)
+	remove_submenu_page( 'themes.php', 'themes.php' );
+
+	// Remove Site Editor / Design submenu (site-editor.php)
+	remove_submenu_page( 'themes.php', 'site-editor.php' );
+
+	// Also remove the theme customization link that appears in some setups
+	remove_submenu_page( 'themes.php', 'customize.php?return=%2Fwp-admin%2F' );
+}
+add_action( 'admin_menu', 'summit_restrict_manager_appearance_menu', 999 );
+
+/**
+ * Block Manager Role Direct Access to Restricted Pages
+ *
+ * Prevents Managers from accessing Themes or Site Editor pages directly
+ * via URL, even if the menu items are hidden.
+ */
+function summit_block_manager_restricted_pages() {
+	// Get current user
+	$user = wp_get_current_user();
+
+	// Only apply to users with 'manager' role
+	if ( ! in_array( 'manager', (array) $user->roles, true ) ) {
+		return;
+	}
+
+	// Get the current admin page
+	global $pagenow;
+
+	// Block access to themes.php and site-editor.php
+	$restricted_pages = array( 'themes.php', 'site-editor.php' );
+
+	if ( in_array( $pagenow, $restricted_pages, true ) ) {
+		// Allow access to customize.php which also loads via themes.php
+		if ( $pagenow === 'themes.php' && isset( $_GET['page'] ) && $_GET['page'] === 'customize' ) {
+			return;
+		}
+
+		// Redirect to admin dashboard with error message
+		wp_die(
+			__( 'Sorry, you are not allowed to access this page.', 'summit-law-theme' ),
+			__( 'Permission Denied', 'summit-law-theme' ),
+			array( 'response' => 403 )
+		);
+	}
+}
+add_action( 'admin_init', 'summit_block_manager_restricted_pages' );
+
+/**
  * Customizer Settings
  */
 if (!function_exists('summit_customize_register')) {
@@ -1380,3 +1498,54 @@ function summit_cases_archive_document_title( $title ) {
 }
 add_filter( 'pre_get_document_title', 'summit_cases_archive_document_title', 996 );
 add_filter( 'seopress_titles_title', 'summit_cases_archive_document_title' );
+
+/**
+ * Convert WordPress core button blocks to use theme .btn class
+ * Strips wp-block-button__link and wp-element-button classes, adds .btn
+ */
+function summit_convert_button_block_classes( $block_content, $block ) {
+  if ( $block['blockName'] !== 'core/button' ) {
+    return $block_content;
+  }
+
+  // Replace the WordPress button classes with our .btn class
+  $block_content = preg_replace(
+    '/class="([^"]*)\bwp-block-button__link\b([^"]*)\bwp-element-button\b([^"]*)"/',
+    'class="$1btn$2$3"',
+    $block_content
+  );
+
+  // Also handle if classes are in different order
+  $block_content = preg_replace(
+    '/class="([^"]*)\bwp-element-button\b([^"]*)\bwp-block-button__link\b([^"]*)"/',
+    'class="$1btn$2$3"',
+    $block_content
+  );
+
+  // Handle outline style - add .outlined modifier
+  if ( isset( $block['attrs']['className'] ) && strpos( $block['attrs']['className'], 'is-style-outline' ) !== false ) {
+    $block_content = str_replace( 'class="btn', 'class="btn outlined', $block_content );
+  }
+
+  return $block_content;
+}
+add_filter( 'render_block', 'summit_convert_button_block_classes', 10, 2 );
+
+/**
+ * Add container classes to core/quote blocks
+ */
+function summit_wrap_quote_block( $block_content, $block ) {
+  if ( $block['blockName'] !== 'core/quote' ) {
+    return $block_content;
+  }
+
+  // Add container and mx-auto classes to the blockquote
+  $block_content = preg_replace(
+    '/class="wp-block-quote([^"]*)"/',
+    'class="wp-block-quote$1 container mx-auto"',
+    $block_content
+  );
+
+  return $block_content;
+}
+add_filter( 'render_block', 'summit_wrap_quote_block', 10, 2 );

@@ -58,12 +58,6 @@ if ( ! empty( $block['align'] ) ) {
 								</div>
 							</a>
 						</h2>
-	
-						<?php if ( get_the_excerpt( $service_type->ID ) ) : ?>
-							<div class="service-type__excerpt">
-								<?php echo wp_kses_post( get_the_excerpt( $service_type->ID ) ); ?>
-							</div>
-						<?php endif; ?>
 					</div>
 
 					<?php

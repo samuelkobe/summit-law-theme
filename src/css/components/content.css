@@ -151,9 +151,15 @@
   }
 
   /* Editor: Links in core paragraph blocks only - NOT ACF blocks */
-  .editor-styles-wrapper [data-type="core/paragraph"] a:not(.btn):not(.wp-block-button__link):not(.components-button),
-  .editor-styles-wrapper [data-type="core/list"] a:not(.btn):not(.wp-block-button__link):not(.components-button),
-  .editor-styles-wrapper [data-type="core/quote"] a:not(.btn):not(.wp-block-button__link):not(.components-button) {
+  .editor-styles-wrapper
+    [data-type="core/paragraph"]
+    a:not(.btn):not(.wp-block-button__link):not(.components-button),
+  .editor-styles-wrapper
+    [data-type="core/list"]
+    a:not(.btn):not(.wp-block-button__link):not(.components-button),
+  .editor-styles-wrapper
+    [data-type="core/quote"]
+    a:not(.btn):not(.wp-block-button__link):not(.components-button) {
     @apply text-green-deep underline decoration-2 underline-offset-2 hover:text-brand-black transition-colors duration-300;
   }
 
@@ -170,7 +176,9 @@
     @apply flex items-start gap-3;
   }
 
-  .entry-content ul:not(.wp-block-gallery):not(.blocks-gallery-grid) > li::before {
+  .entry-content
+    ul:not(.wp-block-gallery):not(.blocks-gallery-grid)
+    > li::before {
     content: "";
     @apply block w-[12px] h-[3px] bg-green-accent1 flex-shrink-0;
     margin-top: 0.7em;
@@ -245,25 +253,38 @@
      BLOCKQUOTES
      ============================================================================= */
 
-  /* Frontend */
+  /* Frontend - Override WordPress core quote block styles */
   .entry-content blockquote,
-  .entry-content .wp-block-quote {
-    @apply border-l-4 border-green-accent1 pl-6 py-2 my-8;
+  .entry-content .wp-block-quote,
+  .wp-block-quote {
+    @apply border-l-4 border-green-accent1 pl-6 py-2 my-8 container mx-auto;
+    border-top: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    padding-right: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    background: transparent !important;
   }
 
   .entry-content blockquote p,
-  .entry-content .wp-block-quote p {
+  .entry-content .wp-block-quote p,
+  .wp-block-quote p {
     @apply text-xl lg:text-2xl text-green-deep mb-4 italic;
+    font-size: clamp(1.25rem, 2vw, 1.5rem) !important;
   }
 
   .entry-content blockquote p:last-child,
-  .entry-content .wp-block-quote p:last-child {
+  .entry-content .wp-block-quote p:last-child,
+  .wp-block-quote p:last-child {
     @apply mb-0;
   }
 
   .entry-content blockquote cite,
-  .entry-content .wp-block-quote cite {
+  .entry-content .wp-block-quote cite,
+  .wp-block-quote cite {
     @apply text-base not-italic text-brand-40 block mt-4;
+    font-style: normal !important;
   }
 
   /* Editor: Only core quote blocks */
@@ -358,32 +379,45 @@
      BUTTONS
      ============================================================================= */
 
-  .entry-content .wp-block-button__link,
+  /* Editor styles for wp-block-button__link (editor still uses WP classes) */
   .editor-styles-wrapper .wp-block-button__link {
     @apply font-semibold max-w-[100dvm] w-fit py-3 px-6 rounded-[8px] text-base lg:text-lg leading-[23px] tracking-[0.05em] cursor-pointer shadow-md hover:shadow-lg transition-all duration-300;
     @apply bg-green-deep hover:bg-brand-black;
-    /* Force styles to override link styles */
     color: white !important;
     text-decoration: none !important;
   }
 
-  .entry-content .wp-block-button__link:hover,
   .editor-styles-wrapper .wp-block-button__link:hover {
     color: white !important;
     text-decoration: none !important;
   }
 
-  .entry-content .wp-block-button.is-style-outline .wp-block-button__link,
   .editor-styles-wrapper .wp-block-button.is-style-outline .wp-block-button__link {
     @apply border-2 border-brand-40 bg-transparent shadow-none hover:shadow-lg;
     color: var(--c-deep) !important;
     text-decoration: none !important;
   }
 
-  .entry-content .wp-block-button.is-style-outline .wp-block-button__link:hover,
   .editor-styles-wrapper .wp-block-button.is-style-outline .wp-block-button__link:hover {
     color: var(--c-deep) !important;
     text-decoration: none !important;
+  }
+
+  /* Frontend: .btn inside WordPress button wrapper - override WP core styles */
+  .wp-block-button .btn {
+    display: inline-block !important;
+    padding: 0.75rem 1.5rem !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    text-decoration: none !important;
+    border: none !important;
+  }
+
+  @media (min-width: 1024px) {
+    .wp-block-button .btn {
+      font-size: 1.125rem !important;
+      line-height: 1.75rem !important;
+    }
   }
 
   .entry-content .wp-block-buttons,
@@ -486,8 +520,8 @@
   /* Frontend */
   .entry-content code {
     @apply bg-brand-10 px-1.5 py-0.5 rounded text-sm text-green-deep;
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-      monospace;
+    font-family:
+      ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   }
 
   .entry-content pre {
@@ -501,8 +535,8 @@
   /* Editor: Only core code blocks */
   .editor-styles-wrapper .wp-block-code code {
     @apply bg-brand-10 px-1.5 py-0.5 rounded text-sm text-green-deep;
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-      monospace;
+    font-family:
+      ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   }
 
   .editor-styles-wrapper .wp-block-code pre,
@@ -594,13 +628,25 @@
     @apply my-8;
   }
 
-  .entry-content .wp-block-media-text .wp-block-media-text__content > *:first-child,
-  .editor-styles-wrapper .wp-block-media-text .wp-block-media-text__content > *:first-child {
+  .entry-content
+    .wp-block-media-text
+    .wp-block-media-text__content
+    > *:first-child,
+  .editor-styles-wrapper
+    .wp-block-media-text
+    .wp-block-media-text__content
+    > *:first-child {
     @apply mt-0;
   }
 
-  .entry-content .wp-block-media-text .wp-block-media-text__content > *:last-child,
-  .editor-styles-wrapper .wp-block-media-text .wp-block-media-text__content > *:last-child {
+  .entry-content
+    .wp-block-media-text
+    .wp-block-media-text__content
+    > *:last-child,
+  .editor-styles-wrapper
+    .wp-block-media-text
+    .wp-block-media-text__content
+    > *:last-child {
     @apply mb-0;
   }
 
@@ -789,5 +835,32 @@
   /* Bullet Group - Last in consecutive group gets bottom padding */
   .bullet-group-last {
     @apply pb-6 lg:pb-12;
+  }
+
+  /* =============================================================================
+     SEOPRESS HTML SITEMAP
+     ============================================================================= */
+
+  /* Remove margin-top from children lists */
+  .entry-content .sp-html-sitemap ul.children {
+    @apply mt-0 mb-4 lg:mb-16;
+  }
+  .entry-content .sp-html-sitemap li a {
+    @apply !no-underline;
+  }
+
+  /* Mobile: Stack children underneath parent */
+  @media (max-width: 767px) {
+    .entry-content .sp-html-sitemap li {
+      @apply flex-row items-start flex-wrap;
+    }
+
+    .entry-content .sp-html-sitemap ul.children {
+      @apply ml-6 w-full;
+    }
+
+    .entry-content .sp-html-sitemap li > ul.children > li {
+      @apply flex-row;
+    }
   }
 }

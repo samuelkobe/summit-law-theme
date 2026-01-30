@@ -191,6 +191,43 @@ body.home .header--light .mobile-menu-toggle {
   transform: translateY(-100%);
 }
 
+/* Fast transition mode - skip delays when scrolled past 50dvh on home page (desktop) */
+/* Must use high specificity to override body.home .header--light rules */
+@media (min-width: 1024px) {
+  body.home [data-header].header--fast,
+  body.home [data-header].header--fast.header--light,
+  body.home [data-header].header--fast.header--dark,
+  body.home .header--fast .header-right,
+  body.home .header--fast.header--light .header-right,
+  body.home .header--fast .nav-menu > li > button,
+  body.home .header--fast .nav-menu > li > a,
+  body.home .header--fast.header--light .nav-menu > li > button,
+  body.home .header--fast.header--light .nav-menu > li > a,
+  body.home .header--fast .search-toggle,
+  body.home .header--fast .mobile-menu-toggle,
+  body.home .header--fast.header--light .search-toggle,
+  body.home .header--fast.header--light .mobile-menu-toggle,
+  body.home .header--fast .hamburger span,
+  body.home .header--fast .logo-primary,
+  body.home .header--fast .logo-alternate,
+  body.home .header--fast .logo-primary img,
+  body.home .header--fast .logo-alternate img,
+  body.home .header--fast.header--light .logo-primary,
+  body.home .header--fast.header--light .logo-alternate,
+  body.home .header--fast.header--light .logo-primary img,
+  body.home .header--fast.header--light .logo-alternate img,
+  body.home .header--fast [data-logo],
+  body.home .header--fast [data-logo] .logo-primary,
+  body.home .header--fast.header--light [data-logo] .logo-primary,
+  body.home .header--fast.header--light .logo-alternate,
+  body.home .header--fast .logo--small .logo-primary img,
+  body.home .header--fast.header--light .logo--small .logo-primary img,
+  body.home .header--fast.header--dark [data-logo]:not(.logo--small) .logo-primary {
+    transition-delay: 0ms !important;
+    transition-duration: 150ms !important;
+  }
+}
+
 /* Hero content margin transition when header switches to light mode on home page */
 @media (min-width: 1280px) {
   body.home [data-hero-content] {

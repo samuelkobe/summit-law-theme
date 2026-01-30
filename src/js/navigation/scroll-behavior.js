@@ -17,6 +17,7 @@ export default class ScrollBehavior {
     this.lastScroll = 0;
     this.scrollThreshold = this.isHomePage ? window.innerHeight * 0.75 : 160; // 75% of viewport height on home, 160px elsewhere
     this.logoTransitionPoint = 80;
+    this.fastTransitionPoint = window.innerHeight * 0.5; // 50dvh - skip delays when past this point
     this.ticking = false;
     this.scrollListenerActive = false;
     this.boundRequestTick = () => this.requestTick();
@@ -173,6 +174,15 @@ export default class ScrollBehavior {
   handleScroll() {
     const currentScroll = window.pageYOffset;
 
+    // On home page: if past 50dvh, use fast transitions (skip delays)
+    if (this.isHomePage) {
+      if (currentScroll >= this.fastTransitionPoint) {
+        this.header.classList.add("header--fast");
+      } else {
+        this.header.classList.remove("header--fast");
+      }
+    }
+
     // Immediate scroll detection for hero before line
     if (currentScroll > 0) {
       document.body.classList.add("page-scrolled");
@@ -227,8 +237,9 @@ export default class ScrollBehavior {
     const wasMobile = this.isMobile;
     this.isMobile = window.innerWidth < 1024;
 
-    // Recalculate scroll threshold based on new viewport height
+    // Recalculate scroll thresholds based on new viewport height
     this.scrollThreshold = this.isHomePage ? window.innerHeight * 0.75 : 160;
+    this.fastTransitionPoint = window.innerHeight * 0.5;
 
     // If switching to mobile, remove scroll listener and reset to light header
     if (this.isMobile && !wasMobile) {
