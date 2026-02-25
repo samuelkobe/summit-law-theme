@@ -28,14 +28,23 @@
     @apply text-brand-black;
   }
 
-  /* Editor: Only apply base text color to specific core blocks, not ACF blocks */
+  /* Editor: Apply base text styles to core blocks */
   .editor-styles-wrapper [data-type="core/paragraph"],
   .editor-styles-wrapper [data-type="core/heading"],
   .editor-styles-wrapper [data-type="core/list"],
   .editor-styles-wrapper [data-type="core/quote"],
   .editor-styles-wrapper [data-type="core/table"],
   .editor-styles-wrapper [data-type="core/code"] {
-    @apply text-brand-black;
+    @apply text-brand-black font-hanken;
+  }
+
+  /* Editor: Apply paragraph font styling */
+  /* Note: In the editor, the p element itself has the data-type attribute */
+  .editor-styles-wrapper p[data-type="core/paragraph"],
+  .editor-styles-wrapper [data-type="core/paragraph"] p {
+    @apply font-hanken text-brand-black mb-6 leading-relaxed;
+    font-size: clamp(16px, 1vw + 14px, 18px);
+    line-height: 1.6;
   }
 
   /* Headings - use theme typography */
@@ -83,44 +92,57 @@
   }
 
   /* Editor: Headings for core blocks only */
+  /* Note: In the editor, the heading element itself has the data-type attribute */
+  .editor-styles-wrapper h1[data-type="core/heading"],
   .editor-styles-wrapper [data-type="core/heading"] h1 {
     @apply h1 mb-6 mt-12;
   }
+  .editor-styles-wrapper h1[data-type="core/heading"]:first-child,
   .editor-styles-wrapper [data-type="core/heading"]:first-child h1 {
     @apply mt-0;
   }
 
+  .editor-styles-wrapper h2[data-type="core/heading"],
   .editor-styles-wrapper [data-type="core/heading"] h2 {
     @apply h2 mb-5 mt-10;
   }
+  .editor-styles-wrapper h2[data-type="core/heading"]:first-child,
   .editor-styles-wrapper [data-type="core/heading"]:first-child h2 {
     @apply mt-0;
   }
 
+  .editor-styles-wrapper h3[data-type="core/heading"],
   .editor-styles-wrapper [data-type="core/heading"] h3 {
     @apply h3 mb-4 mt-8;
   }
+  .editor-styles-wrapper h3[data-type="core/heading"]:first-child,
   .editor-styles-wrapper [data-type="core/heading"]:first-child h3 {
     @apply mt-0;
   }
 
+  .editor-styles-wrapper h4[data-type="core/heading"],
   .editor-styles-wrapper [data-type="core/heading"] h4 {
     @apply h4 mb-3 mt-6;
   }
+  .editor-styles-wrapper h4[data-type="core/heading"]:first-child,
   .editor-styles-wrapper [data-type="core/heading"]:first-child h4 {
     @apply mt-0;
   }
 
+  .editor-styles-wrapper h5[data-type="core/heading"],
   .editor-styles-wrapper [data-type="core/heading"] h5 {
     @apply h5 mb-3 mt-6;
   }
+  .editor-styles-wrapper h5[data-type="core/heading"]:first-child,
   .editor-styles-wrapper [data-type="core/heading"]:first-child h5 {
     @apply mt-0;
   }
 
+  .editor-styles-wrapper h6[data-type="core/heading"],
   .editor-styles-wrapper [data-type="core/heading"] h6 {
     @apply h6 mb-2 mt-4;
   }
+  .editor-styles-wrapper h6[data-type="core/heading"]:first-child,
   .editor-styles-wrapper [data-type="core/heading"]:first-child h6 {
     @apply mt-0;
   }

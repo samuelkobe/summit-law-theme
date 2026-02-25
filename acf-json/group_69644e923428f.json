@@ -8,7 +8,7 @@
             "name": "title",
             "aria-label": "",
             "type": "text",
-            "instructions": "Add a section title to this block (Max 50 characters).",
+            "instructions": "Add a section title to this block (Max 75 characters).",
             "required": 1,
             "conditional_logic": 0,
             "wrapper": {
@@ -17,7 +17,7 @@
                 "id": ""
             },
             "default_value": "",
-            "maxlength": 50,
+            "maxlength": 75,
             "allow_in_bindings": 0,
             "placeholder": "ie. Catchy Title",
             "prepend": "",
@@ -158,5 +158,5 @@
     "description": "",
     "show_in_rest": 0,
     "display_title": "",
-    "modified": 1769074845
+    "modified": 1770232663
 }

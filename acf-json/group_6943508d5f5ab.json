@@ -470,6 +470,261 @@
             "new_lines": "br"
         },
         {
+            "key": "field_697d43332300d",
+            "label": "Languages",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_697d436223010",
+            "label": "Show Languages?",
+            "name": "show_languages_toggle",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "Toggle on the \"Languages\" section of this team member's page.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 0,
+            "allow_in_bindings": 0,
+            "ui_on_text": "On",
+            "ui_off_text": "Off",
+            "ui": 1
+        },
+        {
+            "key": "field_697d438223011",
+            "label": "Languages",
+            "name": "languages",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "Simply add each language you would like to display, separating them with a comma.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    },
+                    {
+                        "field": "field_697d436223010",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    },
+                    {
+                        "field": "field_697d436223010",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "allow_in_bindings": 0,
+            "rows": 2,
+            "placeholder": "",
+            "new_lines": ""
+        },
+        {
+            "key": "field_697d481128306",
+            "label": "Education",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_697d481d28307",
+            "label": "Show Education?",
+            "name": "show_education_toggle",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "Toggle on the \"Education\" section of this team member's page.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 0,
+            "allow_in_bindings": 0,
+            "ui_on_text": "On",
+            "ui_off_text": "Off",
+            "ui": 1
+        },
+        {
+            "key": "field_697d483428308",
+            "label": "Education List",
+            "name": "education_list",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "Simply add each language you would like to display, separating them with a comma.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    },
+                    {
+                        "field": "field_697d481d28307",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    },
+                    {
+                        "field": "field_697d481d28307",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "pagination": 0,
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "Add Row",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_697d484328309",
+                    "label": "Education Item",
+                    "name": "education_item",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "allow_in_bindings": 0,
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_697d483428308"
+                }
+            ]
+        },
+        {
             "key": "field_6952eaa711872",
             "label": "Focus Areas",
             "name": "",
@@ -830,5 +1085,5 @@
     "description": "",
     "show_in_rest": 0,
     "display_title": "",
-    "modified": 1769649262
+    "modified": 1769818212
 }

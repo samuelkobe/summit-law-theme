@@ -165,7 +165,9 @@ class Summit_Mega_Menu_Walker extends Walker_Nav_Menu {
 
     } elseif ($depth === 1) {
       // Category item (Tier 2) - in mega menu
-      $output .= '<div class="mega-menu-column">';
+      $class_names = implode(' ', array_filter($classes));
+      $class_names = 'mega-menu-column' . ($class_names ? ' ' . esc_attr($class_names) : '');
+      $output .= '<div class="' . $class_names . '">';
 
       $atts = [];
       $atts['href'] = !empty($item->url) ? $item->url : '';
@@ -184,7 +186,9 @@ class Summit_Mega_Menu_Walker extends Walker_Nav_Menu {
 
     } elseif ($depth === 2) {
       // Link item (Tier 3) - under category
-      $output .= '<li>';
+      $class_names = implode(' ', array_filter($classes));
+      $class_names = $class_names ? ' class="' . esc_attr($class_names) . '"' : '';
+      $output .= '<li' . $class_names . '>';
 
       $atts = [];
       $atts['href'] = !empty($item->url) ? $item->url : '';
@@ -252,7 +256,9 @@ class Summit_Mega_Menu_Walker extends Walker_Nav_Menu {
 
     } elseif ($depth === 1) {
       // Mobile category
-      $output .= '<div class="mobile-submenu-column">';
+      $class_names = implode(' ', array_filter($classes));
+      $class_names = 'mobile-submenu-column' . ($class_names ? ' ' . esc_attr($class_names) : '');
+      $output .= '<div class="' . $class_names . '">';
 
       $atts = [];
       $atts['href'] = !empty($item->url) ? $item->url : '';
@@ -271,7 +277,9 @@ class Summit_Mega_Menu_Walker extends Walker_Nav_Menu {
 
     } elseif ($depth === 2) {
       // Mobile link under category
-      $output .= '<li>';
+      $class_names = implode(' ', array_filter($classes));
+      $class_names = $class_names ? ' class="' . esc_attr($class_names) . '"' : '';
+      $output .= '<li' . $class_names . '>';
 
       $atts = [];
       $atts['href'] = !empty($item->url) ? $item->url : '';

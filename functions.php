@@ -12,6 +12,7 @@ require_once get_template_directory() . '/inc/svg-icons.php';
 require_once get_template_directory() . '/inc/class-icon-walker.php';
 require_once get_template_directory() . '/inc/class-mega-menu-walker.php';
 require_once get_template_directory() . '/inc/vcard-generator.php';
+require_once get_template_directory() . '/inc/schema.php';
 
 /**
  * Theme Setup
@@ -81,6 +82,39 @@ add_filter('acf/settings/load_json', function($paths) {
  */
 add_filter('use_widgets_block_editor', '__return_false');
 remove_theme_support('widgets-block-editor');
+
+/**
+ * Enable SVG Uploads
+ *
+ * Adds SVG to the list of allowed MIME types for upload.
+ * Only administrators can upload SVGs by default.
+ */
+function summit_allow_svg_uploads( $mimes ) {
+	if ( current_user_can( 'administrator' ) ) {
+		$mimes['svg']  = 'image/svg+xml';
+		$mimes['svgz'] = 'image/svg+xml';
+	}
+	return $mimes;
+}
+add_filter( 'upload_mimes', 'summit_allow_svg_uploads' );
+
+/**
+ * Fix SVG display in Media Library
+ */
+function summit_fix_svg_display( $response, $attachment, $meta ) {
+	if ( $response['mime'] === 'image/svg+xml' ) {
+		$svg_path = get_attached_file( $attachment->ID );
+		if ( file_exists( $svg_path ) ) {
+			$response['sizes'] = array(
+				'full' => array(
+					'url' => $response['url'],
+				),
+			);
+		}
+	}
+	return $response;
+}
+add_filter( 'wp_prepare_attachment_for_js', 'summit_fix_svg_display', 10, 3 );
 
 /**
  * Custom Manager Role

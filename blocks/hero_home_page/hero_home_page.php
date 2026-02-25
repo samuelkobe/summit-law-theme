@@ -48,7 +48,7 @@ if ( ! empty( $block['align'] ) ) {
 					?>
 					<h1 class="font-normal leading-tight tracking-[-0.02em] text-h2 3xl:text-h1 antialiased font-hanken text-green-accent1 mb-4 3xl:mb-10">
 						<?php if ( $slogan ) : ?>
-							<?php echo wp_kses_post( $slogan ); ?>
+							<?php echo strip_tags( $slogan, '<em><strong><br>' ); ?>
 						<?php elseif ( $is_preview && $is_auto_draft ) : ?>
 							<span class="hero-banner-title-placeholder text-brand-40" data-block-id="<?php echo esc_attr( $block['id'] ); ?>">Add a slogan in block settings, or a page title above.</span>
 						<?php else : ?>

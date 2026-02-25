@@ -199,63 +199,41 @@ function summit_enqueue_editor_assets() {
       filemtime($css_file)
     );
 
-    // Debug: Output inline to confirm this is running in both admin and iframe
-    add_action('admin_head', function() {
-      echo '<!-- Summit Law: Editor CSS enqueued in admin_head -->' . "\n";
-    });
-    add_action('wp_head', function() {
-      if (is_admin()) {
-        echo '<!-- Summit Law: Editor CSS enqueued in wp_head (iframe) -->' . "\n";
+    // Add inline CSS for editor customizations
+    $editor_overrides = '
+      /* Disable pointer events on links inside ACF blocks in the editor */
+      [data-type^="acf/"] a {
+        pointer-events: none;
+        cursor: default;
       }
-    });
-  } else {
-    // Debug: File doesn't exist
-    add_action('admin_head', function() use ($css_file) {
-      echo '<!-- Summit Law: CSS file NOT found at ' . esc_html($css_file) . ' -->' . "\n";
-    });
-    add_action('wp_head', function() use ($css_file) {
-      if (is_admin()) {
-        echo '<!-- Summit Law: CSS file NOT found in iframe at ' . esc_html($css_file) . ' -->' . "\n";
+
+      /* Increase editor width for better content editing */
+      .wp-block {
+        max-width: 1400px;
       }
-    });
+
+      /* Increase width for wide-aligned blocks */
+      .wp-block[data-align="wide"] {
+        max-width: 1600px;
+      }
+
+      /* Full-width blocks remain 100% */
+      .wp-block[data-align="full"] {
+        max-width: none;
+      }
+
+      /* Override WordPress block editor default image styles for CORE blocks only */
+      /* ACF blocks should NOT get these overrides - they use their own Tailwind styling */
+      .block-editor__container [data-type="core/image"] img {
+        max-width: none !important;
+        height: auto !important;
+      }
+    ';
+
+    wp_add_inline_style('summit-editor-css', $editor_overrides);
   }
-
-  // Add inline CSS for editor customizations
-  $editor_overrides = '
-    /* Disable pointer events on links inside ACF blocks in the editor */
-    [data-type^="acf/"] a {
-      pointer-events: none;
-      cursor: default;
-    }
-
-    /* Increase editor width for better content editing */
-    .wp-block {
-      max-width: 1400px;
-    }
-
-    /* Increase width for wide-aligned blocks */
-    .wp-block[data-align="wide"] {
-      max-width: 1600px;
-    }
-
-    /* Full-width blocks remain 100% */
-    .wp-block[data-align="full"] {
-      max-width: none;
-    }
-
-    /* Override WordPress block editor default image styles for CORE blocks only */
-    /* ACF blocks should NOT get these overrides - they use their own Tailwind styling */
-    .block-editor__container [data-type="core/image"] img {
-      max-width: none !important;
-      height: auto !important;
-    }
-  ';
-
-  wp_add_inline_style('summit-editor-css', $editor_overrides);
 }
-// Load in both the editor admin page AND the editor canvas iframe
 add_action('enqueue_block_editor_assets', 'summit_enqueue_editor_assets');
-add_action('enqueue_block_assets', 'summit_enqueue_editor_assets');
 
 /**
  * Remove old enqueue function to avoid conflicts
