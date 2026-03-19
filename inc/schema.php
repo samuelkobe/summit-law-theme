@@ -197,13 +197,71 @@ function summit_schema_customizer_settings( $wp_customize ) {
 
 	// Area Served
 	$wp_customize->add_setting( 'summit_schema_area_served', array(
-		'default'           => 'Ontario',
+		'default'           => 'Ottawa and Eastern Ontario',
 		'sanitize_callback' => 'sanitize_text_field',
 	) );
 	$wp_customize->add_control( 'summit_schema_area_served', array(
 		'label'   => __( 'Area Served', 'summit-law' ),
 		'section' => 'summit_schema_section',
 		'type'    => 'text',
+	) );
+
+	// Social Links (sameAs)
+	$wp_customize->add_setting( 'summit_schema_same_as', array(
+		'default'           => '',
+		'sanitize_callback' => 'sanitize_textarea_field',
+	) );
+	$wp_customize->add_control( 'summit_schema_same_as', array(
+		'label'       => __( 'Social Links (sameAs)', 'summit-law' ),
+		'description' => __( 'One URL per line. Include LinkedIn, Facebook, etc.', 'summit-law' ),
+		'section'     => 'summit_schema_section',
+		'type'        => 'textarea',
+	) );
+
+	// Geo Latitude
+	$wp_customize->add_setting( 'summit_schema_geo_lat', array(
+		'default'           => '',
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'summit_schema_geo_lat', array(
+		'label'   => __( 'Latitude', 'summit-law' ),
+		'section' => 'summit_schema_section',
+		'type'    => 'text',
+	) );
+
+	// Geo Longitude
+	$wp_customize->add_setting( 'summit_schema_geo_lng', array(
+		'default'           => '',
+		'sanitize_callback' => 'sanitize_text_field',
+	) );
+	$wp_customize->add_control( 'summit_schema_geo_lng', array(
+		'label'   => __( 'Longitude', 'summit-law' ),
+		'section' => 'summit_schema_section',
+		'type'    => 'text',
+	) );
+
+	// Enable Breadcrumb Schema
+	$wp_customize->add_setting( 'summit_schema_enable_breadcrumbs', array(
+		'default'           => true,
+		'sanitize_callback' => 'summit_sanitize_checkbox',
+	) );
+	$wp_customize->add_control( 'summit_schema_enable_breadcrumbs', array(
+		'label'       => __( 'Enable Breadcrumb Schema', 'summit-law' ),
+		'description' => __( 'Output BreadcrumbList schema on all pages except homepage.', 'summit-law' ),
+		'section'     => 'summit_schema_section',
+		'type'        => 'checkbox',
+	) );
+
+	// Enable BlogPosting Schema
+	$wp_customize->add_setting( 'summit_schema_enable_blogposting', array(
+		'default'           => true,
+		'sanitize_callback' => 'summit_sanitize_checkbox',
+	) );
+	$wp_customize->add_control( 'summit_schema_enable_blogposting', array(
+		'label'       => __( 'Enable BlogPosting Schema', 'summit-law' ),
+		'description' => __( 'Output BlogPosting schema on insight posts.', 'summit-law' ),
+		'section'     => 'summit_schema_section',
+		'type'        => 'checkbox',
 	) );
 }
 add_action( 'customize_register', 'summit_schema_customizer_settings' );
@@ -265,6 +323,15 @@ function summit_get_provider_schema() {
 	$price_range = get_theme_mod( 'summit_schema_price_range', '$$' );
 	if ( $price_range ) {
 		$provider['priceRange'] = $price_range;
+	}
+
+	// Add sameAs (social profiles)
+	$same_as_raw = get_theme_mod( 'summit_schema_same_as', '' );
+	if ( $same_as_raw ) {
+		$same_as_urls = array_filter( array_map( 'trim', explode( "\n", $same_as_raw ) ) );
+		if ( ! empty( $same_as_urls ) ) {
+			$provider['sameAs'] = array_values( $same_as_urls );
+		}
 	}
 
 	return $provider;
@@ -344,9 +411,29 @@ function summit_output_homepage_schema() {
 	}
 
 	// Add area served
-	$area_served = get_theme_mod( 'summit_schema_area_served', 'Ontario' );
+	$area_served = get_theme_mod( 'summit_schema_area_served', 'Ottawa and Eastern Ontario' );
 	if ( $area_served ) {
 		$schema['areaServed'] = $area_served;
+	}
+
+	// Add sameAs (social profiles)
+	$same_as_raw = get_theme_mod( 'summit_schema_same_as', '' );
+	if ( $same_as_raw ) {
+		$same_as_urls = array_filter( array_map( 'trim', explode( "\n", $same_as_raw ) ) );
+		if ( ! empty( $same_as_urls ) ) {
+			$schema['sameAs'] = array_values( $same_as_urls );
+		}
+	}
+
+	// Add geo coordinates if set
+	$geo_lat = get_theme_mod( 'summit_schema_geo_lat', '' );
+	$geo_lng = get_theme_mod( 'summit_schema_geo_lng', '' );
+	if ( $geo_lat && $geo_lng ) {
+		$schema['geo'] = array(
+			'@type'     => 'GeoCoordinates',
+			'latitude'  => $geo_lat,
+			'longitude' => $geo_lng,
+		);
 	}
 
 	// Query parent services to add as offered services
@@ -424,7 +511,7 @@ function summit_output_service_schema() {
 	}
 
 	// Add area served
-	$area_served = get_theme_mod( 'summit_schema_area_served', 'Ontario' );
+	$area_served = get_theme_mod( 'summit_schema_area_served', 'Ottawa and Eastern Ontario' );
 	if ( $area_served ) {
 		$schema['areaServed'] = $area_served;
 	}
@@ -463,6 +550,273 @@ function summit_output_service_schema() {
 	summit_output_json_ld( $schema );
 }
 add_action( 'wp_head', 'summit_output_service_schema', 5 );
+
+/**
+ * Output BlogPosting Schema on Insight (post) Singles
+ */
+function summit_output_blogposting_schema() {
+	if ( ! is_singular( 'post' ) ) {
+		return;
+	}
+
+	if ( ! get_theme_mod( 'summit_schema_enable_blogposting', true ) ) {
+		return;
+	}
+
+	global $post;
+
+	$schema = array(
+		'@context'      => 'https://schema.org',
+		'@type'         => 'BlogPosting',
+		'headline'      => get_the_title(),
+		'url'           => get_permalink(),
+		'datePublished' => get_the_date( 'c' ),
+		'dateModified'  => get_the_modified_date( 'c' ),
+	);
+
+	// Author
+	$author_name   = get_the_author();
+	$schema['author'] = array(
+		'@type' => 'Person',
+		'name'  => $author_name,
+	);
+
+	// Try to link author to their team profile page
+	$team_post = get_posts( array(
+		'post_type'      => 'team',
+		'title'          => $author_name,
+		'posts_per_page' => 1,
+		'post_status'    => 'publish',
+	) );
+	if ( $team_post ) {
+		$schema['author']['url'] = get_permalink( $team_post[0]->ID );
+	}
+
+	// Publisher (the firm)
+	$firm_name = get_theme_mod( 'summit_schema_firm_name', 'Summit Law LLP' );
+	$logo      = get_theme_mod( 'summit_schema_logo' );
+
+	$publisher = array(
+		'@type' => 'Organization',
+		'name'  => $firm_name,
+		'url'   => get_theme_mod( 'summit_schema_firm_url', home_url() ),
+	);
+	if ( $logo ) {
+		$publisher['logo'] = array(
+			'@type' => 'ImageObject',
+			'url'   => $logo,
+		);
+	}
+	$schema['publisher'] = $publisher;
+
+	// Featured image
+	if ( has_post_thumbnail() ) {
+		$thumb_id  = get_post_thumbnail_id();
+		$thumb_url = wp_get_attachment_image_url( $thumb_id, 'full' );
+		if ( $thumb_url ) {
+			$schema['image'] = $thumb_url;
+		}
+	}
+
+	// Description from excerpt or content
+	if ( has_excerpt() ) {
+		$schema['description'] = get_the_excerpt();
+	} else {
+		$content              = wp_strip_all_tags( $post->post_content );
+		$schema['description'] = wp_trim_words( $content, 30, '...' );
+	}
+
+	// mainEntityOfPage
+	$schema['mainEntityOfPage'] = array(
+		'@type' => 'WebPage',
+		'@id'   => get_permalink(),
+	);
+
+	summit_output_json_ld( $schema );
+}
+add_action( 'wp_head', 'summit_output_blogposting_schema', 5 );
+
+/**
+ * Output ContactPage Schema on Contact Page
+ */
+function summit_output_contact_page_schema() {
+	if ( ! is_page( 'contact' ) ) {
+		return;
+	}
+
+	$firm_name   = get_theme_mod( 'summit_schema_firm_name', 'Summit Law LLP' );
+	$phone       = get_theme_mod( 'summit_schema_phone' );
+	$main_entity = summit_get_provider_schema();
+
+	// Add contactPoint with telephone
+	if ( $phone ) {
+		$main_entity['contactPoint'] = array(
+			'@type'       => 'ContactPoint',
+			'telephone'   => $phone,
+			'contactType' => 'customer service',
+		);
+	}
+
+	// Add opening hours to the main entity
+	$hours = get_theme_mod( 'summit_schema_hours', 'Mo-Fr 09:00-17:00' );
+	if ( $hours ) {
+		$main_entity['openingHours'] = $hours;
+	}
+
+	$schema = array(
+		'@context'   => 'https://schema.org',
+		'@type'      => 'ContactPage',
+		'name'       => 'Contact ' . $firm_name,
+		'url'        => get_permalink(),
+		'mainEntity' => $main_entity,
+	);
+
+	summit_output_json_ld( $schema );
+}
+add_action( 'wp_head', 'summit_output_contact_page_schema', 5 );
+
+/**
+ * Output ItemList Schema on Services Archive
+ */
+function summit_output_services_archive_schema() {
+	if ( ! is_post_type_archive( 'service' ) ) {
+		return;
+	}
+
+	$parent_services = get_posts( array(
+		'post_type'      => 'service',
+		'post_parent'    => 0,
+		'posts_per_page' => -1,
+		'post_status'    => 'publish',
+		'orderby'        => 'title',
+		'order'          => 'ASC',
+	) );
+
+	if ( ! $parent_services ) {
+		return;
+	}
+
+	$items    = array();
+	$position = 1;
+	foreach ( $parent_services as $service ) {
+		$items[] = array(
+			'@type'    => 'ListItem',
+			'position' => $position,
+			'url'      => get_permalink( $service->ID ),
+			'name'     => $service->post_title,
+		);
+		$position++;
+	}
+
+	$schema = array(
+		'@context'        => 'https://schema.org',
+		'@type'           => 'ItemList',
+		'name'            => 'Legal Services',
+		'itemListElement' => $items,
+	);
+
+	summit_output_json_ld( $schema );
+}
+add_action( 'wp_head', 'summit_output_services_archive_schema', 5 );
+
+/**
+ * Output BreadcrumbList Schema (all pages except homepage)
+ */
+function summit_output_breadcrumb_schema() {
+	if ( is_front_page() ) {
+		return;
+	}
+
+	if ( ! get_theme_mod( 'summit_schema_enable_breadcrumbs', true ) ) {
+		return;
+	}
+
+	$crumbs = array();
+
+	// Position 1 is always Home
+	$crumbs[] = array(
+		'name' => get_theme_mod( 'summit_schema_firm_name', 'Summit Law LLP' ),
+		'url'  => home_url( '/' ),
+	);
+
+	if ( is_singular( 'service' ) ) {
+		// Services > [Parent] > [Child]
+		global $post;
+		$crumbs[] = array( 'name' => 'Services', 'url' => home_url( '/services/' ) );
+		if ( $post->post_parent ) {
+			$parent   = get_post( $post->post_parent );
+			$crumbs[] = array( 'name' => $parent->post_title, 'url' => get_permalink( $parent->ID ) );
+		}
+		$crumbs[] = array( 'name' => get_the_title(), 'url' => get_permalink() );
+
+	} elseif ( is_post_type_archive( 'service' ) ) {
+		$crumbs[] = array( 'name' => 'Services', 'url' => home_url( '/services/' ) );
+
+	} elseif ( is_singular( 'post' ) ) {
+		// Insights > [Post Title]
+		$crumbs[] = array( 'name' => 'Insights', 'url' => home_url( '/insights/' ) );
+		$crumbs[] = array( 'name' => get_the_title(), 'url' => get_permalink() );
+
+	} elseif ( is_home() ) {
+		// Insights archive page
+		$crumbs[] = array( 'name' => 'Insights', 'url' => home_url( '/insights/' ) );
+
+	} elseif ( is_singular( 'case' ) ) {
+		$crumbs[] = array( 'name' => 'Cases', 'url' => get_post_type_archive_link( 'case' ) );
+		$crumbs[] = array( 'name' => get_the_title(), 'url' => get_permalink() );
+
+	} elseif ( is_post_type_archive( 'case' ) ) {
+		$crumbs[] = array( 'name' => 'Cases', 'url' => get_post_type_archive_link( 'case' ) );
+
+	} elseif ( is_singular( 'team' ) ) {
+		$crumbs[] = array( 'name' => 'Team', 'url' => get_post_type_archive_link( 'team' ) );
+		$crumbs[] = array( 'name' => get_the_title(), 'url' => get_permalink() );
+
+	} elseif ( is_post_type_archive( 'team' ) ) {
+		$crumbs[] = array( 'name' => 'Team', 'url' => get_post_type_archive_link( 'team' ) );
+
+	} elseif ( is_page() ) {
+		// Regular pages — handle nested pages via ancestors
+		global $post;
+		$ancestors = array_reverse( get_post_ancestors( $post->ID ) );
+		foreach ( $ancestors as $ancestor_id ) {
+			$crumbs[] = array(
+				'name' => get_the_title( $ancestor_id ),
+				'url'  => get_permalink( $ancestor_id ),
+			);
+		}
+		$crumbs[] = array( 'name' => get_the_title(), 'url' => get_permalink() );
+
+	} elseif ( is_search() ) {
+		$crumbs[] = array( 'name' => 'Search Results', 'url' => get_search_link() );
+
+	} elseif ( is_404() ) {
+		$crumbs[] = array( 'name' => 'Page Not Found', 'url' => '' );
+	}
+
+	// Build the schema
+	$items = array();
+	foreach ( $crumbs as $position => $crumb ) {
+		$item = array(
+			'@type'    => 'ListItem',
+			'position' => $position + 1,
+			'name'     => $crumb['name'],
+		);
+		if ( ! empty( $crumb['url'] ) ) {
+			$item['item'] = $crumb['url'];
+		}
+		$items[] = $item;
+	}
+
+	$schema = array(
+		'@context'        => 'https://schema.org',
+		'@type'           => 'BreadcrumbList',
+		'itemListElement' => $items,
+	);
+
+	summit_output_json_ld( $schema );
+}
+add_action( 'wp_head', 'summit_output_breadcrumb_schema', 5 );
 
 /**
  * Output JSON-LD script tag
