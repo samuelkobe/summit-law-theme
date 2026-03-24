@@ -309,7 +309,24 @@ function summit_add_critical_css() {
     }
     img, video { max-width: 100%; height: auto; }
     /* Prevent layout shift for header */
-    [data-header] { min-height: 80px; }
+    [data-header] {
+      min-height: 80px;
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      transform: translateY(-100%);
+    }
+    [data-header].header--ready { transform: translateY(0); }
+    /* Logo sizing to prevent flash of unstyled large logo */
+    [data-logo] img { width: 140px; height: auto; display: block; }
+    @media (min-width: 1024px) { [data-logo] img { width: 180px; } }
+    .logo-alternate { position: absolute; top: 0; left: 0; }
+    /* Light header base styles */
+    .header--light { background-color: #fff; }
+    /* Dark header (home) starts transparent */
+    .header--dark { background-color: transparent; position: fixed; }
     /* Hide content until CSS loads to prevent FOUC */
     .no-js body { visibility: visible; }
   </style>

@@ -160,6 +160,10 @@
     @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.01em] text-h3 antialiased;
   }
 
+  .wp-block-heading.h3 {
+    @apply !font-museum;
+  }
+
   .h4 {
     @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.005em] text-h4 antialiased;
   }
@@ -191,6 +195,10 @@
   .entry-content > h3,
   .page-content > h3 {
     @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.01em] text-h3;
+  }
+  .entry-content > h3.wp-block-heading,
+  .page-content > h3.wp-block-heading {
+    @apply !font-museum;
   }
 
   .entry-content > h4,
