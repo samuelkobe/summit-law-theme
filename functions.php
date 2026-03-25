@@ -1248,11 +1248,19 @@ function summit_search_orderby( $orderby, $query ) {
 		$post_type   = $query->get( 'post_type' );
 		$search_term = $query->get( 's' );
 
+		// Check if filtering/searching for services only
+		$is_service_only = ( $post_type === 'service' ) ||
+						   ( isset( $_GET['type'] ) && $_GET['type'] === 'service' );
+
 		// Check if filtering/searching for team only
 		$is_team_only = ( $post_type === 'team' ) ||
 						( isset( $_GET['type'] ) && $_GET['type'] === 'team' );
 
-		if ( $is_team_only ) {
+		if ( $is_service_only ) {
+			// Order services: parents first (post_parent = 0), then children, alphabetically within each group
+			$orderby = "CASE WHEN {$wpdb->posts}.post_parent = 0 THEN 0 ELSE 1 END ASC,
+			{$wpdb->posts}.post_title ASC";
+		} elseif ( $is_team_only ) {
 			// Order team members by role hierarchy, then alphabetically by title
 			// This requires a subquery to get the role meta value
 			$orderby = "(

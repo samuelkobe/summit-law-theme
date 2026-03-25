@@ -101,7 +101,7 @@
         <div class="text-brand-40 text-sm">
           Designed and maintained by
           <?php if (get_theme_mod('footer_maintained_by_link')) : ?>
-            <a href="<?php echo esc_url(get_theme_mod('footer_maintained_by_link')); ?>" target="_blank" rel="noopener noreferrer">
+            <a class="underline" href="<?php echo esc_url(get_theme_mod('footer_maintained_by_link')); ?>" target="_blank" rel="noopener noreferrer">
               <?php echo esc_html(get_theme_mod('footer_maintained_by', 'Web Ok Solutions Inc.')); ?>
             </a>
           <?php else : ?>
