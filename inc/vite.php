@@ -269,6 +269,57 @@ function summit_add_font_preloads() {
 add_action('wp_head', 'summit_add_font_preloads', 1);
 
 /**
+ * Preload the LCP hero image on the front page
+ *
+ * Emits a <link rel="preload"> so the browser discovers the hero image
+ * from HTML immediately, without waiting for block rendering.
+ */
+function summit_preload_hero_image() {
+  if (!is_front_page() || is_admin()) {
+    return;
+  }
+
+  // Get the front page ID
+  $front_page_id = get_option('page_on_front');
+  if (!$front_page_id) {
+    return;
+  }
+
+  // Get the gallery field from the front page
+  $gallery_images = get_field('gallery', $front_page_id);
+  if (!$gallery_images || !is_array($gallery_images) || empty($gallery_images)) {
+    return;
+  }
+
+  // Use the first image for preload (random selection in block means we can't predict,
+  // but preloading the first one still helps in ~1/N cases and doesn't hurt otherwise)
+  $first_image = $gallery_images[0];
+  $image_id = $first_image['ID'];
+
+  $image_medium = wp_get_attachment_image_src($image_id, 'medium');
+  $image_large = wp_get_attachment_image_src($image_id, 'large');
+  $image_full = wp_get_attachment_image_src($image_id, 'full');
+
+  if ($image_large) {
+    $href = esc_url($image_large[0]);
+    $srcset_parts = [];
+    if ($image_medium) {
+      $srcset_parts[] = esc_url($image_medium[0]) . ' ' . $image_medium[1] . 'w';
+    }
+    $srcset_parts[] = esc_url($image_large[0]) . ' ' . $image_large[1] . 'w';
+    if ($image_full) {
+      $srcset_parts[] = esc_url($image_full[0]) . ' ' . $image_full[1] . 'w';
+    }
+
+    $srcset = implode(', ', $srcset_parts);
+    $sizes = '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 624px';
+
+    echo '<link rel="preload" as="image" href="' . $href . '" imagesrcset="' . esc_attr($srcset) . '" imagesizes="' . esc_attr($sizes) . '" fetchpriority="high">' . "\n";
+  }
+}
+add_action('wp_head', 'summit_preload_hero_image', 3);
+
+/**
  * Add critical inline CSS
  *
  * Prevents FOUC when main CSS loads asynchronously.

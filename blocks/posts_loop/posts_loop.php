@@ -73,7 +73,7 @@ if ( ! empty( $block['align'] ) ) {
 									<span class="absolute top-3 left-3 z-10 bg-green-deep text-white uppercase text-xs font-semibold tracking-widest px-2.5 py-1 rounded-md">
 										<?php echo get_post_type() === 'post' ? 'Insight' : 'Case'; ?>
 									</span>
-									<?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover' ) ); ?>
+									<?php the_post_thumbnail( 'medium_large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover', 'loading' => 'lazy' ) ); ?>
 								</a>
 							<?php endif; ?>
 							<div class="flex justify-between items-center mb-2 text-brand-black uppercase text-xs border-b-2 border-b-brand-30 pt-4 lg:pt-6 pb-2 lg:pb-3">
@@ -193,7 +193,7 @@ if ( ! empty( $block['align'] ) ) {
 										<span class="absolute top-4 left-4 z-10 bg-green-deep text-white uppercase text-[9px] font-semibold tracking-widest px-2.5 py-1 rounded-md">
 											<?php echo get_post_type( $post_id ) === 'post' ? 'Insight' : 'Case'; ?>
 										</span>
-										<?php echo get_the_post_thumbnail( $post_id, 'large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover' ) ); ?>
+										<?php echo get_the_post_thumbnail( $post_id, 'medium_large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover', 'loading' => 'lazy' ) ); ?>
 									</a>
 								<?php endif; ?>
 								<div class="flex justify-between items-center mb-2 text-brand-black uppercase text-xs border-b-2 border-b-brand-30 pt-4 lg:pt-6 pb-2 lg:pb-3">
@@ -280,7 +280,7 @@ if ( ! empty( $block['align'] ) ) {
 											<span class="absolute top-4 left-4 z-10 bg-green-deep text-white uppercase text-[9px] font-semibold tracking-widest px-2.5 py-1 rounded-md">
 												<?php echo get_post_type() === 'post' ? 'Insight' : 'Case'; ?>
 											</span>
-											<?php the_post_thumbnail( 'large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover' ) ); ?>
+											<?php the_post_thumbnail( 'medium_large', array( 'class' => 'w-full h-auto rounded-lg aspect-[13/8] overflow-hidden object-cover', 'loading' => 'lazy' ) ); ?>
 										</a>
 									<?php endif; ?>
 									<div class="flex justify-between items-center mb-2 text-brand-black uppercase text-xs border-b-2 border-b-brand-30 pt-4 lg:pt-6 pb-2 lg:pb-3">

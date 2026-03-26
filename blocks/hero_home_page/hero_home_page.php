@@ -108,15 +108,36 @@ if ( ! empty( $block['align'] ) ) {
 						// Get a random image from the gallery
 						$random_index = array_rand( $gallery_images );
 						$random_image = $gallery_images[ $random_index ];
-						// Use large size for better quality, fallback to full
-						$image_size = isset( $random_image['sizes']['large'] ) ? 'large' : 'full';
-						$image_url = $random_image['sizes'][ $image_size ] ?? $random_image['url'];
+						$image_id = $random_image['ID'];
+
+						// Get responsive image sizes
+						$image_medium = wp_get_attachment_image_src( $image_id, 'medium' );
+						$image_large = wp_get_attachment_image_src( $image_id, 'large' );
+						$image_full = wp_get_attachment_image_src( $image_id, 'full' );
+
+						// Use large as the default src
+						$image_url = $image_large ? $image_large[0] : $random_image['url'];
+						$image_width = $image_large ? $image_large[1] : '';
+						$image_height = $image_large ? $image_large[2] : '';
 						?>
 						<div class="hero-gallery-image relative">
 							<img
 								src="<?php echo esc_url( $image_url ); ?>"
+								<?php if ( $image_medium && $image_large && $image_full ) : ?>
+								srcset="<?php echo esc_url( $image_medium[0] ); ?> <?php echo $image_medium[1]; ?>w,
+										<?php echo esc_url( $image_large[0] ); ?> <?php echo $image_large[1]; ?>w,
+										<?php echo esc_url( $image_full[0] ); ?> <?php echo $image_full[1]; ?>w"
+								sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 624px"
+								<?php endif; ?>
+								<?php if ( $image_width && $image_height ) : ?>
+								width="<?php echo esc_attr( $image_width ); ?>"
+								height="<?php echo esc_attr( $image_height ); ?>"
+								<?php endif; ?>
 								alt="<?php echo esc_attr( $random_image['alt'] ); ?>"
 								class="w-full h-auto aspect-video object-cover shadow-lg overflow-hidden"
+								loading="eager"
+								fetchpriority="high"
+								decoding="async"
 							/>
 							<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 72 72" class="w-12 md:w-16 xl:w-[72px] lg:group-hover:-translate-y-4 transition-transform duration-500 delay-200 flex-shrink-0 absolute top-8 md:-top-8 left-8 md:left-16 z-10">
 								<path class="fill-green-accent1" d="M39.2,0L0,40.5v6.9L45.9,0h-6.7Z"/>

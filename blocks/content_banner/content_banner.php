@@ -78,7 +78,7 @@ if ( ! empty( $block['align'] ) ) {
 								srcset="<?php echo esc_url( $image_mobile[0] ); ?> <?php echo $image_mobile[1]; ?>w,
 										<?php echo esc_url( $image_tablet[0] ); ?> <?php echo $image_tablet[1]; ?>w,
 										<?php echo esc_url( $image_desktop[0] ); ?> <?php echo $image_desktop[1]; ?>w"
-								sizes="800px"
+								sizes="(max-width: 1024px) 100vw, 58vw"
 								alt="<?php echo esc_attr( $image_alt ); ?>"
 								loading="eager"
 							/>

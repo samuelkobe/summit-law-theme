@@ -69,9 +69,9 @@ if ( ! empty( $block['align'] ) ) {
 							srcset="<?php echo esc_url( $image_mobile[0] ); ?> <?php echo $image_mobile[1]; ?>w,
 									<?php echo esc_url( $image_tablet[0] ); ?> <?php echo $image_tablet[1]; ?>w,
 									<?php echo esc_url( $image_desktop[0] ); ?> <?php echo $image_desktop[1]; ?>w"
-							sizes="1920px"
+							sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 1200px"
 							alt="<?php echo esc_attr( $image_alt ); ?>"
-							loading="eager"
+							loading="lazy"
 						/>
 						<svg class="w-12 md:w-16 2xl:w-24 flex-shrink-0 absolute bottom-8 2xl:bottom-12 right-8 md:-right-8 2xl:-right-12 z-1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 72 72">
 							<path class="fill-green-accent1" d="M39.2,0L0,40.5v6.9L45.9,0h-6.7Z"/>
