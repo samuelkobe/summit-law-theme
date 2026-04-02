@@ -1,6 +1,6 @@
 {
     "key": "group_6943508d5f5ab",
-    "title": "Team Content",
+    "title": "Team Member Content",
     "fields": [
         {
             "key": "field_6943508d366da",
@@ -1062,6 +1062,119 @@
             "elements": "",
             "bidirectional": 0,
             "bidirectional_target": []
+        },
+        {
+            "key": "field_69ceb473badbb",
+            "label": "Bookable Services",
+            "name": "",
+            "aria-label": "",
+            "type": "tab",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "partner"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_6943508d366da",
+                        "operator": "==",
+                        "value": "associate"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "placement": "top",
+            "endpoint": 0,
+            "selected": 0
+        },
+        {
+            "key": "field_69ceb4ead62ec",
+            "label": "Bookable Services?",
+            "name": "bookable_services_toggle",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "Toggle Bookable Services On\/Off.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 0,
+            "allow_in_bindings": 0,
+            "ui_on_text": "On",
+            "ui_off_text": "Off",
+            "ui": 1
+        },
+        {
+            "key": "field_69ceb4c1badbd",
+            "label": "Service",
+            "name": "service",
+            "aria-label": "",
+            "type": "flexible_content",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_69ceb4ead62ec",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layouts": {
+                "layout_69ceb4c64037b": {
+                    "key": "layout_69ceb4c64037b",
+                    "name": "mediation_service",
+                    "label": "Mediation",
+                    "display": "block",
+                    "sub_fields": [
+                        {
+                            "key": "field_69ceb5800c36a",
+                            "label": "Mediation Shortcode",
+                            "name": "mediation_shortcode",
+                            "aria-label": "",
+                            "type": "wysiwyg",
+                            "instructions": "Add the Amelia <b>[shortcode]<\/b> for the attorney's calendar so their bookable mediation options appear on their Team Member card on the team page, and their individual Team Member page.",
+                            "required": 0,
+                            "conditional_logic": 0,
+                            "wrapper": {
+                                "width": "",
+                                "class": "",
+                                "id": ""
+                            },
+                            "default_value": "",
+                            "allow_in_bindings": 0,
+                            "tabs": "all",
+                            "toolbar": "full",
+                            "media_upload": 1,
+                            "delay": 0
+                        }
+                    ],
+                    "min": "",
+                    "max": ""
+                }
+            },
+            "min": "",
+            "max": "",
+            "button_label": "Add Row"
         }
     ],
     "location": [
@@ -1085,5 +1198,7 @@
     "description": "",
     "show_in_rest": 0,
     "display_title": "",
-    "modified": 1769818212
+    "allow_ai_access": false,
+    "ai_description": "",
+    "modified": 1775156613
 }

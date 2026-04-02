@@ -36,6 +36,7 @@ if ( ! empty( $block['align'] ) ) {
 
 <div id="<?php echo esc_attr( $id ); ?>" class="bg-white block-white grid grid-cols-1 gap-y-12 lg:gap-y-24 xl:gap-y-32 2xl:gap-y-48 xl:pb-32 2xl:pb-48 <?php echo esc_attr( $classes ); ?>">
 	
+	<?php if ( get_field( 'areas_toggle' ) == 1 ) : ?>
 	<!-- Service Areas section -->
 	<section class="services-overview bg-white antialiased">
 		<div class="container mx-auto px-6">
@@ -80,6 +81,7 @@ if ( ! empty( $block['align'] ) ) {
 		</div>
 	</section>
 	<!-- End Service Areas section -->
+	<?php endif; ?>
 
 	<?php if ( get_field( 'info_toggle' ) == 1 ) : ?>
 	<!-- Info section -->

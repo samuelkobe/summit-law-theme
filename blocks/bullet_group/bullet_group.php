@@ -55,7 +55,7 @@ $has_bullet_points = have_rows( 'bullet_points' );
 				<?php if ( $has_bullet_points ) : ?>
 					<ul class="text-lg leading-8 xl:text-xl xl:leading-9 2xl:text-xl 2xl:leading-10 font-normal list-none space-y-2">
 						<?php while ( have_rows( 'bullet_points' ) ) : the_row(); ?>
-							<li class="flex items-start before:top-4 xl:before:top-[18px] 2xl:before:top-5 before:relative gap-5 before:content-[''] before:block before:w-[15px] before:h-[3px] before:bg-green-accent1 before:flex-shrink-0">
+							<li class="flex items-start before:top-4 xl:before:top-[18px] 2xl:before:top-5 before:relative gap-5 before:content-[''] before:block before:w-[15px] before:h-[3px] before:bg-green-accent1 before:flex-shrink-0 [&_a]:font-normal [&_a]:underline [&_a]:decoration-green-deep [&_a]:underline-offset-[2px] [&_a]:decoration-[1px] [&_a]:text-green-deep [&_a]:transition-colors [&_a]:duration-300 [&_a:hover]:text-black">
 								<?php the_sub_field( 'bullet_content' ); ?>
 							</li>
 						<?php endwhile; ?>

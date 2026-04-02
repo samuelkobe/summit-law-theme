@@ -21,6 +21,53 @@
             "selected": 0
         },
         {
+            "key": "field_69695a843c791",
+            "label": "Show Areas?",
+            "name": "areas_toggle",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "Toggle the Areas section on or off.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 1,
+            "allow_in_bindings": 0,
+            "ui_on_text": "On",
+            "ui_off_text": "Off",
+            "ui": 1
+        },
+        {
+            "key": "field_69695a843c792",
+            "label": "Areas Off Notice",
+            "name": "",
+            "aria-label": "",
+            "type": "message",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_69695a843c791",
+                        "operator": "!=",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "NOTE: The Areas section is turned 'Off'.",
+            "new_lines": "wpautop",
+            "esc_html": 0
+        },
+        {
             "key": "field_69695a843c790",
             "label": "Areas",
             "name": "",
@@ -28,7 +75,15 @@
             "type": "message",
             "instructions": "",
             "required": 0,
-            "conditional_logic": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_69695a843c791",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
             "wrapper": {
                 "width": "",
                 "class": "",
@@ -226,5 +281,5 @@
     "description": "",
     "show_in_rest": 0,
     "display_title": "",
-    "modified": 1769209237
+    "modified": 1775079219
 }

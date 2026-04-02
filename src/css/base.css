@@ -318,4 +318,18 @@
   .success {
     @apply p-2 border-l-[0.5px] border-l-green-deep bg-brand-10 text-brand-black;
   }
+
+  /* 1. Hide the default Amelia trophy icon */
+  .am-fs__congrats-main img {
+    display: none !important;
+  }
+
+  /* 2. Set your Site Icon as the new background */
+  .am-fs__congrats-main {
+    background-image: var(--site-icon-url);
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: 80px auto; /* Scale it to a visible size */
+    padding-top: 100px !important; /* Move the 'Congratulations' text below the icon */
+  }
 }

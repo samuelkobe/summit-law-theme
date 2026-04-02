@@ -1296,6 +1296,44 @@ function summit_search_orderby( $orderby, $query ) {
 				$like_term,
 				$like_term
 			);
+		} else {
+			// Empty search (browse all) - group by post type, then order within each group
+			// Pages: by menu_order (Page Order), Services: parents first then alpha,
+			// Insights/Cases: by date, Team: by role hierarchy
+			$orderby = "CASE {$wpdb->posts}.post_type
+				WHEN 'page' THEN 1
+				WHEN 'service' THEN 2
+				WHEN 'post' THEN 3
+				WHEN 'case' THEN 4
+				WHEN 'team' THEN 5
+				ELSE 6
+			END ASC,
+			CASE
+				WHEN {$wpdb->posts}.post_type = 'page' THEN {$wpdb->posts}.menu_order
+				ELSE 0
+			END ASC,
+			CASE
+				WHEN {$wpdb->posts}.post_type = 'service' AND {$wpdb->posts}.post_parent = 0 THEN 0
+				WHEN {$wpdb->posts}.post_type = 'service' THEN 1
+				ELSE 0
+			END ASC,
+			CASE
+				WHEN {$wpdb->posts}.post_type = 'team' THEN (
+					SELECT CASE sr.meta_value
+						WHEN 'partner' THEN 1
+						WHEN 'associate' THEN 2
+						WHEN 'clerk' THEN 3
+						WHEN 'assistant' THEN 4
+						ELSE 5
+					END
+					FROM {$wpdb->postmeta} AS sr
+					WHERE sr.post_id = {$wpdb->posts}.ID
+					AND sr.meta_key = 'role'
+					LIMIT 1
+				)
+				ELSE 0
+			END ASC,
+			{$wpdb->posts}.post_title ASC";
 		}
 	}
 
@@ -1591,3 +1629,15 @@ function summit_wrap_quote_block( $block_content, $block ) {
   return $block_content;
 }
 add_filter( 'render_block', 'summit_wrap_quote_block', 10, 2 );
+
+/**
+ * Output Site Icon URL as CSS custom property
+ * Used by Amelia congrats screen to display the site icon
+ */
+function summit_site_icon_css_var() {
+	$icon_url = get_site_icon_url( 512 );
+	if ( $icon_url ) {
+		echo '<style>:root{--site-icon-url:url("' . esc_url( $icon_url ) . '")}</style>' . "\n";
+	}
+}
+add_action( 'wp_head', 'summit_site_icon_css_var' );

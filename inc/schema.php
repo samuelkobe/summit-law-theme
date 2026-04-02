@@ -769,11 +769,11 @@ function summit_output_breadcrumb_schema() {
 		$crumbs[] = array( 'name' => 'Cases', 'url' => get_post_type_archive_link( 'case' ) );
 
 	} elseif ( is_singular( 'team' ) ) {
-		$crumbs[] = array( 'name' => 'Team', 'url' => get_post_type_archive_link( 'team' ) );
+		$crumbs[] = array( 'name' => 'Team', 'url' => home_url( '/team/' ) );
 		$crumbs[] = array( 'name' => get_the_title(), 'url' => get_permalink() );
 
 	} elseif ( is_post_type_archive( 'team' ) ) {
-		$crumbs[] = array( 'name' => 'Team', 'url' => get_post_type_archive_link( 'team' ) );
+		$crumbs[] = array( 'name' => 'Team', 'url' => home_url( '/team/' ) );
 
 	} elseif ( is_page() ) {
 		// Regular pages — handle nested pages via ancestors

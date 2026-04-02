@@ -50,7 +50,7 @@
                     "label": "Bullet Content",
                     "name": "bullet_content",
                     "aria-label": "",
-                    "type": "textarea",
+                    "type": "wysiwyg",
                     "instructions": "Add bullet point content to this section.",
                     "required": 0,
                     "conditional_logic": 0,
@@ -60,11 +60,11 @@
                         "id": ""
                     },
                     "default_value": "",
-                    "maxlength": "",
                     "allow_in_bindings": 0,
-                    "rows": 3,
-                    "placeholder": "",
-                    "new_lines": "br",
+                    "tabs": "visual",
+                    "toolbar": "basic",
+                    "media_upload": 0,
+                    "delay": 1,
                     "parent_repeater": "field_6957feac12e43"
                 }
             ]
@@ -89,5 +89,5 @@
     "description": "",
     "show_in_rest": 0,
     "display_title": "",
-    "modified": 1767375130
+    "modified": 1774554401
 }

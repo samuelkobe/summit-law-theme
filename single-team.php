@@ -22,7 +22,7 @@ get_header(); ?>
 		<section class="bg-gradient-to-b from-brand-black to-[#34312D]">
 			<div class="grid md:grid-cols-12 md:container mx-auto !px-0">
 
-				<div class="overflow-hidden md:self-end md:col-start-1 md:col-span-6 lg:col-start-2 lg:col-span-5 xl:col-start-2 xl:col-span-4 px-4">
+				<div class="overflow-hidden md:self-end md:col-start-1 md:col-span-6 lg:col-start-2 lg:col-span-5 2xl:col-start-2 2xl:col-span-4 px-4">
 					<?php if ( has_post_thumbnail() ) : ?>
 						<div class="aspect-[3/4] overflow-hidden opacity-100">
 							<?php
@@ -42,7 +42,8 @@ get_header(); ?>
 					<?php endif; ?>
 				</div>
 
-				<div class="self-center bg-green-deep md:bg-transparent md:col-start-7 md:col-span-6 lg:col-start-7 lg:col-span-6 p-6">
+				<?php $has_booking = get_field( 'bookable_services_toggle' ) == 1 && ! empty( get_field( 'service' ) ); ?>
+				<div class="self-center bg-green-deep md:bg-transparent md:col-start-7 md:col-span-6 lg:col-start-7 lg:col-span-6 p-6 <?php echo $has_booking ? 'md:py-24' : ''; ?>">
 					<h1 class="h1 text-4xl lg:text-5xl xl:text-[62.5px] text-white mb-1 xl:mb-2"><?php the_title(); // display name ?></h1>
 					<h2 class="h2 text-2xl lg:text-3xl xl:text-[32px] text-green-accent1 mb-4">
 						<?php if ( $role ) :
@@ -55,6 +56,26 @@ get_header(); ?>
 					// Check if legal assistant is enabled
 					$has_legal_assistant = get_field( 'legal_assistant_toggle' ) == 1;
 					?>
+
+					<?php if ( get_field( 'bookable_services_toggle' ) == 1 && have_rows( 'service' ) ) :
+						// Check for first service row label to use in CTA
+						$has_bookable_service = false;
+						$service_label = '';
+						while ( have_rows( 'service' ) ) : the_row();
+							if ( get_row_layout() == 'mediation_service' ) :
+								$has_bookable_service = true;
+								$service_label = 'Mediation session';
+								break;
+							endif;
+						endwhile;
+					?>
+						<?php if ( $has_bookable_service ) : ?>
+							<div class="mt-8 mb-12 lg:my-16">
+								<h3 class="text-white font-museum text-xl xl:text-2xl mb-3 lg:mb-6">Online Services</h3>
+								<a href="#book-service" class="btn alt text-sm lg:text-base cursor-pointer">Book a <?php echo esc_html( $service_label ); ?> with <?php echo esc_html( explode( ' ', get_the_title() )[0] ); ?></a>
+							</div>
+						<?php endif; ?>
+					<?php endif; ?>
 
 					<div class="grid grid-cols-1 <?php echo $has_legal_assistant ? 'sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2' : ''; ?> gap-6 mt-6">
 
@@ -257,7 +278,7 @@ get_header(); ?>
 		</section>
 
 		<section class="bg-white min-h-[30dvh] pb-12 lg:pb-16">
-			<div class="md:container grid grid-cols-1 lg:grid-cols-12 gap-8 p-6  lg:px-6 lg:py-8">
+			<div class="md:container grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 lg:px-6 lg:py-8">
 				<div class="lg:col-span-4">
 					<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]">Profile Summary</h2>
 					<?php if ( get_field( 'show_languages_toggle' ) && get_field( 'languages' ) ) : ?>
@@ -391,6 +412,31 @@ get_header(); ?>
 			<?php wp_reset_postdata(); ?>
 		<?php endif; ?>
 
+		<?php if ( get_field( 'bookable_services_toggle' ) == 1 && have_rows( 'service' ) ) :
+			$has_service_to_book = false;
+			$booking_shortcode = '';
+			$booking_service_label = '';
+			while ( have_rows( 'service' ) ) : the_row();
+				if ( get_row_layout() == 'mediation_service' ) :
+					$has_service_to_book = true;
+					$booking_service_label = 'Mediation Session';
+					$booking_shortcode = get_sub_field( 'mediation_shortcode' );
+					break;
+				endif;
+			endwhile;
+		?>
+			<?php if ( $has_service_to_book && $booking_shortcode ) : ?>
+				<div id="book-service" class="md:container grid grid-cols-1 lg:grid-cols-12 gap-8 p-6 lg:px-6 lg:py-16 scroll-mt-24">
+					<div class="lg:col-span-4">
+						<h2 class="h2 border-b-2 lg:border-b-[3px] border-brand-30 w-fit pb-[6px] lg:pb-[10px]">Book a <?php echo esc_html( $booking_service_label ); ?></h2>
+						<p class="text-base lg:text-lg text-brand-50 pt-2 lg:pt-4">Schedule a <?php echo esc_html( strtolower( $booking_service_label ) ); ?> with <?php the_title(); ?>.</p>
+					</div>
+					<div class="lg:col-span-7">
+						<?php echo do_shortcode( $booking_shortcode ); ?>
+					</div>
+				</div>
+			<?php endif; ?>
+		<?php endif; ?>
 
 <?php $insights = get_field( 'insights' ); ?>
 		<?php if ( $insights ) : ?>
