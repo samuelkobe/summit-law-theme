@@ -1,3 +1,15 @@
+/* Register Tailwind transform custom properties so they can be animated in keyframes */
+@property --tw-scale-x {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-scale-y {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
 .banner-after-content {
   @apply after:content-['']
   after:absolute
@@ -14,6 +26,7 @@
 
 /* Animation states - starts hidden */
 .banner-after-content::after {
+  @apply transform-gpu;
   transform-origin: left top;
 }
 
@@ -26,7 +39,7 @@
   @apply max-md:scale-x-100 md:scale-y-100;
 }
 
-/* Animated state */
+/* Animated state — use Tailwind custom properties so keyframes don't conflict with transform stack */
 .banner-after-content.animate-line::after {
   animation: growLine 0.8s ease-out forwards;
 }
@@ -34,10 +47,10 @@
 /* Mobile: grow left to right (scaleX) */
 @keyframes growLine {
   from {
-    transform: scaleX(0);
+    --tw-scale-x: 0;
   }
   to {
-    transform: scaleX(1);
+    --tw-scale-x: 1;
   }
 }
 
@@ -45,10 +58,10 @@
 @media (min-width: 768px) {
   @keyframes growLine {
     from {
-      transform: scaleY(0);
+      --tw-scale-y: 0;
     }
     to {
-      transform: scaleY(1);
+      --tw-scale-y: 1;
     }
   }
 }
@@ -82,13 +95,13 @@
   animation: growLineHorizontal 0.8s ease-out forwards;
 }
 
-/* Horizontal grow animation for h2 */
+/* Horizontal grow animation for h2 — use Tailwind custom property */
 @keyframes growLineHorizontal {
   from {
-    transform: scaleX(0);
+    --tw-scale-x: 0;
   }
   to {
-    transform: scaleX(1);
+    --tw-scale-x: 1;
   }
 }
 
@@ -144,19 +157,19 @@
 /* Grow from right to left */
 @keyframes growLineFromRight {
   from {
-    transform: scaleX(0);
+    --tw-scale-x: 0;
   }
   to {
-    transform: scaleX(1);
+    --tw-scale-x: 1;
   }
 }
 
 /* Grow from left to right */
 @keyframes growLineFromLeft {
   from {
-    transform: scaleX(0);
+    --tw-scale-x: 0;
   }
   to {
-    transform: scaleX(1);
+    --tw-scale-x: 1;
   }
 }

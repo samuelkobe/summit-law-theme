@@ -253,6 +253,31 @@
   @apply transform -translate-y-5 lg:-translate-y-7;
 }
 
+/* WordPress Password Protected Form */
+.post-password-form {
+  @apply max-w-md mx-auto text-center py-16 lg:py-24 px-4;
+}
+
+.post-password-form p:first-of-type {
+  @apply text-lg lg:text-xl text-brand-40 mb-6;
+}
+
+.post-password-form p:last-of-type {
+  @apply flex flex-col items-center gap-4;
+}
+
+.post-password-form label {
+  @apply text-base lg:text-lg font-medium text-green-deep w-full;
+}
+
+.post-password-form input[type="password"] {
+  @apply w-full mt-2 px-4 py-3 text-base text-green-deep bg-brand-10 border-2 border-green-accent1 rounded-lg shadow-md focus:shadow-xl focus:border-green-accent2 focus:outline-none transition-all duration-300;
+}
+
+.post-password-form input[type="submit"] {
+  @apply font-semibold py-3 px-8 text-base lg:text-lg tracking-[0.05em] rounded-[8px] shadow-md hover:shadow-lg bg-green-deep hover:bg-brand-black text-white cursor-pointer transition-all duration-300 w-full sm:w-auto;
+}
+
 /* Autofill background color override */
 input:-internal-autofill-selected {
   @apply bg-green-accent1/15 !important;
