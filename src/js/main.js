@@ -7,6 +7,7 @@ import SearchOverlay from './navigation/search-overlay.js';
 import ScrollBehavior from './navigation/scroll-behavior.js';
 import BannerAnimation from './banner-animation.js';
 import BulletGroupStyling from './bullet-group.js';
+import MediationIntake from './mediation-intake.js';
 
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize navigation modules
@@ -20,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Initialize bullet group styling
   new BulletGroupStyling();
+
+  // Initialize mediation intake form (injects into Amelia booking forms)
+  new MediationIntake();
 });
 
 // Focus first error on submit for accessibility

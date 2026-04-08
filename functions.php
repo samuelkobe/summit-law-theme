@@ -13,6 +13,7 @@ require_once get_template_directory() . '/inc/class-icon-walker.php';
 require_once get_template_directory() . '/inc/class-mega-menu-walker.php';
 require_once get_template_directory() . '/inc/vcard-generator.php';
 require_once get_template_directory() . '/inc/schema.php';
+require_once get_template_directory() . '/inc/mediation-intake.php';
 
 /**
  * Theme Setup
@@ -1641,3 +1642,5 @@ function summit_site_icon_css_var() {
 	}
 }
 add_action( 'wp_head', 'summit_site_icon_css_var' );
+
+add_filter( 'wpcf7_autop_or_not', '__return_false' );

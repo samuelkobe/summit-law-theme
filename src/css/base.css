@@ -4,6 +4,7 @@
 @import "./components/search.css";
 @import "./components/blocks.css";
 @import "./components/form.css";
+@import "./components/mediation-intake.css";
 
 @tailwind base;
 @tailwind components;

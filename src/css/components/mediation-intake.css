@@ -1,0 +1,145 @@
+/**
+ * Mediation Intake Form Styles
+ *
+ * Injected into Amelia's Information step via JS.
+ * Uses .amelia-v2-booking #amelia-container in selectors to match Amelia's
+ * full specificity chain so our styles win without needing !important.
+ */
+
+/* Container injected below Amelia's native fields */
+.amelia-v2-booking #amelia-container .mediation-intake-fields {
+  @apply w-full pt-6 border-t-2 border-green-accent1;
+}
+
+.amelia-v2-booking #amelia-container .mediation-intake-fields__heading {
+  @apply text-lg lg:text-xl font-semibold text-green-deep mb-1;
+}
+
+.amelia-v2-booking #amelia-container .mediation-intake-fields__subtext {
+  @apply text-sm text-brand-40 mb-4 leading-tight;
+}
+
+/* Party group fieldset */
+.amelia-v2-booking #amelia-container .intake-party-group {
+  @apply mb-8;
+}
+
+.amelia-v2-booking #amelia-container .intake-party-group legend {
+  @apply text-base lg:text-lg font-semibold text-green-deep mb-2;
+}
+
+.amelia-v2-booking #amelia-container .intake-optional-tag {
+  @apply text-sm font-normal text-brand-40;
+}
+
+/* Individual party entry row */
+.amelia-v2-booking #amelia-container .intake-party-entry {
+  @apply relative flex flex-col gap-2 mb-2 pr-10
+         lg:flex-row lg:flex-wrap lg:gap-x-3 lg:gap-y-1 lg:mb-1 lg:items-end lg:pr-0;
+}
+
+/* Numbered row label — sits above inputs on its own line */
+.amelia-v2-booking #amelia-container .intake-party-entry__label {
+  @apply w-full text-sm text-brand-40 font-medium;
+}
+
+.amelia-v2-booking #amelia-container .intake-party-entry input {
+  @apply w-full lg:flex-1 lg:min-w-0 px-3 py-2 text-sm text-green-deep bg-brand-10 border-2 border-green-accent1 rounded-lg shadow-sm transition-all duration-300;
+}
+
+.amelia-v2-booking #amelia-container .intake-party-entry input:focus {
+  @apply shadow-md border-green-accent2 outline-none;
+}
+
+.amelia-v2-booking #amelia-container .intake-party-entry input::placeholder {
+  @apply text-brand-40 font-normal;
+}
+
+/* Validation error state */
+.amelia-v2-booking #amelia-container .intake-party-entry input.intake-invalid {
+  @apply border-red-500;
+}
+
+/* Remove button for additional rows */
+.amelia-v2-booking #amelia-container .intake-remove-entry {
+  @apply absolute right-0 top-1 lg:static
+         flex-shrink-0 w-8 h-8 flex items-center justify-center text-brand-40 hover:text-red-500 bg-transparent border-none cursor-pointer rounded-full hover:bg-red-50 transition-colors duration-200 text-lg leading-none;
+}
+
+/* Add button */
+.amelia-v2-booking #amelia-container .intake-add-entry {
+  @apply mt-1 text-sm font-medium text-green-deep bg-transparent border-none cursor-pointer underline decoration-transparent hover:decoration-green-deep underline-offset-2 transition-colors duration-200 p-0;
+}
+
+/* File upload section */
+.amelia-v2-booking #amelia-container .intake-file-group {
+  @apply mb-8;
+}
+
+.amelia-v2-booking #amelia-container .intake-file-group legend {
+  @apply text-base lg:text-lg font-semibold text-green-deep mb-2;
+}
+
+.amelia-v2-booking #amelia-container .intake-file-input-wrapper {
+  @apply relative;
+}
+
+.amelia-v2-booking
+  #amelia-container
+  .intake-file-input-wrapper
+  input[type="file"] {
+  @apply w-full text-sm text-brand-40 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-2 file:border-green-accent1 file:text-sm file:font-medium file:bg-brand-10 file:text-green-deep file:cursor-pointer hover:file:bg-green-accent1/20 file:transition-colors file:duration-200;
+}
+
+/* File preview badge */
+.amelia-v2-booking #amelia-container .intake-file-preview {
+  @apply flex items-center gap-2 mt-1 text-sm text-brand-50;
+}
+
+.amelia-v2-booking #amelia-container .intake-file-preview .filename {
+  @apply font-medium text-green-deep;
+}
+
+.amelia-v2-booking #amelia-container .intake-file-preview .remove-file {
+  @apply text-brand-40 hover:text-red-500 cursor-pointer text-xs underline;
+}
+
+/* Uploading state */
+.amelia-v2-booking #amelia-container .intake-file-uploading {
+  @apply opacity-60 pointer-events-none;
+}
+
+.amelia-v2-booking #amelia-container .intake-file-spinner {
+  @apply inline-block w-4 h-4 border-2 border-green-accent1 border-t-transparent rounded-full animate-spin;
+}
+
+/* Third party block — groups party entry + inline claim upload */
+.amelia-v2-booking #amelia-container .intake-tp-block {
+  @apply mb-3 pb-4 border-b border-brand-20 last:border-b-0 last:pb-0;
+}
+
+/* Inline claim upload within a third party block */
+.amelia-v2-booking #amelia-container .intake-claim-inline {
+  @apply mt-2 pl-0 lg:pl-1;
+}
+
+.amelia-v2-booking #amelia-container .intake-claim-inline label {
+  @apply block text-sm text-brand-40 mb-1;
+}
+
+/* Section divider between party groups and files */
+.amelia-v2-booking #amelia-container .intake-section-divider {
+  @apply my-6 border-t border-brand-20;
+}
+
+/* Error message */
+.amelia-v2-booking #amelia-container .intake-error-message {
+  @apply text-sm text-red-500 font-medium mt-1;
+}
+
+/* Submission state */
+.amelia-v2-booking
+  #amelia-container
+  .mediation-intake-fields.intake-submitting {
+  @apply opacity-60 pointer-events-none;
+}
