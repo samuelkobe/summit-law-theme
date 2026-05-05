@@ -232,18 +232,9 @@ function summit_capture_amelia_booking_id( $booking, $service, $appointment ) {
 				$booking_date = $appointment['bookingStart']; // Already 'Y-m-d H:i:s' format.
 			}
 
-			// Capture the Zoom join URL — check appointment first, then booking as fallback.
-			$zoom_join_url = '';
-			if ( is_array( $appointment ) && ! empty( $appointment['zoomMeeting']['joinUrl'] ) ) {
-				$zoom_join_url = $appointment['zoomMeeting']['joinUrl'];
-			} elseif ( is_array( $booking ) && ! empty( $booking['zoomMeeting']['joinUrl'] ) ) {
-				$zoom_join_url = $booking['zoomMeeting']['joinUrl'];
-			}
-
 			set_transient( $session_key, [
-				'booking_id'    => $booking_id,
-				'booking_date'  => $booking_date,
-				'zoom_join_url' => $zoom_join_url,
+				'booking_id'   => $booking_id,
+				'booking_date' => $booking_date,
 			], 300 ); // 5 min TTL
 		}
 	}
@@ -719,11 +710,28 @@ function summit_intake_submit() {
 	if ( is_array( $transient_data ) ) {
 		$amelia_booking_id = $transient_data['booking_id'] ?? 0;
 		$booking_date      = $transient_data['booking_date'] ?? '';
-		$zoom_join_url     = $transient_data['zoom_join_url'] ?? '';
 	} else {
 		$amelia_booking_id = $transient_data ?: 0;
 		$booking_date      = '';
-		$zoom_join_url     = '';
+	}
+
+	// Query the Zoom join URL from Amelia's tables — more reliable than the hook
+	// because Amelia creates the Zoom meeting after amelia_after_appointment_booking_saved fires.
+	$zoom_join_url = '';
+	if ( $amelia_booking_id ) {
+		global $wpdb;
+		$zoom_json = $wpdb->get_var( $wpdb->prepare(
+			"SELECT a.zoom_meeting
+			 FROM {$wpdb->prefix}amelia_customer_bookings cb
+			 JOIN {$wpdb->prefix}amelia_appointments a ON a.id = cb.appointment_id
+			 WHERE cb.id = %d
+			 LIMIT 1",
+			$amelia_booking_id
+		) );
+		if ( $zoom_json ) {
+			$zoom_data     = json_decode( $zoom_json, true );
+			$zoom_join_url = $zoom_data['joinUrl'] ?? '';
+		}
 	}
 
 	// Create the intake post
