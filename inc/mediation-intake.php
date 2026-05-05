@@ -594,6 +594,31 @@ function summit_intake_hide_from_media_library( $query ) {
 add_filter( 'ajax_query_attachments_args', 'summit_intake_hide_from_media_library' );
 
 // =============================================================================
+// OttoKit Webhook Dispatch
+// =============================================================================
+
+/**
+ * Fire a non-blocking POST to the configured OttoKit webhook URL.
+ * If no URL is saved, returns immediately without doing anything.
+ *
+ * @param int   $post_id The mediation intake post ID (for reference).
+ * @param array $data    Associative array to send as JSON payload.
+ */
+function summit_intake_dispatch_webhook( $post_id, $data ) {
+	$webhook_url = get_option( 'summit_intake_ottokit_webhook_url', '' );
+	if ( ! $webhook_url ) {
+		return;
+	}
+
+	wp_remote_post( $webhook_url, [
+		'headers'  => [ 'Content-Type' => 'application/json' ],
+		'body'     => wp_json_encode( $data ),
+		'timeout'  => 10,
+		'blocking' => false, // Fire-and-forget — don't delay the user's success response.
+	] );
+}
+
+// =============================================================================
 // AJAX — Submit Intake
 // =============================================================================
 
@@ -755,6 +780,44 @@ function summit_intake_submit() {
 		delete_post_meta( $title_file_id, '_summit_intake_upload_time' );
 	}
 
+	// Resolve mediator name for webhook payload
+	$mediator_post = $team_member ? get_post( $team_member ) : null;
+	$mediator_name = ( $mediator_post instanceof WP_Post ) ? $mediator_post->post_title : $team_member_name;
+
+	// Collect all counsel emails (deduplicated)
+	$all_counsel_emails = [];
+	foreach ( array_merge( $plaintiff_rows, $defendant_rows, $third_party_rows ) as $party ) {
+		$email = $party['counsel_email'] ?? '';
+		if ( $email ) {
+			$all_counsel_emails[] = $email;
+		}
+	}
+	$all_counsel_emails = array_values( array_unique( $all_counsel_emails ) );
+
+	// Format booking date in the site's local timezone
+	$booking_date_formatted = '';
+	if ( $booking_date ) {
+		$dt                     = new DateTimeImmutable( $booking_date, wp_timezone() );
+		$booking_date_formatted = wp_date( 'F j, Y \a\t g:i a', $dt->getTimestamp() );
+	}
+
+	// Strip "Intake — " prefix to get a clean case name
+	$case_name = preg_replace( '/^Intake\s*[—\-]+\s*/u', '', $post_title );
+
+	summit_intake_dispatch_webhook( $post_id, [
+		'intake_id'          => $post_id,
+		'case_name'          => $case_name,
+		'booking_date'       => $booking_date_formatted,
+		'booking_date_raw'   => $booking_date,
+		'mediator_name'      => $mediator_name,
+		'all_counsel_emails' => $all_counsel_emails,
+		'counsel_emails_to'  => implode( ', ', $all_counsel_emails ),
+		'plaintiffs'         => $plaintiff_rows,
+		'defendants'         => $defendant_rows,
+		'third_parties'      => $third_party_rows,
+		'amelia_booking_id'  => $amelia_booking_id ?: null,
+	] );
+
 	wp_send_json_success( [
 		'intake_id'        => $post_id,
 		'amelia_booking_id' => $amelia_booking_id ?: null,
@@ -882,6 +945,12 @@ function summit_intake_register_settings() {
 		'default'           => false,
 	] );
 
+	register_setting( 'summit_intake_settings', 'summit_intake_ottokit_webhook_url', [
+		'type'              => 'string',
+		'sanitize_callback' => 'esc_url_raw',
+		'default'           => '',
+	] );
+
 	add_settings_section(
 		'summit_intake_download_section',
 		'File Download Access',
@@ -913,6 +982,23 @@ function summit_intake_register_settings() {
 		'summit-intake-settings',
 		'summit_intake_general_section'
 	);
+
+	add_settings_section(
+		'summit_intake_notifications_section',
+		'OttoKit Notifications',
+		function () {
+			echo '<p>Paste the OttoKit "Catch Webhook" URL here to send intake data to OttoKit when a booking is confirmed. Leave blank to disable.</p>';
+		},
+		'summit-intake-settings'
+	);
+
+	add_settings_field(
+		'summit_intake_ottokit_webhook_url',
+		'OttoKit Webhook URL',
+		'summit_intake_render_webhook_url_field',
+		'summit-intake-settings',
+		'summit_intake_notifications_section'
+	);
 }
 
 /**
@@ -924,6 +1010,18 @@ function summit_intake_render_manual_create_field() {
 		'<label><input type="checkbox" name="summit_intake_allow_manual_create" value="1" %s> Allow "Add New Intake" in the admin dashboard (Leave unchecked).</label>',
 		checked( $enabled, true, false )
 	);
+}
+
+/**
+ * Render the OttoKit webhook URL input.
+ */
+function summit_intake_render_webhook_url_field() {
+	$url = get_option( 'summit_intake_ottokit_webhook_url', '' );
+	printf(
+		'<input type="url" name="summit_intake_ottokit_webhook_url" value="%s" class="regular-text" placeholder="https://...">',
+		esc_attr( $url )
+	);
+	echo '<p class="description">This URL is provided by OttoKit when you create a "Catch Webhook" trigger step.</p>';
 }
 add_action( 'admin_init', 'summit_intake_register_settings' );
 
