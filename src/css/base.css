@@ -165,6 +165,10 @@
     @apply !font-museum;
   }
 
+  .wp-block-heading.h3.summit-quote {
+    @apply !font-museum !-mb-8 !pl-0;
+  }
+
   .h4 {
     @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.005em] text-h4 antialiased;
   }

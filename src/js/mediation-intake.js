@@ -109,6 +109,15 @@ export default class MediationIntake {
     this.bindRepeaters(wrapper);
     this.bindFileUploads(wrapper);
     this.syncStateFromInputs(wrapper);
+    this.bindEmailValidation(wrapper);
+
+    // Store a reference to Amelia's Continue button so we can toggle disabled
+    const ameliaRoot =
+      infoForm.closest('[id^="amelia-v2-booking"]') ||
+      infoForm.closest("#amelia-container") ||
+      document.body;
+    this.continueBtn =
+      ameliaRoot.querySelector(".am-button-continue") || null;
   }
 
   /**
@@ -361,6 +370,64 @@ export default class MediationIntake {
   }
 
   /**
+   * Validate counsel email fields on blur/input and sync the Continue button state.
+   * Uses event delegation so dynamically added rows are covered.
+   */
+  bindEmailValidation(wrapper) {
+    // Show error when leaving an invalid field, then sync button
+    wrapper.addEventListener("focusout", (e) => {
+      if (!e.target.matches('[data-field="counsel_email"]')) return;
+      const val = e.target.value.trim();
+      if (val && !this.isValidEmail(val)) {
+        this.showEmailError(e.target);
+      } else {
+        this.clearEmailError(e.target);
+      }
+      this.updateContinueButton(wrapper);
+    });
+
+    // Clear error immediately as the user types a valid (or empty) value, then sync button
+    wrapper.addEventListener("input", (e) => {
+      if (!e.target.matches('[data-field="counsel_email"]')) return;
+      const val = e.target.value.trim();
+      if (!val || this.isValidEmail(val)) {
+        this.clearEmailError(e.target);
+      }
+      this.updateContinueButton(wrapper);
+    });
+  }
+
+  /**
+   * Enable or disable Amelia's Continue button based on whether any counsel
+   * email field contains a non-empty invalid value.
+   *
+   * Mirrors exactly what Amelia itself does: toggles the `disabled` attribute
+   * and the `is-disabled` class. A native disabled button receives no click
+   * events, so no event interception is needed.
+   */
+  updateContinueButton(wrapper) {
+    if (!this.continueBtn) return;
+
+    const hasInvalidEmail = Array.from(
+      wrapper.querySelectorAll('[data-field="counsel_email"]'),
+    ).some((input) => {
+      const val = input.value.trim();
+      return val && !this.isValidEmail(val);
+    });
+
+    if (hasInvalidEmail) {
+      this.continueBtn.disabled = true;
+      this.continueBtn.classList.add("is-disabled");
+      this._intakeDisabledBtn = true;
+    } else if (this._intakeDisabledBtn) {
+      // Only re-enable if WE disabled it — don't override Amelia's own disabled state
+      this.continueBtn.disabled = false;
+      this.continueBtn.classList.remove("is-disabled");
+      this._intakeDisabledBtn = false;
+    }
+  }
+
+  /**
    * Read all party data from the DOM into state.
    */
   updateStateFromDOM(wrapper) {
@@ -469,10 +536,48 @@ export default class MediationIntake {
    * Submit all intake data to the server after Amelia booking completes.
    */
   async submitIntake() {
-    // Read final state from DOM
+    // Read final state from DOM if the form is still attached
     const wrapper = document.querySelector(".mediation-intake-fields");
     if (wrapper) {
       this.updateStateFromDOM(wrapper);
+    }
+
+    // Validate counsel emails from state — runs even if the form has been
+    // removed from the DOM by Amelia's step navigation
+    let hasEmailError = false;
+    for (const p of [
+      ...this.state.plaintiffs,
+      ...this.state.defendants,
+      ...this.state.thirdParties,
+    ]) {
+      const email = (p.counsel_email || "").trim();
+      if (email && !this.isValidEmail(email)) {
+        hasEmailError = true;
+        break;
+      }
+    }
+
+    if (hasEmailError) {
+      if (wrapper) {
+        // Form is still in the DOM — show inline errors and retry button
+        wrapper.querySelectorAll('[data-field="counsel_email"]').forEach((input) => {
+          const val = input.value.trim();
+          if (val && !this.isValidEmail(val)) {
+            this.showEmailError(input);
+          } else {
+            this.clearEmailError(input);
+          }
+        });
+        this.showRetryUI(wrapper);
+      } else {
+        // Amelia has already navigated away — show error near the congrats screen
+        this.showCongratsError();
+      }
+      return;
+    }
+
+    if (wrapper) {
+      this.clearRetryUI(wrapper);
       wrapper.classList.add("intake-submitting");
     }
 
@@ -555,6 +660,83 @@ export default class MediationIntake {
       thirdParty: "thirdParties",
     };
     return map[type] || type;
+  }
+
+  /**
+   * Validate an email address using the browser's built-in parser.
+   */
+  isValidEmail(val) {
+    const input = document.createElement("input");
+    input.type = "email";
+    input.value = val;
+    return input.checkValidity();
+  }
+
+  /**
+   * Mark a counsel email input as invalid and insert an error message after it.
+   */
+  showEmailError(input) {
+    input.classList.add("intake-field-error");
+    if (!input.nextElementSibling?.classList.contains("intake-email-error")) {
+      const msg = document.createElement("span");
+      msg.className = "intake-error-message intake-email-error";
+      msg.textContent = "Please enter a valid email address.";
+      input.insertAdjacentElement("afterend", msg);
+    }
+  }
+
+  /**
+   * Remove the invalid state and error message from a counsel email input.
+   */
+  clearEmailError(input) {
+    input.classList.remove("intake-field-error");
+    const msg = input.nextElementSibling;
+    if (msg?.classList.contains("intake-email-error")) {
+      msg.remove();
+    }
+  }
+
+  /**
+   * Show a banner with a retry button when submission is blocked by email errors.
+   */
+  showRetryUI(wrapper) {
+    if (wrapper.querySelector(".intake-retry-banner")) return;
+    const banner = document.createElement("div");
+    banner.className = "intake-retry-banner";
+    banner.innerHTML = `
+      <span class="intake-error-message">Some email addresses are invalid — please correct them above and click <strong>Submit Intake</strong>.</span>
+      <button type="button" class="intake-retry-btn">Submit Intake</button>
+    `;
+    banner.querySelector(".intake-retry-btn").addEventListener("click", () => {
+      this.submitIntake();
+    });
+    wrapper.appendChild(banner);
+  }
+
+  /**
+   * Remove the retry banner once submission succeeds.
+   */
+  clearRetryUI(wrapper) {
+    wrapper.querySelector(".intake-retry-banner")?.remove();
+  }
+
+  /**
+   * Show an error message on the Amelia congrats screen when validation fails
+   * after the intake form has already been removed from the DOM.
+   */
+  showCongratsError() {
+    const congrats = document.querySelector(".am-fs__congrats");
+    if (!congrats) return;
+    if (congrats.querySelector(".intake-congrats-error")) return;
+    const banner = document.createElement("div");
+    banner.className = "intake-congrats-error";
+    banner.style.cssText =
+      "margin:0 0 16px;padding:14px 16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;color:#991b1b;font-size:14px;line-height:1.5;";
+    banner.innerHTML =
+      "<strong>Intake not submitted — invalid email address.</strong><br>" +
+      "One or more counsel email addresses were invalid and could not be saved. " +
+      "Please contact us to provide the correct email address(es) so we can complete your intake record.";
+    congrats.insertAdjacentElement("afterbegin", banner);
   }
 
   /**

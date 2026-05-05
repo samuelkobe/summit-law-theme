@@ -1,4 +1,6 @@
 {
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
   "name": "acf/form",
   "title": "Contact Form - Summit Law LLP",
   "description": "A block for adding content and a main form",
@@ -18,6 +20,7 @@
     "renderTemplate": "form.php"
   },
   "supports": {
-    "anchor": true
+    "anchor": true,
+    "jsx": true
   }
 }

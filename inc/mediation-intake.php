@@ -76,6 +76,7 @@ function summit_intake_columns( $columns ) {
 		if ( $key === 'title' ) {
 			$new[ $key ] = $label;
 			$new['booking_date'] = 'Booking Date';
+			$new['bundle']       = 'Actions';
 			continue;
 		}
 		if ( $key === 'date' ) {
@@ -92,14 +93,39 @@ add_filter( 'manage_mediation_intake_posts_columns', 'summit_intake_columns' );
  * Render the Booking Date column value.
  */
 function summit_intake_column_content( $column, $post_id ) {
-	if ( $column !== 'booking_date' ) {
-		return;
+	if ( $column === 'booking_date' ) {
+		$date = get_field( 'booking_date', $post_id );
+		if ( $date ) {
+			$dt = new DateTimeImmutable( $date, wp_timezone() );
+			echo esc_html( wp_date( 'F j, Y \a\t g:i a', $dt->getTimestamp() ) );
+		} else {
+			echo '—';
+		}
 	}
-	$date = get_field( 'booking_date', $post_id );
-	if ( $date ) {
-		echo esc_html( wp_date( 'F j, Y \a\t g:i a', strtotime( $date ) ) );
-	} else {
-		echo '—';
+
+	if ( $column === 'bundle' ) {
+		echo '<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">';
+
+		if ( summit_intake_current_user_can_download() ) {
+			$bundle_url = wp_nonce_url(
+				add_query_arg(
+					[ 'action' => 'summit_intake_download_bundle', 'post_id' => $post_id ],
+					admin_url( 'admin-post.php' )
+				),
+				'summit_intake_bundle_' . $post_id,
+				'_bundle_nonce'
+			);
+			echo '<a href="' . esc_url( $bundle_url ) . '" class="button button-small" target="_blank" rel="noopener noreferrer">&#8675; Download</a>';
+		} else {
+			echo '<span style="color:#999;font-size:12px;" title="Contact your administrator to gain download access.">No access</span>';
+		}
+
+		$mailto = summit_intake_mailto_url( $post_id );
+		if ( $mailto ) {
+			echo '<a href="' . esc_attr( $mailto ) . '" class="button button-small" target="_blank" rel="noopener noreferrer">&#9993; Email Parties</a>';
+		}
+
+		echo '</div>';
 	}
 }
 add_action( 'manage_mediation_intake_posts_custom_column', 'summit_intake_column_content', 10, 2 );
@@ -153,179 +179,8 @@ function summit_intake_default_sort( $query ) {
 add_action( 'pre_get_posts', 'summit_intake_default_sort' );
 
 // =============================================================================
-// ACF Field Group Registration
+// ACF Field Group — loaded from acf-json/group_mediation_intake.json
 // =============================================================================
-
-function summit_register_intake_acf_fields() {
-	if ( ! function_exists( 'acf_add_local_field_group' ) ) {
-		return;
-	}
-
-	acf_add_local_field_group( [
-		'key'      => 'group_mediation_intake',
-		'title'    => 'Mediation Intake Details',
-		'location' => [
-			[
-				[
-					'param'    => 'post_type',
-					'operator' => '==',
-					'value'    => 'mediation_intake',
-				],
-			],
-		],
-		'fields'   => [
-			// Status
-			[
-				'key'           => 'field_intake_status',
-				'label'         => 'Status',
-				'name'          => 'intake_status',
-				'type'          => 'select',
-				'choices'       => [
-					'pending'   => 'Pending',
-					'confirmed' => 'Confirmed',
-				],
-				'default_value' => 'pending',
-			],
-			// Amelia Booking ID
-			[
-				'key'   => 'field_intake_amelia_booking_id',
-				'label' => 'Amelia Booking ID',
-				'name'  => 'amelia_booking_id',
-				'type'  => 'number',
-			],
-			// Booking Date (from Amelia appointment)
-			[
-				'key'            => 'field_intake_booking_date',
-				'label'          => 'Booking Date',
-				'name'           => 'booking_date',
-				'type'           => 'date_time_picker',
-				'display_format' => 'F j, Y g:i a',
-				'return_format'  => 'Y-m-d H:i:s',
-			],
-			// Team Member
-			[
-				'key'       => 'field_intake_team_member',
-				'label'     => 'Mediator',
-				'name'      => 'team_member',
-				'type'      => 'post_object',
-				'post_type' => [ 'team' ],
-				'return_format' => 'id',
-			],
-			// Plaintiffs Repeater
-			[
-				'key'        => 'field_intake_plaintiffs',
-				'label'      => 'Plaintiffs',
-				'name'       => 'plaintiffs',
-				'type'       => 'repeater',
-				'layout'     => 'table',
-				'sub_fields' => [
-					[
-						'key'   => 'field_intake_plaintiff_name',
-						'label' => 'Name',
-						'name'  => 'name',
-						'type'  => 'text',
-					],
-					[
-						'key'   => 'field_intake_plaintiff_counsel_name',
-						'label' => 'Counsel Name',
-						'name'  => 'counsel_name',
-						'type'  => 'text',
-					],
-					[
-						'key'   => 'field_intake_plaintiff_counsel_email',
-						'label' => 'Counsel Email',
-						'name'  => 'counsel_email',
-						'type'  => 'email',
-					],
-				],
-			],
-			// Defendants Repeater
-			[
-				'key'        => 'field_intake_defendants',
-				'label'      => 'Defendants',
-				'name'       => 'defendants',
-				'type'       => 'repeater',
-				'layout'     => 'table',
-				'sub_fields' => [
-					[
-						'key'   => 'field_intake_defendant_name',
-						'label' => 'Name',
-						'name'  => 'name',
-						'type'  => 'text',
-					],
-					[
-						'key'   => 'field_intake_defendant_counsel_name',
-						'label' => 'Counsel Name',
-						'name'  => 'counsel_name',
-						'type'  => 'text',
-					],
-					[
-						'key'   => 'field_intake_defendant_counsel_email',
-						'label' => 'Counsel Email',
-						'name'  => 'counsel_email',
-						'type'  => 'email',
-					],
-				],
-			],
-			// Third Parties Repeater
-			[
-				'key'        => 'field_intake_third_parties',
-				'label'      => 'Third Parties',
-				'name'       => 'third_parties',
-				'type'       => 'repeater',
-				'layout'     => 'table',
-				'sub_fields' => [
-					[
-						'key'   => 'field_intake_tp_name',
-						'label' => 'Name',
-						'name'  => 'name',
-						'type'  => 'text',
-					],
-					[
-						'key'   => 'field_intake_tp_counsel_name',
-						'label' => 'Counsel Name',
-						'name'  => 'counsel_name',
-						'type'  => 'text',
-					],
-					[
-						'key'   => 'field_intake_tp_counsel_email',
-						'label' => 'Counsel Email',
-						'name'  => 'counsel_email',
-						'type'  => 'email',
-					],
-				],
-			],
-			// Title of Proceedings File
-			[
-				'key'           => 'field_intake_title_of_proceedings',
-				'label'         => 'Title of Proceedings',
-				'name'          => 'title_of_proceedings',
-				'type'          => 'file',
-				'return_format' => 'id',
-				'mime_types'    => 'pdf,doc,docx',
-			],
-			// Third Party Claims Repeater
-			[
-				'key'        => 'field_intake_third_party_claims',
-				'label'      => 'Third Party Statements of Claim',
-				'name'       => 'third_party_claims',
-				'type'       => 'repeater',
-				'layout'     => 'table',
-				'sub_fields' => [
-					[
-						'key'           => 'field_intake_claim_file',
-						'label'         => 'Claim File',
-						'name'          => 'claim_file',
-						'type'          => 'file',
-						'return_format' => 'id',
-						'mime_types'    => 'pdf,doc,docx',
-					],
-				],
-			],
-		],
-	] );
-}
-add_action( 'acf/init', 'summit_register_intake_acf_fields' );
 
 /**
  * Filter the Mediator post_object field to only show team members
@@ -562,6 +417,71 @@ add_action( 'wp_ajax_nopriv_summit_intake_upload_file', 'summit_intake_upload_fi
  * Stream an intake file to authorized users.
  * Logged-in only (no nopriv hook). Checks role against allowed list.
  */
+/**
+ * Render a branded access-denied page with the theme header and footer.
+ * Used for both unauthenticated and unauthorised download attempts.
+ *
+ * @param int    $status  HTTP status code (401 or 403).
+ * @param string $heading Page heading.
+ * @param string $message Explanatory paragraph shown beneath the heading.
+ */
+function summit_intake_render_access_denied( $status, $heading, $message ) {
+	status_header( $status );
+	nocache_headers();
+
+	get_header();
+	?>
+	<main id="main" class="site-main">
+		<div class="container mx-auto px-4">
+			<div class="max-w-2xl mx-auto text-center py-20">
+
+				<div class="mb-8">
+					<svg class="w-12 h-12 mx-auto text-green-deep opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+					</svg>
+				</div>
+
+				<div class="mb-12">
+					<h1 class="text-3xl md:text-4xl font-bold text-green-deep mb-4">
+						<?php echo esc_html( $heading ); ?>
+					</h1>
+					<p class="text-lg text-gray-600">
+						<?php echo esc_html( $message ); ?>
+					</p>
+				</div>
+
+				<div class="flex flex-col sm:flex-row gap-4 justify-center">
+
+					<?php if ( $status === 401 ) : ?>
+					<a href="<?php echo esc_url( wp_login_url( home_url() ) ); ?>"
+					   class="group flex flex-col items-center justify-center p-6 bg-white border-2 border-gray-200 rounded-lg hover:border-green-deep hover:shadow-lg transition-all duration-300">
+						<svg class="w-12 h-12 text-green-deep mb-3 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+						</svg>
+						<span class="text-lg font-medium text-green-deep"><?php esc_html_e( 'Log In', 'summit-law-theme' ); ?></span>
+						<span class="text-sm text-gray-500 mt-1"><?php esc_html_e( 'Access your account', 'summit-law-theme' ); ?></span>
+					</a>
+					<?php endif; ?>
+
+					<a href="<?php echo esc_url( home_url( '/' ) ); ?>"
+					   class="group flex flex-col items-center justify-center p-6 bg-white border-2 border-gray-200 rounded-lg hover:border-green-deep hover:shadow-lg transition-all duration-300">
+						<svg class="w-12 h-12 text-green-deep mb-3 group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+						</svg>
+						<span class="text-lg font-medium text-green-deep"><?php esc_html_e( 'Home', 'summit-law-theme' ); ?></span>
+						<span class="text-sm text-gray-500 mt-1"><?php esc_html_e( 'Return to homepage', 'summit-law-theme' ); ?></span>
+					</a>
+
+				</div>
+
+			</div>
+		</div>
+	</main>
+	<?php
+	get_footer();
+	die();
+}
+
 function summit_intake_download() {
 	check_ajax_referer( 'summit_intake_download', 'nonce' );
 
@@ -588,7 +508,11 @@ function summit_intake_download() {
 	}
 
 	if ( ! $has_access ) {
-		wp_die( 'You do not have permission to download this file.', 'Forbidden', [ 'response' => 403 ] );
+		summit_intake_render_access_denied(
+			403,
+			'Access Restricted',
+			'You don\'t have permission to download this file. Contact your administrator to have your role updated under Mediation Intakes → Permissions.'
+		);
 	}
 
 	// Get file path
@@ -616,6 +540,15 @@ function summit_intake_download() {
 	exit;
 }
 add_action( 'wp_ajax_summit_intake_download', 'summit_intake_download' );
+
+function summit_intake_download_nopriv() {
+	summit_intake_render_access_denied(
+		401,
+		'Login Required',
+		'This file is restricted to authorised staff. Please log in to continue.'
+	);
+}
+add_action( 'wp_ajax_nopriv_summit_intake_download', 'summit_intake_download_nopriv' );
 
 // =============================================================================
 // Rewrite Intake Attachment URLs to Proxy
@@ -714,6 +647,23 @@ function summit_intake_submit() {
 	}
 	$claim_ids     = array_map( 'absint', $data['thirdPartyClaimIds'] ?? [] );
 
+	// Validate counsel emails — sanitize_email() returns '' for invalid input
+	foreach ( [ 'plaintiff' => $plaintiffs, 'defendant' => $defendants, 'third party' => $third_parties ] as $label => $parties ) {
+		foreach ( $parties as $i => $p ) {
+			$raw = trim( $p['counsel_email'] ?? '' );
+			if ( $raw !== '' && sanitize_email( $raw ) === '' ) {
+				wp_send_json_error( [
+					'message' => sprintf(
+						'Invalid email address for %s %d: "%s". Please go back and correct it.',
+						$label,
+						$i + 1,
+						$raw
+					),
+				] );
+			}
+		}
+	}
+
 	// Validate minimum data
 	if ( empty( $plaintiffs ) || empty( $defendants ) ) {
 		wp_send_json_error( [ 'message' => 'At least one plaintiff and one defendant are required.' ] );
@@ -781,13 +731,18 @@ function summit_intake_submit() {
 	}
 	update_field( 'defendants', $defendant_rows, $post_id );
 
-	// Save third parties repeater
+	// Save third parties repeater — claim file is stored inline per row
 	$third_party_rows = [];
-	foreach ( $third_parties as $tp ) {
+	foreach ( $third_parties as $i => $tp ) {
+		$claim_id = absint( $claim_ids[ $i ] ?? 0 );
+		if ( $claim_id ) {
+			delete_post_meta( $claim_id, '_summit_intake_upload_time' );
+		}
 		$third_party_rows[] = [
 			'name'          => sanitize_text_field( $tp['name'] ?? '' ),
 			'counsel_name'  => sanitize_text_field( $tp['counsel_name'] ?? '' ),
 			'counsel_email' => sanitize_email( $tp['counsel_email'] ?? '' ),
+			'claim_file'    => $claim_id ?: '',
 		];
 	}
 	update_field( 'third_parties', $third_party_rows, $post_id );
@@ -798,18 +753,6 @@ function summit_intake_submit() {
 		// Remove orphan timestamp so cron won't delete it; keep _summit_intake_upload
 		// so the download proxy continues to recognize it as an intake file.
 		delete_post_meta( $title_file_id, '_summit_intake_upload_time' );
-	}
-
-	// Save third party claim files repeater
-	$claim_rows = [];
-	foreach ( $claim_ids as $claim_id ) {
-		if ( $claim_id ) {
-			$claim_rows[] = [ 'claim_file' => $claim_id ];
-			delete_post_meta( $claim_id, '_summit_intake_upload_time' );
-		}
-	}
-	if ( ! empty( $claim_rows ) ) {
-		update_field( 'third_party_claims', $claim_rows, $post_id );
 	}
 
 	wp_send_json_success( [
@@ -891,13 +834,13 @@ function summit_intake_delete_attached_files( $post_id ) {
 		wp_delete_attachment( (int) $title_id, true );
 	}
 
-	// Third Party Statements of Claim
-	$claims = get_field( 'third_party_claims', $post_id );
-	if ( is_array( $claims ) ) {
-		foreach ( $claims as $row ) {
-			$claim_id = $row['claim_file'] ?? 0;
+	// Third Party Statements of Claim (stored inline within third_parties repeater)
+	$third_parties = get_field( 'third_parties', $post_id );
+	if ( is_array( $third_parties ) ) {
+		foreach ( $third_parties as $row ) {
+			$claim_id = absint( $row['claim_file'] ?? 0 );
 			if ( $claim_id ) {
-				wp_delete_attachment( (int) $claim_id, true );
+				wp_delete_attachment( $claim_id, true );
 			}
 		}
 	}
@@ -1012,6 +955,380 @@ function summit_intake_render_roles_field() {
 		);
 	}
 }
+
+// =============================================================================
+// Conflict Search Bundle — Email Parties Mailto Helper
+// =============================================================================
+
+/**
+ * Build a mailto: URL addressed to all counsel on the intake.
+ * Subject line includes the case name and booking date.
+ * Returns an empty string if no counsel emails are found.
+ */
+function summit_intake_mailto_url( $post_id ) {
+	$plaintiffs    = get_field( 'plaintiffs', $post_id ) ?: [];
+	$defendants    = get_field( 'defendants', $post_id ) ?: [];
+	$third_parties = get_field( 'third_parties', $post_id ) ?: [];
+
+	$emails = [];
+	foreach ( array_merge( $plaintiffs, $defendants, $third_parties ) as $party ) {
+		$email = sanitize_email( $party['counsel_email'] ?? '' );
+		if ( $email ) {
+			$emails[] = $email;
+		}
+	}
+	$emails = array_values( array_unique( $emails ) );
+
+	if ( empty( $emails ) ) {
+		return '';
+	}
+
+	// Build subject: strip the "Intake — " prefix from the post title, then append booking date
+	$post      = get_post( $post_id );
+	$case_name = $post ? preg_replace( '/^Intake\s*[—\-]+\s*/u', '', $post->post_title ) : '';
+	$subject   = 'Mediation — ' . $case_name;
+
+	$booking_date = get_field( 'booking_date', $post_id );
+	if ( $booking_date ) {
+		$dt = new DateTimeImmutable( $booking_date, wp_timezone() );
+		$subject .= ' — ' . wp_date( 'F j, Y', $dt->getTimestamp() );
+	}
+
+	return 'mailto:' . implode( ',', $emails ) . '?subject=' . rawurlencode( $subject );
+}
+
+// =============================================================================
+// Conflict Search Bundle — Role Helper
+// =============================================================================
+
+/**
+ * Return true if the current logged-in user has a role allowed to download
+ * intake files (same permission set used by the individual file proxy).
+ */
+function summit_intake_current_user_can_download() {
+	$user = wp_get_current_user();
+	if ( ! $user->ID ) {
+		return false;
+	}
+	$allowed_roles = get_option( 'summit_intake_download_roles', [ 'administrator' ] );
+	foreach ( $allowed_roles as $role ) {
+		if ( in_array( $role, (array) $user->roles, true ) ) {
+			return true;
+		}
+	}
+	return false;
+}
+
+// =============================================================================
+// Conflict Search Bundle — Download Action
+// =============================================================================
+
+/**
+ * Stream a ZIP bundle containing an HTML conflict-search summary and all
+ * uploaded files (Title of Proceedings + Third Party Statements of Claim).
+ *
+ * Triggered via admin-post.php (both GET and POST) so PHP can output raw
+ * file headers directly without an AJAX JSON wrapper.
+ */
+function summit_intake_download_bundle() {
+	$post_id = absint( $_REQUEST['post_id'] ?? 0 );
+
+	// Nonce check
+	if ( ! wp_verify_nonce( $_REQUEST['_bundle_nonce'] ?? '', 'summit_intake_bundle_' . $post_id ) ) {
+		wp_die(
+			'<p>Security check failed. Please go back and try again.</p>',
+			'Access Denied',
+			[ 'response' => 403, 'back_link' => true ]
+		);
+	}
+
+	// Validate post
+	$post = get_post( $post_id );
+	if ( ! $post || $post->post_type !== 'mediation_intake' ) {
+		wp_die(
+			'<p>Intake not found.</p>',
+			'Not Found',
+			[ 'response' => 404, 'back_link' => true ]
+		);
+	}
+
+	// Role check with a descriptive message for unauthorised users
+	if ( ! summit_intake_current_user_can_download() ) {
+		wp_die(
+			'<p>You do not have permission to download the conflict search bundle.</p>'
+			. '<p>Contact your administrator to have your role updated under '
+			. '<strong>Mediation Intakes &rarr; Permissions</strong>.</p>',
+			'Access Denied',
+			[ 'response' => 403, 'back_link' => true ]
+		);
+	}
+
+	// Server capability check
+	if ( ! class_exists( 'ZipArchive' ) ) {
+		wp_die(
+			'<p>ZIP file generation is not available on this server. Please contact your site administrator.</p>',
+			'Server Error',
+			[ 'response' => 500, 'back_link' => true ]
+		);
+	}
+
+	// Gather ACF data
+	$booking_date      = get_field( 'booking_date', $post_id );
+	$team_member_id    = get_field( 'team_member', $post_id );
+	$team_member_post  = $team_member_id ? get_post( absint( $team_member_id ) ) : null;
+	$mediator_name     = ( $team_member_post instanceof WP_Post ) ? $team_member_post->post_title : '—';
+	$plaintiffs        = get_field( 'plaintiffs', $post_id ) ?: [];
+	$defendants        = get_field( 'defendants', $post_id ) ?: [];
+	$third_parties     = get_field( 'third_parties', $post_id ) ?: [];
+	$title_file        = get_field( 'title_of_proceedings', $post_id );
+
+	$booking_date_formatted = $booking_date
+		? wp_date( 'F j, Y \a\t g:i a', ( new DateTimeImmutable( $booking_date, wp_timezone() ) )->getTimestamp() )
+		: '—';
+
+	// Resolve uploaded files to disk paths + display names
+	$files = [];
+
+	if ( $title_file ) {
+		$att_id  = is_array( $title_file ) ? ( $title_file['ID'] ?? 0 ) : absint( $title_file );
+		$path    = $att_id ? get_attached_file( $att_id ) : '';
+		$orignal = $att_id ? ( get_post_meta( $att_id, '_summit_intake_original_name', true ) ?: basename( $path ) ) : '';
+		if ( $path && file_exists( $path ) ) {
+			$files[ 'Title-of-Proceedings-' . $orignal ] = $path;
+		}
+	}
+
+	$claim_num = 1;
+	foreach ( $third_parties as $tp_row ) {
+		$claim_id = absint( $tp_row['claim_file'] ?? 0 );
+		if ( ! $claim_id ) {
+			continue;
+		}
+		$path    = get_attached_file( $claim_id );
+		$orignal = get_post_meta( $claim_id, '_summit_intake_original_name', true ) ?: basename( $path );
+		if ( $path && file_exists( $path ) ) {
+			$files[ 'Third-Party-Claim-' . $claim_num . '-' . $orignal ] = $path;
+			$claim_num++;
+		}
+	}
+
+	// Generate HTML summary
+	$html = summit_intake_bundle_html(
+		$post,
+		$booking_date_formatted,
+		$mediator_name,
+		$plaintiffs,
+		$defendants,
+		$third_parties,
+		$title_file
+	);
+
+	// Build ZIP
+	$post_slug = sanitize_file_name( $post->post_title );
+	$zip_name  = 'Conflict-Bundle-' . $post_slug . '.zip';
+	$zip_path  = trailingslashit( sys_get_temp_dir() ) . $zip_name;
+
+	$zip = new ZipArchive();
+	if ( $zip->open( $zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE ) !== true ) {
+		wp_die(
+			'<p>Could not create the ZIP file. Please try again or contact your administrator.</p>',
+			'Error',
+			[ 'response' => 500, 'back_link' => true ]
+		);
+	}
+
+	$zip->addFromString( 'Conflict-Search-Summary.html', $html );
+	foreach ( $files as $zip_filename => $file_path ) {
+		$zip->addFile( $file_path, $zip_filename );
+	}
+	$zip->close();
+
+	// Clear any buffered output before streaming binary data
+	while ( ob_get_level() ) {
+		ob_end_clean();
+	}
+
+	nocache_headers();
+	header( 'Content-Type: application/zip' );
+	header( 'Content-Disposition: attachment; filename="' . $zip_name . '"' );
+	header( 'Content-Length: ' . filesize( $zip_path ) );
+	flush();
+
+	readfile( $zip_path );
+	@unlink( $zip_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+	exit;
+}
+add_action( 'admin_post_summit_intake_download_bundle', 'summit_intake_download_bundle' );
+
+// =============================================================================
+// Conflict Search Bundle — HTML Summary Generator
+// =============================================================================
+
+/**
+ * Return a self-contained, print-friendly HTML document summarising the intake.
+ */
+function summit_intake_bundle_html( $post, $booking_date, $mediator, $plaintiffs, $defendants, $third_parties, $title_file ) {
+	$generated = wp_date( 'F j, Y \a\t g:i a' );
+	$title     = esc_html( $post->post_title );
+
+	// Build file list for the "Files Included" section
+	$file_list   = [];
+	$file_list[] = 'Conflict-Search-Summary.html (this document)';
+
+	if ( $title_file ) {
+		$att_id  = is_array( $title_file ) ? ( $title_file['ID'] ?? 0 ) : absint( $title_file );
+		$orignal = $att_id ? ( get_post_meta( $att_id, '_summit_intake_original_name', true ) ?: '' ) : '';
+		if ( $orignal ) {
+			$file_list[] = esc_html( 'Title-of-Proceedings-' . $orignal );
+		}
+	}
+
+	$n = 1;
+	foreach ( $third_parties as $tp_row ) {
+		$claim_id = absint( $tp_row['claim_file'] ?? 0 );
+		if ( ! $claim_id ) {
+			continue;
+		}
+		$orignal = get_post_meta( $claim_id, '_summit_intake_original_name', true ) ?: '';
+		if ( $orignal ) {
+			$file_list[] = esc_html( 'Third-Party-Claim-' . $n . '-' . $orignal );
+			$n++;
+		}
+	}
+
+	// Build party rows
+	$build_party_rows = function( array $parties ) {
+		if ( empty( $parties ) ) {
+			return '<tr><td colspan="3" style="color:#888;">None recorded</td></tr>';
+		}
+		$rows = '';
+		foreach ( $parties as $p ) {
+			$rows .= '<tr>'
+				. '<td>' . esc_html( $p['name'] ?? '' ) . '</td>'
+				. '<td>' . esc_html( $p['counsel_name'] ?? '' ) . '</td>'
+				. '<td>' . esc_html( $p['counsel_email'] ?? '' ) . '</td>'
+				. '</tr>';
+		}
+		return $rows;
+	};
+
+	$plaintiff_rows    = $build_party_rows( $plaintiffs );
+	$defendant_rows    = $build_party_rows( $defendants );
+	$third_party_block = '';
+	if ( ! empty( $third_parties ) ) {
+		$third_party_block = '<h2>Third Parties</h2>'
+			. '<table><thead><tr><th>Name</th><th>Counsel</th><th>Counsel Email</th></tr></thead>'
+			. '<tbody>' . $build_party_rows( $third_parties ) . '</tbody></table>';
+	}
+
+	$files_html = '<ul>' . implode( '', array_map( fn( $f ) => '<li>' . $f . '</li>', $file_list ) ) . '</ul>';
+
+	return <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conflict Search &mdash; {$title}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, "Times New Roman", serif; color: #1a1a1a; max-width: 960px; margin: 40px auto; padding: 0 24px; font-size: 14px; line-height: 1.6; }
+  header { border-bottom: 3px solid #1c3d4a; padding-bottom: 16px; margin-bottom: 28px; }
+  header h1 { font-size: 20px; color: #1c3d4a; margin-bottom: 4px; }
+  header p { font-size: 12px; color: #666; }
+  .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 0; background: #f4f7f8; border: 1px solid #dde3e6; border-radius: 4px; margin-bottom: 32px; overflow: hidden; }
+  .meta dt { font-size: 10px; text-transform: uppercase; letter-spacing: .07em; color: #888; padding: 10px 16px 2px; }
+  .meta dd { font-size: 15px; font-weight: bold; padding: 0 16px 12px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .09em; color: #1c3d4a; border-bottom: 1px solid #dde3e6; padding-bottom: 6px; margin: 32px 0 12px; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: #f4f7f8; }
+  th { text-align: left; padding: 8px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #666; border-bottom: 2px solid #dde3e6; }
+  td { padding: 9px 12px; border-bottom: 1px solid #eef0f1; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td:first-child { font-weight: bold; }
+  .files { background: #f9f9f9; border: 1px solid #e4e4e4; border-radius: 4px; padding: 12px 20px; margin-top: 8px; }
+  .files ul { padding-left: 18px; }
+  .files li { font-size: 13px; padding: 2px 0; color: #444; }
+  footer { margin-top: 48px; padding-top: 12px; border-top: 1px solid #eee; font-size: 11px; color: #aaa; }
+  @media print {
+    body { margin: 20px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Summit Law LLP &mdash; Conflict Search Package</h1>
+  <p>Generated: {$generated} &nbsp;&bull;&nbsp; Intake: {$title}</p>
+</header>
+
+<dl class="meta">
+  <dt>Booking Date</dt><dd>{$booking_date}</dd>
+  <dt>Mediator</dt><dd>{$mediator}</dd>
+</dl>
+
+<h2>Plaintiffs</h2>
+<table>
+  <thead><tr><th>Name</th><th>Counsel</th><th>Counsel Email</th></tr></thead>
+  <tbody>{$plaintiff_rows}</tbody>
+</table>
+
+<h2>Defendants</h2>
+<table>
+  <thead><tr><th>Name</th><th>Counsel</th><th>Counsel Email</th></tr></thead>
+  <tbody>{$defendant_rows}</tbody>
+</table>
+
+{$third_party_block}
+
+<h2>Files Included in This Bundle</h2>
+<div class="files">{$files_html}</div>
+
+<footer>Summit Law LLP &mdash; Conflict Search Bundle &mdash; For internal use only.</footer>
+</body>
+</html>
+HTML;
+}
+
+// =============================================================================
+// Conflict Search Bundle — Button on Intake Edit Screen
+// =============================================================================
+
+/**
+ * Render a download button (or a permission notice) directly below the intake
+ * title field so it is immediately visible when opening an intake record.
+ */
+function summit_intake_bundle_button( $post ) {
+	if ( ! $post || $post->post_type !== 'mediation_intake' ) {
+		return;
+	}
+
+	echo '<div style="margin:12px 0 0;padding:12px 16px;background:#f9f9f9;border:1px solid #ddd;border-radius:3px;display:flex;align-items:center;gap:12px;">';
+	echo '<strong style="flex-shrink:0;">Conflict Search Bundle:</strong> ';
+
+	if ( summit_intake_current_user_can_download() ) {
+		$url = wp_nonce_url(
+			add_query_arg(
+				[ 'action' => 'summit_intake_download_bundle', 'post_id' => $post->ID ],
+				admin_url( 'admin-post.php' )
+			),
+			'summit_intake_bundle_' . $post->ID,
+			'_bundle_nonce'
+		);
+		echo '<a href="' . esc_url( $url ) . '" class="button button-primary" target="_blank" rel="noopener noreferrer">&#8675; Download Conflict Bundle</a>';
+	} else {
+		echo '<span style="color:#666;font-size:13px;">You do not have permission to download this bundle. '
+			. 'Contact your administrator to update your role under '
+			. '<strong>Mediation Intakes &rarr; Permissions</strong>.</span>';
+	}
+
+	$mailto = summit_intake_mailto_url( $post->ID );
+	if ( $mailto ) {
+		echo ' <a href="' . esc_attr( $mailto ) . '" class="button" target="_blank" rel="noopener noreferrer">&#9993; Email Parties</a>';
+	}
+
+	echo '</div>';
+}
+add_action( 'edit_form_after_title', 'summit_intake_bundle_button' );
 
 /**
  * Render the settings page.

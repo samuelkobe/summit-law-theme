@@ -137,6 +137,20 @@
   @apply text-sm text-red-500 font-medium mt-1;
 }
 
+/* Invalid email field border */
+.amelia-v2-booking #amelia-container .intake-party-entry input.intake-field-error {
+  @apply border-red-500;
+}
+
+/* Retry banner shown when submission is blocked by email validation errors */
+.amelia-v2-booking #amelia-container .intake-retry-banner {
+  @apply mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex flex-col gap-3 items-start;
+}
+
+.amelia-v2-booking #amelia-container .intake-retry-banner .intake-retry-btn {
+  @apply px-4 py-2 bg-green-deep text-white text-sm font-medium rounded-lg cursor-pointer border-none hover:opacity-90 transition-opacity duration-200;
+}
+
 /* Submission state */
 .amelia-v2-booking
   #amelia-container
