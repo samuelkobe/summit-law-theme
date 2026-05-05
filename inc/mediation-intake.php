@@ -911,6 +911,110 @@ function summit_intake_delete_attached_files( $post_id ) {
 add_action( 'before_delete_post', 'summit_intake_delete_attached_files' );
 
 // =============================================================================
+// REST API — Intake Lookup by Amelia Booking ID
+// =============================================================================
+
+/**
+ * Register the intake lookup endpoint.
+ * Used by OttoKit to retrieve custom intake data during cancellation workflows.
+ *
+ * GET /wp-json/summit/v1/intake-by-booking?booking_id=39&key=SECRET
+ */
+function summit_intake_register_rest_routes() {
+	register_rest_route( 'summit/v1', '/intake-by-booking', [
+		'methods'             => WP_REST_Server::READABLE,
+		'callback'            => 'summit_intake_lookup_by_booking',
+		'permission_callback' => '__return_true', // Auth handled inside via secret key
+		'args'                => [
+			'booking_id' => [
+				'required'          => true,
+				'validate_callback' => fn( $v ) => is_numeric( $v ) && $v > 0,
+				'sanitize_callback' => 'absint',
+			],
+			'key' => [
+				'required'          => true,
+				'sanitize_callback' => 'sanitize_text_field',
+			],
+		],
+	] );
+}
+add_action( 'rest_api_init', 'summit_intake_register_rest_routes' );
+
+/**
+ * Handle the intake lookup request.
+ */
+function summit_intake_lookup_by_booking( WP_REST_Request $request ) {
+	// Validate secret key
+	$stored_key = get_option( 'summit_intake_lookup_secret_key', '' );
+	if ( ! $stored_key || ! hash_equals( $stored_key, $request->get_param( 'key' ) ) ) {
+		return new WP_REST_Response( [ 'error' => 'Unauthorized.' ], 401 );
+	}
+
+	$booking_id = $request->get_param( 'booking_id' );
+
+	// Find the intake post with this Amelia booking ID
+	$posts = get_posts( [
+		'post_type'      => 'mediation_intake',
+		'posts_per_page' => 1,
+		'post_status'    => 'publish',
+		'meta_query'     => [
+			[
+				'key'   => 'amelia_booking_id',
+				'value' => $booking_id,
+			],
+		],
+	] );
+
+	if ( empty( $posts ) ) {
+		return new WP_REST_Response( [ 'error' => 'No intake found for this booking ID.' ], 404 );
+	}
+
+	$post_id = $posts[0]->ID;
+
+	// Gather ACF data
+	$booking_date  = get_field( 'booking_date', $post_id );
+	$team_member   = get_field( 'team_member', $post_id );
+	$plaintiffs    = get_field( 'plaintiffs', $post_id ) ?: [];
+	$defendants    = get_field( 'defendants', $post_id ) ?: [];
+	$third_parties = get_field( 'third_parties', $post_id ) ?: [];
+
+	$mediator_post = $team_member ? get_post( absint( is_array( $team_member ) ? ( $team_member['ID'] ?? 0 ) : $team_member ) ) : null;
+	$mediator_name = ( $mediator_post instanceof WP_Post ) ? $mediator_post->post_title : '';
+
+	$booking_date_formatted = '';
+	if ( $booking_date ) {
+		$dt                     = new DateTimeImmutable( $booking_date, wp_timezone() );
+		$booking_date_formatted = wp_date( 'F j, Y \a\t g:i a', $dt->getTimestamp() );
+	}
+
+	// Collect all counsel emails
+	$all_counsel_emails = [];
+	foreach ( array_merge( $plaintiffs, $defendants, $third_parties ) as $party ) {
+		$email = $party['counsel_email'] ?? '';
+		if ( $email ) {
+			$all_counsel_emails[] = $email;
+		}
+	}
+	$all_counsel_emails = array_values( array_unique( $all_counsel_emails ) );
+
+	$case_name = preg_replace( '/^Intake\s*[—\-]+\s*/u', '', $posts[0]->post_title );
+
+	return new WP_REST_Response( [
+		'intake_id'          => $post_id,
+		'case_name'          => $case_name,
+		'booking_date'       => $booking_date_formatted,
+		'booking_date_raw'   => $booking_date,
+		'mediator_name'      => $mediator_name,
+		'all_counsel_emails' => $all_counsel_emails,
+		'counsel_emails_to'  => implode( ', ', $all_counsel_emails ),
+		'plaintiffs'         => $plaintiffs,
+		'defendants'         => $defendants,
+		'third_parties'      => $third_parties,
+		'amelia_booking_id'  => $booking_id,
+	], 200 );
+}
+
+// =============================================================================
 // Settings Page — Role-Based Download Access
 // =============================================================================
 
@@ -951,6 +1055,12 @@ function summit_intake_register_settings() {
 		'default'           => '',
 	] );
 
+	register_setting( 'summit_intake_settings', 'summit_intake_lookup_secret_key', [
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_text_field',
+		'default'           => '',
+	] );
+
 	add_settings_section(
 		'summit_intake_download_section',
 		'File Download Access',
@@ -987,7 +1097,7 @@ function summit_intake_register_settings() {
 		'summit_intake_notifications_section',
 		'OttoKit Notifications',
 		function () {
-			echo '<p>Paste the OttoKit "Catch Webhook" URL here to send intake data to OttoKit when a booking is confirmed. Leave blank to disable.</p>';
+			echo '<p>Configure OttoKit integration for booking confirmation and cancellation notifications.</p>';
 		},
 		'summit-intake-settings'
 	);
@@ -996,6 +1106,14 @@ function summit_intake_register_settings() {
 		'summit_intake_ottokit_webhook_url',
 		'OttoKit Webhook URL',
 		'summit_intake_render_webhook_url_field',
+		'summit-intake-settings',
+		'summit_intake_notifications_section'
+	);
+
+	add_settings_field(
+		'summit_intake_lookup_secret_key',
+		'Lookup Secret Key',
+		'summit_intake_render_lookup_secret_field',
 		'summit-intake-settings',
 		'summit_intake_notifications_section'
 	);
@@ -1022,6 +1140,22 @@ function summit_intake_render_webhook_url_field() {
 		esc_attr( $url )
 	);
 	echo '<p class="description">This URL is provided by OttoKit when you create a "Catch Webhook" trigger step.</p>';
+}
+
+/**
+ * Render the lookup secret key input.
+ */
+function summit_intake_render_lookup_secret_field() {
+	$key = get_option( 'summit_intake_lookup_secret_key', '' );
+	printf(
+		'<input type="text" name="summit_intake_lookup_secret_key" value="%s" class="regular-text" placeholder="Enter a secret key...">',
+		esc_attr( $key )
+	);
+	echo '<p class="description">A secret string you choose. Include it as <code>?key=YOUR_KEY</code> in the OttoKit lookup URL to authenticate requests. Keep this private.</p>';
+	if ( $key ) {
+		$lookup_url = rest_url( 'summit/v1/intake-by-booking' ) . '?booking_id=BOOKING_ID&key=' . rawurlencode( $key );
+		echo '<p class="description">Lookup endpoint: <code>' . esc_html( $lookup_url ) . '</code></p>';
+	}
 }
 add_action( 'admin_init', 'summit_intake_register_settings' );
 
