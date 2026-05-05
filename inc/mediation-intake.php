@@ -723,14 +723,12 @@ function summit_intake_submit() {
 		$zoom_json = $wpdb->get_var( $wpdb->prepare(
 			"SELECT a.zoomMeeting
 			 FROM {$wpdb->prefix}amelia_customer_bookings cb
-			 JOIN {$wpdb->prefix}amelia_appointments a ON a.id = cb.appointment_id
+			 JOIN {$wpdb->prefix}amelia_appointments a ON a.id = cb.appointmentId
 			 WHERE cb.id = %d
 			 LIMIT 1",
 			$amelia_booking_id
 		) );
 		// DEBUG — remove once Zoom URL is confirmed working
-		$cols = $wpdb->get_col( "SHOW COLUMNS FROM {$wpdb->prefix}amelia_appointments" );
-		error_log( '[Summit Intake] amelia_appointments columns: ' . implode( ', ', $cols ) );
 		error_log( '[Summit Intake] booking_id=' . $amelia_booking_id . ' zoom_json=' . var_export( $zoom_json, true ) );
 		if ( $zoom_json ) {
 			$zoom_data = json_decode( $zoom_json, true );
