@@ -729,6 +729,8 @@ function summit_intake_submit() {
 			$amelia_booking_id
 		) );
 		// DEBUG — remove once Zoom URL is confirmed working
+		$cols = $wpdb->get_col( "SHOW COLUMNS FROM {$wpdb->prefix}amelia_appointments" );
+		error_log( '[Summit Intake] amelia_appointments columns: ' . implode( ', ', $cols ) );
 		error_log( '[Summit Intake] booking_id=' . $amelia_booking_id . ' zoom_json=' . var_export( $zoom_json, true ) );
 		if ( $zoom_json ) {
 			$zoom_data = json_decode( $zoom_json, true );
