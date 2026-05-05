@@ -178,8 +178,9 @@ add_filter('style_loader_tag', 'summit_async_css', 10, 4);
 /**
  * Enqueue Vite assets in the block editor
  *
- * For simplicity, we always load the built CSS file (not dev server)
- * Run `npm run build` to update editor styles during development
+ * Uses wp_enqueue_block_assets so styles are injected into the iframe canvas
+ * (required for apiVersion 3 blocks). enqueue_block_editor_assets loads into
+ * the parent document only and does not reach the iframe content.
  */
 function summit_enqueue_editor_assets() {
   // Only load in admin/editor context, not on frontend
@@ -187,8 +188,6 @@ function summit_enqueue_editor_assets() {
     return;
   }
 
-  // Always use the built CSS file for the editor
-  // This is simpler and more reliable than trying to use Vite dev server in iframe
   $css_file = get_template_directory() . '/dist/css/main.css';
 
   if (file_exists($css_file)) {

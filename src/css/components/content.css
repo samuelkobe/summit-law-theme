@@ -279,7 +279,7 @@
   .entry-content blockquote,
   .entry-content .wp-block-quote,
   .wp-block-quote {
-    @apply border-l-4 border-green-accent1 pl-6 py-2 my-8 container mx-auto;
+    @apply border-l-4 border-brand-20 pl-6 py-2 my-8 container mx-auto;
     border-top: none !important;
     border-right: none !important;
     border-bottom: none !important;
@@ -293,7 +293,7 @@
   .entry-content .wp-block-quote p,
   .wp-block-quote p {
     @apply text-xl lg:text-2xl text-green-deep mb-4 italic;
-    font-size: clamp(1.25rem, 2vw, 1.5rem) !important;
+    font-size: clamp(1rem, 1.75vw, 1.25rem) !important;
   }
 
   .entry-content blockquote p:last-child,
@@ -312,7 +312,7 @@
   /* Editor: Only core quote blocks */
   .editor-styles-wrapper [data-type="core/quote"] blockquote,
   .editor-styles-wrapper .wp-block-quote {
-    @apply border-l-4 border-green-accent1 pl-6 py-2 my-8;
+    @apply border-l-4 border-brand-20 pl-6 py-2 my-8;
   }
 
   .editor-styles-wrapper [data-type="core/quote"] blockquote p,
@@ -414,13 +414,17 @@
     text-decoration: none !important;
   }
 
-  .editor-styles-wrapper .wp-block-button.is-style-outline .wp-block-button__link {
+  .editor-styles-wrapper
+    .wp-block-button.is-style-outline
+    .wp-block-button__link {
     @apply border-2 border-brand-40 bg-transparent shadow-none hover:shadow-lg;
     color: var(--c-deep) !important;
     text-decoration: none !important;
   }
 
-  .editor-styles-wrapper .wp-block-button.is-style-outline .wp-block-button__link:hover {
+  .editor-styles-wrapper
+    .wp-block-button.is-style-outline
+    .wp-block-button__link:hover {
     color: var(--c-deep) !important;
     text-decoration: none !important;
   }

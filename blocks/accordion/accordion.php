@@ -42,7 +42,7 @@ if ( ! empty( $block['align'] ) ) {
 		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%23d1d436'%3E%3Cpath d='M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z'/%3E%3C/svg%3E");
 		background-size: contain;
 		background-repeat: no-repeat;
-		transition: transform 0.3s ease;
+		transition: transform 0.5s ease;
 	}
 
 	<?php echo '#' . $id; ?> .accordion-heading.active::after {
@@ -52,11 +52,20 @@ if ( ! empty( $block['align'] ) ) {
 	<?php echo '#' . $id; ?> .accordion-content {
 		max-height: 0;
 		overflow: hidden;
-		transition: max-height 0.3s ease;
 	}
 
 	<?php echo '#' . $id; ?> .accordion-content.active {
 		max-height: 1000px;
+	}
+
+	<?php echo '#' . $id; ?> .accordion-content p {
+		opacity: 0;
+		transition: opacity 0s ease;
+	}
+
+	<?php echo '#' . $id; ?> .accordion-content.active p {
+		opacity: 1;
+		transition: opacity 0.3s ease 0.3s;
 	}
 
 	<?php echo '#' . $id; ?> .accordion-heading:focus-visible {
@@ -159,8 +168,13 @@ $has_accordion_items = have_rows( 'accordion_object' );
 			button.classList.add('active', 'text-green-deep');
 			button.classList.remove('text-brand-40');
 			button.setAttribute('aria-expanded', 'true');
-			content.classList.add('active');
+			// Remove hidden first so the element enters the render tree at opacity:0,
+			// then add active on the next frame so the browser has a "from" state
+			// to animate the opacity transition from.
 			content.removeAttribute('hidden');
+			requestAnimationFrame(() => requestAnimationFrame(() => {
+				content.classList.add('active');
+			}));
 			accordionItem.classList.remove('pb-4', 'lg:pb-6');
 			accordionItem.classList.add('pb-8', 'lg:pb-12');
 		}

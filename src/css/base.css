@@ -4,6 +4,7 @@
 @import "./components/search.css";
 @import "./components/blocks.css";
 @import "./components/form.css";
+@import "./components/mediation-intake.css";
 
 @tailwind base;
 @tailwind components;
@@ -162,6 +163,10 @@
 
   .wp-block-heading.h3 {
     @apply !font-museum;
+  }
+
+  .wp-block-heading.h3.summit-quote {
+    @apply !font-museum !-mb-8 !pl-0;
   }
 
   .h4 {
