@@ -232,9 +232,18 @@ function summit_capture_amelia_booking_id( $booking, $service, $appointment ) {
 				$booking_date = $appointment['bookingStart']; // Already 'Y-m-d H:i:s' format.
 			}
 
+			// Capture the Zoom join URL — check appointment first, then booking as fallback.
+			$zoom_join_url = '';
+			if ( is_array( $appointment ) && ! empty( $appointment['zoomMeeting']['joinUrl'] ) ) {
+				$zoom_join_url = $appointment['zoomMeeting']['joinUrl'];
+			} elseif ( is_array( $booking ) && ! empty( $booking['zoomMeeting']['joinUrl'] ) ) {
+				$zoom_join_url = $booking['zoomMeeting']['joinUrl'];
+			}
+
 			set_transient( $session_key, [
-				'booking_id'   => $booking_id,
-				'booking_date' => $booking_date,
+				'booking_id'    => $booking_id,
+				'booking_date'  => $booking_date,
+				'zoom_join_url' => $zoom_join_url,
 			], 300 ); // 5 min TTL
 		}
 	}
@@ -710,9 +719,11 @@ function summit_intake_submit() {
 	if ( is_array( $transient_data ) ) {
 		$amelia_booking_id = $transient_data['booking_id'] ?? 0;
 		$booking_date      = $transient_data['booking_date'] ?? '';
+		$zoom_join_url     = $transient_data['zoom_join_url'] ?? '';
 	} else {
 		$amelia_booking_id = $transient_data ?: 0;
 		$booking_date      = '';
+		$zoom_join_url     = '';
 	}
 
 	// Create the intake post
@@ -733,6 +744,9 @@ function summit_intake_submit() {
 		update_field( 'booking_date', $booking_date, $post_id );
 	}
 	update_field( 'team_member', $team_member, $post_id );
+	if ( $zoom_join_url ) {
+		update_post_meta( $post_id, '_summit_intake_zoom_url', esc_url_raw( $zoom_join_url ) );
+	}
 
 	// Save plaintiffs repeater
 	$plaintiff_rows = [];
@@ -812,6 +826,7 @@ function summit_intake_submit() {
 		'mediator_name'      => $mediator_name,
 		'all_counsel_emails' => $all_counsel_emails,
 		'counsel_emails_to'  => implode( ', ', $all_counsel_emails ),
+		'zoom_join_url'      => $zoom_join_url,
 		'plaintiffs'         => $plaintiff_rows,
 		'defendants'         => $defendant_rows,
 		'third_parties'      => $third_party_rows,
@@ -980,6 +995,7 @@ function summit_intake_lookup_by_booking( WP_REST_Request $request ) {
 
 	$mediator_post = $team_member ? get_post( absint( is_array( $team_member ) ? ( $team_member['ID'] ?? 0 ) : $team_member ) ) : null;
 	$mediator_name = ( $mediator_post instanceof WP_Post ) ? $mediator_post->post_title : '';
+	$zoom_join_url = get_post_meta( $post_id, '_summit_intake_zoom_url', true ) ?: '';
 
 	$booking_date_formatted = '';
 	if ( $booking_date ) {
@@ -1007,6 +1023,7 @@ function summit_intake_lookup_by_booking( WP_REST_Request $request ) {
 		'mediator_name'      => $mediator_name,
 		'all_counsel_emails' => $all_counsel_emails,
 		'counsel_emails_to'  => implode( ', ', $all_counsel_emails ),
+		'zoom_join_url'      => $zoom_join_url,
 		'plaintiffs'         => $plaintiffs,
 		'defendants'         => $defendants,
 		'third_parties'      => $third_parties,
