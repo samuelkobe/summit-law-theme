@@ -729,6 +729,13 @@ function summit_intake_submit() {
 			$amelia_booking_id
 		) );
 		// DEBUG — remove once Zoom URL is confirmed working
+		$cb_cols = $wpdb->get_col( "SHOW COLUMNS FROM {$wpdb->prefix}amelia_customer_bookings" );
+		error_log( '[Summit Intake] amelia_customer_bookings columns: ' . implode( ', ', $cb_cols ) );
+		$cb_row = $wpdb->get_row( $wpdb->prepare(
+			"SELECT * FROM {$wpdb->prefix}amelia_customer_bookings WHERE id = %d LIMIT 1",
+			$amelia_booking_id
+		), ARRAY_A );
+		error_log( '[Summit Intake] customer_booking row: ' . var_export( $cb_row, true ) );
 		error_log( '[Summit Intake] booking_id=' . $amelia_booking_id . ' zoom_json=' . var_export( $zoom_json, true ) );
 		if ( $zoom_json ) {
 			$zoom_data = json_decode( $zoom_json, true );
