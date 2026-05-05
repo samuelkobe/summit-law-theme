@@ -721,15 +721,18 @@ function summit_intake_submit() {
 	if ( $amelia_booking_id ) {
 		global $wpdb;
 		$zoom_json = $wpdb->get_var( $wpdb->prepare(
-			"SELECT a.zoom_meeting
+			"SELECT a.zoomMeeting
 			 FROM {$wpdb->prefix}amelia_customer_bookings cb
 			 JOIN {$wpdb->prefix}amelia_appointments a ON a.id = cb.appointment_id
 			 WHERE cb.id = %d
 			 LIMIT 1",
 			$amelia_booking_id
 		) );
+		// DEBUG — remove once Zoom URL is confirmed working
+		error_log( '[Summit Intake] booking_id=' . $amelia_booking_id . ' zoom_json=' . var_export( $zoom_json, true ) );
 		if ( $zoom_json ) {
-			$zoom_data     = json_decode( $zoom_json, true );
+			$zoom_data = json_decode( $zoom_json, true );
+			error_log( '[Summit Intake] zoom_data=' . var_export( $zoom_data, true ) );
 			$zoom_join_url = $zoom_data['joinUrl'] ?? '';
 		}
 	}
