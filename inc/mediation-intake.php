@@ -1029,35 +1029,25 @@ function summit_intake_maybe_generate_secret_key() {
 add_action( 'admin_init', 'summit_intake_maybe_generate_secret_key' );
 
 /**
- * Handle the Regenerate Key form action.
+ * AJAX handler — regenerate the lookup secret key in place (no page reload).
  */
-function summit_intake_handle_regenerate_key() {
-	check_admin_referer( 'summit_regenerate_lookup_key' );
+function summit_intake_ajax_regenerate_key() {
+	check_ajax_referer( 'summit_regen_key_nonce', 'nonce' );
 
 	if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( 'Unauthorized.' );
+		wp_send_json_error( [ 'message' => 'Unauthorized.' ], 401 );
 	}
 
-	update_option( 'summit_intake_lookup_secret_key', wp_generate_password( 32, false ) );
+	$new_key = wp_generate_password( 32, false );
+	update_option( 'summit_intake_lookup_secret_key', $new_key );
 
-	wp_redirect( add_query_arg(
-		[ 'page' => 'summit-intake-permissions', 'key_regenerated' => '1' ],
-		admin_url( 'edit.php?post_type=mediation_intake' )
-	) );
-	exit;
+	wp_send_json_success( [
+		'key'   => $new_key,
+		'url'   => rest_url( 'summit/v1/intake-by-booking' ) . '?booking_id=BOOKING_ID&key=' . rawurlencode( $new_key ),
+		'nonce' => wp_create_nonce( 'summit_regen_key_nonce' ), // Fresh nonce for next call
+	] );
 }
-add_action( 'admin_post_summit_regenerate_lookup_key', 'summit_intake_handle_regenerate_key' );
-
-/**
- * Show a success notice after key regeneration.
- */
-function summit_intake_regenerate_notice() {
-	if ( empty( $_GET['key_regenerated'] ) || empty( $_GET['page'] ) || $_GET['page'] !== 'summit-intake-permissions' ) {
-		return;
-	}
-	echo '<div class="notice notice-success is-dismissible"><p><strong>Lookup secret key regenerated.</strong> Update the URL in OttoKit with the new value shown below.</p></div>';
-}
-add_action( 'admin_notices', 'summit_intake_regenerate_notice' );
+add_action( 'wp_ajax_summit_regenerate_lookup_key', 'summit_intake_ajax_regenerate_key' );
 
 /**
  * Enqueue reveal/copy JS on the Permissions settings page only.
@@ -1070,23 +1060,30 @@ function summit_intake_settings_footer_js() {
 	?>
 	<script>
 	(function () {
-		// Reveal / Hide toggle
-		const keyInput  = document.getElementById('summit-lookup-key');
-		const revealBtn = document.getElementById('summit-reveal-key');
+		const keyInput   = document.getElementById('summit-lookup-key');
+		const revealBtn  = document.getElementById('summit-reveal-key');
+		const copyKeyBtn = document.getElementById('summit-copy-key');
+		const regenBtn   = document.getElementById('summit-regen-key');
+		const urlInput   = document.getElementById('summit-lookup-url');
+		const copyUrlBtn = document.getElementById('summit-copy-url');
+
+		let revealed = false;
+
+		// Reveal / Hide — toggles both the key field and the URL display together
 		if (keyInput && revealBtn) {
 			revealBtn.addEventListener('click', function () {
-				if (keyInput.type === 'password') {
-					keyInput.type    = 'text';
-					revealBtn.textContent = 'Hide';
-				} else {
-					keyInput.type    = 'password';
-					revealBtn.textContent = 'Reveal';
+				revealed = !revealed;
+				keyInput.type         = revealed ? 'text' : 'password';
+				revealBtn.textContent = revealed ? 'Hide' : 'Reveal';
+				if (urlInput) {
+					urlInput.value = revealed
+						? urlInput.dataset.realUrl
+						: urlInput.dataset.redactedUrl;
 				}
 			});
 		}
 
-		// Copy key
-		const copyKeyBtn = document.getElementById('summit-copy-key');
+		// Copy key — reads from the actual input value
 		if (copyKeyBtn && keyInput) {
 			copyKeyBtn.addEventListener('click', function () {
 				navigator.clipboard.writeText(keyInput.value).then(function () {
@@ -1096,14 +1093,55 @@ function summit_intake_settings_footer_js() {
 			});
 		}
 
-		// Copy URL
-		const urlInput  = document.getElementById('summit-lookup-url');
-		const copyUrlBtn = document.getElementById('summit-copy-url');
+		// Copy URL — always reads the real URL from the data attribute, never the redacted display
 		if (copyUrlBtn && urlInput) {
 			copyUrlBtn.addEventListener('click', function () {
-				navigator.clipboard.writeText(urlInput.value).then(function () {
+				navigator.clipboard.writeText(urlInput.dataset.realUrl || urlInput.value).then(function () {
 					copyUrlBtn.textContent = 'Copied!';
 					setTimeout(function () { copyUrlBtn.textContent = 'Copy'; }, 2000);
+				});
+			});
+		}
+
+		// Regenerate — AJAX, updates both fields in place without a page reload
+		if (regenBtn) {
+			regenBtn.addEventListener('click', function () {
+				if (!confirm('Regenerate the secret key?\n\nThe OttoKit lookup URL will stop working until you update it there.')) {
+					return;
+				}
+				regenBtn.textContent = 'Regenerating\u2026';
+				regenBtn.disabled    = true;
+
+				fetch(ajaxurl, {
+					method:  'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					body:    new URLSearchParams({
+						action: 'summit_regenerate_lookup_key',
+						nonce:  regenBtn.dataset.nonce,
+					}),
+				})
+				.then(function (r) { return r.json(); })
+				.then(function (data) {
+					if (!data.success) { return; }
+					const newKey = data.data.key;
+					const newUrl = data.data.url;
+					const redacted = urlInput ? urlInput.dataset.redactedUrl.replace(/•+/, '••••••••') : '';
+
+					// Update key field
+					if (keyInput) { keyInput.value = newKey; }
+
+					// Update URL field data and display
+					if (urlInput) {
+						urlInput.dataset.realUrl = newUrl;
+						urlInput.value = revealed ? newUrl : redacted;
+					}
+
+					// Refresh nonce for the next regeneration
+					regenBtn.dataset.nonce = data.data.nonce;
+				})
+				.finally(function () {
+					regenBtn.textContent = 'Regenerate';
+					regenBtn.disabled    = false;
 				});
 			});
 		}
@@ -1237,16 +1275,16 @@ function summit_intake_render_webhook_url_field() {
 
 /**
  * Render the lookup secret key field — read-only with reveal, copy, and regenerate controls.
+ * The URL display shows the key redacted; the Copy button always copies the real URL.
  */
 function summit_intake_render_lookup_secret_field() {
-	$key        = get_option( 'summit_intake_lookup_secret_key', '' );
-	$lookup_url = $key
+	$key          = get_option( 'summit_intake_lookup_secret_key', '' );
+	$real_url     = $key
 		? rest_url( 'summit/v1/intake-by-booking' ) . '?booking_id=BOOKING_ID&key=' . rawurlencode( $key )
 		: '';
-	$regen_url  = wp_nonce_url(
-		admin_url( 'admin-post.php?action=summit_regenerate_lookup_key' ),
-		'summit_regenerate_lookup_key'
-	);
+	$redacted_url = $key
+		? rest_url( 'summit/v1/intake-by-booking' ) . '?booking_id=BOOKING_ID&key=••••••••'
+		: '';
 	?>
 	<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
 		<input
@@ -1258,30 +1296,31 @@ function summit_intake_render_lookup_secret_field() {
 		>
 		<button type="button" id="summit-reveal-key" class="button">Reveal</button>
 		<button type="button" id="summit-copy-key" class="button">Copy</button>
-		<a
-			href="<?php echo esc_url( $regen_url ); ?>"
+		<button
+			type="button"
+			id="summit-regen-key"
 			class="button"
-			onclick="return confirm('Regenerate the secret key?\n\nThe OttoKit lookup URL will stop working until you update it there.');"
-		>Regenerate</a>
+			data-nonce="<?php echo esc_attr( wp_create_nonce( 'summit_regen_key_nonce' ) ); ?>"
+		>Regenerate</button>
 	</div>
 	<p class="description">Auto-generated. Used to authenticate OttoKit's requests to the lookup endpoint. Keep this private.</p>
 
-	<?php if ( $lookup_url ) : ?>
 	<div style="margin-top:14px;">
 		<strong style="display:block;margin-bottom:6px;">OttoKit Lookup URL</strong>
 		<div style="display:flex;align-items:center;gap:8px;">
 			<input
 				type="text"
 				id="summit-lookup-url"
-				value="<?php echo esc_attr( $lookup_url ); ?>"
+				value="<?php echo esc_attr( $redacted_url ); ?>"
+				data-real-url="<?php echo esc_attr( $real_url ); ?>"
+				data-redacted-url="<?php echo esc_attr( $redacted_url ); ?>"
 				readonly
 				style="font-family:monospace;width:100%;max-width:580px;"
 			>
 			<button type="button" id="summit-copy-url" class="button">Copy</button>
 		</div>
-		<p class="description">Replace <code>BOOKING_ID</code> with <code>@{Appointmentid}</code> in OttoKit.</p>
+		<p class="description">Replace <code>BOOKING_ID</code> with <code>@{Appointmentid}</code> in OttoKit. Use the Copy button — the key is hidden in the display.</p>
 	</div>
-	<?php endif; ?>
 	<?php
 }
 add_action( 'admin_init', 'summit_intake_register_settings' );
