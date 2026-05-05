@@ -922,7 +922,7 @@ add_action( 'before_delete_post', 'summit_intake_delete_attached_files' );
  */
 function summit_intake_register_rest_routes() {
 	register_rest_route( 'summit/v1', '/intake-by-booking', [
-		'methods'             => WP_REST_Server::READABLE,
+		'methods'             => 'GET, POST',
 		'callback'            => 'summit_intake_lookup_by_booking',
 		'permission_callback' => '__return_true', // Auth handled inside via secret key
 		'args'                => [
