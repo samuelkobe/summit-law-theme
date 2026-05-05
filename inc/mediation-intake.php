@@ -1015,6 +1015,105 @@ function summit_intake_lookup_by_booking( WP_REST_Request $request ) {
 }
 
 // =============================================================================
+// Secret Key — Auto-generation, Regeneration, Admin UI
+// =============================================================================
+
+/**
+ * Auto-generate the lookup secret key on first use if none is set.
+ */
+function summit_intake_maybe_generate_secret_key() {
+	if ( ! get_option( 'summit_intake_lookup_secret_key', '' ) ) {
+		update_option( 'summit_intake_lookup_secret_key', wp_generate_password( 32, false ) );
+	}
+}
+add_action( 'admin_init', 'summit_intake_maybe_generate_secret_key' );
+
+/**
+ * Handle the Regenerate Key form action.
+ */
+function summit_intake_handle_regenerate_key() {
+	check_admin_referer( 'summit_regenerate_lookup_key' );
+
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( 'Unauthorized.' );
+	}
+
+	update_option( 'summit_intake_lookup_secret_key', wp_generate_password( 32, false ) );
+
+	wp_redirect( add_query_arg(
+		[ 'page' => 'summit-intake-permissions', 'key_regenerated' => '1' ],
+		admin_url( 'edit.php?post_type=mediation_intake' )
+	) );
+	exit;
+}
+add_action( 'admin_post_summit_regenerate_lookup_key', 'summit_intake_handle_regenerate_key' );
+
+/**
+ * Show a success notice after key regeneration.
+ */
+function summit_intake_regenerate_notice() {
+	if ( empty( $_GET['key_regenerated'] ) || empty( $_GET['page'] ) || $_GET['page'] !== 'summit-intake-permissions' ) {
+		return;
+	}
+	echo '<div class="notice notice-success is-dismissible"><p><strong>Lookup secret key regenerated.</strong> Update the URL in OttoKit with the new value shown below.</p></div>';
+}
+add_action( 'admin_notices', 'summit_intake_regenerate_notice' );
+
+/**
+ * Enqueue reveal/copy JS on the Permissions settings page only.
+ */
+function summit_intake_settings_footer_js() {
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+	if ( ! $screen || $screen->id !== 'mediation_intake_page_summit-intake-permissions' ) {
+		return;
+	}
+	?>
+	<script>
+	(function () {
+		// Reveal / Hide toggle
+		const keyInput  = document.getElementById('summit-lookup-key');
+		const revealBtn = document.getElementById('summit-reveal-key');
+		if (keyInput && revealBtn) {
+			revealBtn.addEventListener('click', function () {
+				if (keyInput.type === 'password') {
+					keyInput.type    = 'text';
+					revealBtn.textContent = 'Hide';
+				} else {
+					keyInput.type    = 'password';
+					revealBtn.textContent = 'Reveal';
+				}
+			});
+		}
+
+		// Copy key
+		const copyKeyBtn = document.getElementById('summit-copy-key');
+		if (copyKeyBtn && keyInput) {
+			copyKeyBtn.addEventListener('click', function () {
+				navigator.clipboard.writeText(keyInput.value).then(function () {
+					copyKeyBtn.textContent = 'Copied!';
+					setTimeout(function () { copyKeyBtn.textContent = 'Copy'; }, 2000);
+				});
+			});
+		}
+
+		// Copy URL
+		const urlInput  = document.getElementById('summit-lookup-url');
+		const copyUrlBtn = document.getElementById('summit-copy-url');
+		if (copyUrlBtn && urlInput) {
+			copyUrlBtn.addEventListener('click', function () {
+				navigator.clipboard.writeText(urlInput.value).then(function () {
+					copyUrlBtn.textContent = 'Copied!';
+					setTimeout(function () { copyUrlBtn.textContent = 'Copy'; }, 2000);
+				});
+			});
+		}
+	})();
+	</script>
+	<?php
+}
+add_action( 'admin_footer', 'summit_intake_settings_footer_js' );
+
+// =============================================================================
 // Settings Page — Role-Based Download Access
 // =============================================================================
 
@@ -1052,12 +1151,6 @@ function summit_intake_register_settings() {
 	register_setting( 'summit_intake_settings', 'summit_intake_ottokit_webhook_url', [
 		'type'              => 'string',
 		'sanitize_callback' => 'esc_url_raw',
-		'default'           => '',
-	] );
-
-	register_setting( 'summit_intake_settings', 'summit_intake_lookup_secret_key', [
-		'type'              => 'string',
-		'sanitize_callback' => 'sanitize_text_field',
 		'default'           => '',
 	] );
 
@@ -1143,19 +1236,53 @@ function summit_intake_render_webhook_url_field() {
 }
 
 /**
- * Render the lookup secret key input.
+ * Render the lookup secret key field — read-only with reveal, copy, and regenerate controls.
  */
 function summit_intake_render_lookup_secret_field() {
-	$key = get_option( 'summit_intake_lookup_secret_key', '' );
-	printf(
-		'<input type="text" name="summit_intake_lookup_secret_key" value="%s" class="regular-text" placeholder="Enter a secret key...">',
-		esc_attr( $key )
+	$key        = get_option( 'summit_intake_lookup_secret_key', '' );
+	$lookup_url = $key
+		? rest_url( 'summit/v1/intake-by-booking' ) . '?booking_id=BOOKING_ID&key=' . rawurlencode( $key )
+		: '';
+	$regen_url  = wp_nonce_url(
+		admin_url( 'admin-post.php?action=summit_regenerate_lookup_key' ),
+		'summit_regenerate_lookup_key'
 	);
-	echo '<p class="description">A secret string you choose. Include it as <code>?key=YOUR_KEY</code> in the OttoKit lookup URL to authenticate requests. Keep this private.</p>';
-	if ( $key ) {
-		$lookup_url = rest_url( 'summit/v1/intake-by-booking' ) . '?booking_id=BOOKING_ID&key=' . rawurlencode( $key );
-		echo '<p class="description">Lookup endpoint: <code>' . esc_html( $lookup_url ) . '</code></p>';
-	}
+	?>
+	<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+		<input
+			type="password"
+			id="summit-lookup-key"
+			value="<?php echo esc_attr( $key ); ?>"
+			readonly
+			style="font-family:monospace;width:320px;"
+		>
+		<button type="button" id="summit-reveal-key" class="button">Reveal</button>
+		<button type="button" id="summit-copy-key" class="button">Copy</button>
+		<a
+			href="<?php echo esc_url( $regen_url ); ?>"
+			class="button"
+			onclick="return confirm('Regenerate the secret key?\n\nThe OttoKit lookup URL will stop working until you update it there.');"
+		>Regenerate</a>
+	</div>
+	<p class="description">Auto-generated. Used to authenticate OttoKit's requests to the lookup endpoint. Keep this private.</p>
+
+	<?php if ( $lookup_url ) : ?>
+	<div style="margin-top:14px;">
+		<strong style="display:block;margin-bottom:6px;">OttoKit Lookup URL</strong>
+		<div style="display:flex;align-items:center;gap:8px;">
+			<input
+				type="text"
+				id="summit-lookup-url"
+				value="<?php echo esc_attr( $lookup_url ); ?>"
+				readonly
+				style="font-family:monospace;width:100%;max-width:580px;"
+			>
+			<button type="button" id="summit-copy-url" class="button">Copy</button>
+		</div>
+		<p class="description">Replace <code>BOOKING_ID</code> with <code>@{Appointmentid}</code> in OttoKit.</p>
+	</div>
+	<?php endif; ?>
+	<?php
 }
 add_action( 'admin_init', 'summit_intake_register_settings' );
 
