@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/content-group",
+  "title": "Content Group - Summit Law LLP",
+  "description": "A content block for displaying a title and a large content area.",
+  "category": "formatting",
+  "icon": "text",
+  "keywords": ["content", "test", "paragraphs", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "content_group.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

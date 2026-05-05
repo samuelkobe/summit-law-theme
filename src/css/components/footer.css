@@ -1,0 +1,86 @@
+@tailwind components;
+
+@layer components {
+  /* Footer Grid Layout - 12 columns */
+  .footer-grid {
+    @apply container mx-auto p-4 text-white grid grid-cols-12 gap-4;
+  }
+
+  .footer-grid > :nth-child(1) {
+    @apply col-span-12 xl:col-span-3;
+  }
+
+  .footer-grid > :nth-child(2) {
+    @apply col-span-6 lg:col-span-3 xl:col-span-2 xl:col-start-5;
+  }
+
+  .footer-grid > :nth-child(3),
+  .footer-grid > :nth-child(4),
+  .footer-grid > :nth-child(5) {
+    @apply col-span-6 lg:col-span-3 xl:col-span-2;
+  }
+  .footer-bottom {
+    @apply bg-brand-black text-white;
+  }
+  .footer-bottom > div > div > p {
+    @apply text-base font-light;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Footer Logo Styles */
+  .footer-logo {
+    @apply sm:w-[196px] sm:max-w-[100dvw] h-auto;
+  }
+
+  /* Footer Address Styles */
+  .footer-grid address {
+    @apply not-italic mt-3 lg:mt-2 text-base lg:text-lg leading-[1.6];
+  }
+
+  /* Footer Menu Styles */
+  .footer-menu {
+    @apply list-none p-0 m-0 space-y-2 lg:space-y-3;
+  }
+
+  .footer-menu li a {
+    @apply text-base text-white no-underline hover:text-green-accent1 hover:underline transition-colors duration-300;
+  }
+
+  .footer-legal-menu {
+    @apply list-none p-0 m-0 flex gap-4;
+  }
+
+  .footer-legal-menu li a {
+    @apply text-white no-underline hover:text-green-accent1 transition-colors duration-300 text-sm;
+  }
+
+  /* Footer menu title links */
+  .footer-grid .footer-menu-title-link {
+    @apply no-underline text-green-accent1 hover:text-green-accent2 transition-colors duration-300 inline-flex items-center gap-2;
+  }
+
+  /* Footer grid default link styles (for links without specific classes) */
+  .footer-grid a:not(.btn):not([class*="footer-"]):not([class*="text-"]) {
+    @apply text-white hover:text-green-accent2;
+  }
+
+  /* Footer bottom default link styles */
+  .footer-bottom a:not(.btn):not([class*="text-"]) {
+    @apply text-white hover:text-green-accent2;
+  }
+
+  /* Footer menu icon styles */
+  .footer-menu li a svg {
+    @apply inline-block w-4 h-4 mr-2 align-text-bottom;
+    fill: currentColor;
+  }
+
+  .footer-menu li.icon-phone a svg,
+  .footer-menu li.icon-email a svg {
+    @apply fill-[transparent] stroke-white;
+  }
+  .footer-menu li.icon-phone a:hover svg,
+  .footer-menu li.icon-email a:hover svg {
+    @apply stroke-green-accent1 transition-colors duration-300;
+  }
+}

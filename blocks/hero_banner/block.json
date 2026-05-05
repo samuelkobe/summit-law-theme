@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/hero-banner",
+  "title": "Hero Banner - Summit Law LLP",
+  "description": "A block for displaying a hero banner with a background colour and text.",
+  "category": "formatting",
+  "icon": "align-full-width",
+  "keywords": ["hero", "banner", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "hero_banner.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

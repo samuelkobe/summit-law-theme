@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/posts-loop",
+  "title": "Posts Loop - Summit Law LLP",
+  "description": "A block to display a loop of posts.",
+  "category": "formatting",
+  "icon": "editor-insertmore",
+  "keywords": ["posts", "loop", "content", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "posts_loop.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

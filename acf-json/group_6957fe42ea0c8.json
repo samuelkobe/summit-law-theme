@@ -1,0 +1,93 @@
+{
+    "key": "group_6957fe42ea0c8",
+    "title": "BLOCK: Bullet Group",
+    "fields": [
+        {
+            "key": "field_6957fe430e73f",
+            "label": "Title",
+            "name": "title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Add a section title to this block (Max 50 characters).",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": 50,
+            "allow_in_bindings": 0,
+            "placeholder": "ie. What we do",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_6957feac12e43",
+            "label": "Bullet Points",
+            "name": "bullet_points",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "pagination": 0,
+            "min": 0,
+            "max": 0,
+            "collapsed": "field_6957feeae842f",
+            "button_label": "Add Bullet",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_6957feeae842f",
+                    "label": "Bullet Content",
+                    "name": "bullet_content",
+                    "aria-label": "",
+                    "type": "wysiwyg",
+                    "instructions": "Add bullet point content to this section.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "allow_in_bindings": 0,
+                    "tabs": "visual",
+                    "toolbar": "basic",
+                    "media_upload": 0,
+                    "delay": 1,
+                    "parent_repeater": "field_6957feac12e43"
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/bullet-group"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "",
+    "show_in_rest": 0,
+    "display_title": "",
+    "modified": 1774554401
+}

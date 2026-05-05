@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/services-loop",
+  "title": "Services Loop - Summit Law LLP",
+  "description": "A block for displaying a loop of services with their practice areas.",
+  "category": "formatting",
+  "icon": "portfolio",
+  "keywords": ["services", "loop", "practice areas", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "services_loop.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

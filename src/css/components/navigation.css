@@ -1,0 +1,868 @@
+@tailwind components;
+
+/**
+ * Navigation Styles
+ *
+ * Includes:
+ * - Header (light/dark versions, hidden state)
+ * - Desktop mega menus
+ * - Mobile drawer menu
+ * - Search overlay
+ * - Transitions & animations
+ * - Focus styles
+ */
+
+/* =============================================================================
+   HEADER BASE
+   ============================================================================= */
+
+[data-header] {
+  @apply sticky top-0 left-0 right-0 z-50 transition-transform duration-500 ease-out;
+  /* Start hidden above viewport, JS will reveal after applying correct state */
+  transform: translateY(-100%);
+}
+
+/* Dark header (home page at top) should be fixed to overlay the hero */
+.header--dark {
+  @apply fixed;
+}
+
+/* When scrolled (has header--light), use sticky positioning */
+.header--light {
+  @apply sticky;
+}
+
+/* On home page, keep header fixed even when scrolled (prevents page jump when opening mega menu) */
+body.home.admin-bar [data-header] {
+  @apply lg:!mt-8;
+}
+
+body.home [data-header],
+body.home [data-header].header--light,
+body.home [data-header].header--dark {
+  @apply sticky lg:fixed;
+}
+
+/* Mobile: always white background header (must override .header--dark) */
+.header--light .container {
+  @apply max-lg:bg-white;
+}
+
+/* Header ready state - applied by JS after scroll state is determined */
+[data-header].header--ready {
+  transform: translateY(0);
+}
+
+/* Skip entrance animation for internal navigation or page refresh while scrolled */
+[data-header].header--no-transition,
+[data-header].header--no-transition *,
+[data-header].header--no-transition .nav-menu > li > button,
+[data-header].header--no-transition .nav-menu > li > a,
+[data-header].header--no-transition .search-toggle,
+[data-header].header--no-transition .mobile-menu-toggle,
+[data-header].header--no-transition .hamburger span,
+[data-header].header--no-transition .logo-primary,
+[data-header].header--no-transition .logo-alternate,
+[data-header].header--no-transition .logo-primary img,
+[data-header].header--no-transition .logo-alternate img,
+[data-header].header--no-transition [data-logo] {
+  transition: none !important;
+  transition-delay: 0ms !important;
+}
+
+/* Header container - matches Tailwind container */
+[data-header] > .container {
+  @apply mx-auto w-full;
+  @apply px-4 lg:px-8;
+  @apply relative;
+  z-index: 51; /* Ensure container stays above mobile menu */
+}
+
+/* Header inner flexbox */
+.header-inner {
+  @apply flex items-center justify-between relative;
+  z-index: 51; /* Ensure header content stays above mobile menu (z-45) */
+}
+
+/* Right side wrapper for nav and search */
+.header-right {
+  @apply hidden lg:flex items-center gap-2;
+}
+
+.header-right {
+  @apply h-28;
+}
+
+body.home .header--light .header-right {
+  @apply lg:delay-[2000ms];
+}
+
+/* =============================================================================
+   HEADER VARIANTS - Light & Dark
+   ============================================================================= */
+
+/* Light header (default pages and scrolled on home) */
+.header--light {
+  @apply bg-white shadow-sm transition-all duration-300 ease-out;
+}
+
+.header--light .nav-menu > li > button,
+.header--light .nav-menu > li > a {
+  @apply text-brand-black transition-colors duration-300;
+}
+
+body.home .header--light .nav-menu > li > button,
+body.home .header--light .nav-menu > li > a {
+  @apply lg:delay-[1450ms];
+}
+
+.header--light .search-toggle,
+.header--light .mobile-menu-toggle {
+  @apply text-brand-black transition-colors duration-300;
+}
+
+body.home .header--light .search-toggle,
+body.home .header--light .mobile-menu-toggle {
+  @apply lg:delay-[1450ms];
+}
+
+.header--light .hamburger span {
+  @apply bg-brand-black transition-all duration-300;
+}
+
+/* Dark header (home page top) - transparent by default */
+.header--dark {
+  @apply bg-transparent transition-all duration-300 ease-out;
+}
+
+.header--dark .nav-menu > li > button,
+.header--dark .nav-menu > li > a {
+  @apply text-white transition-colors duration-300;
+}
+
+.header--dark .search-toggle,
+.header--dark .mobile-menu-toggle {
+  @apply text-white transition-colors duration-300;
+}
+
+.header--dark .hamburger span {
+  @apply bg-white transition-all duration-300;
+}
+
+/* When mega menu is open, force light header style (needed for slide animation) */
+.header--dark.has-mega-open {
+  @apply bg-white shadow-sm;
+}
+
+.header--dark.has-mega-open .nav-menu > li > button,
+.header--dark.has-mega-open .nav-menu > li > a {
+  @apply text-brand-black;
+}
+
+.header--dark.has-mega-open .search-toggle,
+.header--dark.has-mega-open .mobile-menu-toggle {
+  @apply text-brand-black;
+}
+
+.header--dark.has-mega-open .hamburger span {
+  @apply bg-brand-black;
+}
+
+/* Also switch to alternate logo when mega menu is open on dark header */
+.header--dark.has-mega-open .logo-primary {
+  @apply opacity-0;
+}
+
+.header--dark.has-mega-open .logo-alternate {
+  @apply opacity-100;
+}
+
+/* Add top padding to logo on home page when not scrolled (large logo state) */
+.header--dark [data-logo]:not(.logo--small) .logo-primary {
+  @apply xl:pt-20 transition-all duration-500 ease-out;
+}
+
+.header--dark [data-logo]:not(.logo--small) .logo-primary img {
+  @apply xl:absolute xl:w-full xl:h-auto;
+}
+
+/* Hidden state (scroll down on desktop) - must override header--ready */
+[data-header].header--hidden {
+  transform: translateY(-100%);
+}
+
+/* Fast transition mode - skip delays when scrolled past 50dvh on home page (desktop) */
+/* Must use high specificity to override body.home .header--light rules */
+@media (min-width: 1024px) {
+  body.home [data-header].header--fast,
+  body.home [data-header].header--fast.header--light,
+  body.home [data-header].header--fast.header--dark,
+  body.home .header--fast .header-right,
+  body.home .header--fast.header--light .header-right,
+  body.home .header--fast .nav-menu > li > button,
+  body.home .header--fast .nav-menu > li > a,
+  body.home .header--fast.header--light .nav-menu > li > button,
+  body.home .header--fast.header--light .nav-menu > li > a,
+  body.home .header--fast .search-toggle,
+  body.home .header--fast .mobile-menu-toggle,
+  body.home .header--fast.header--light .search-toggle,
+  body.home .header--fast.header--light .mobile-menu-toggle,
+  body.home .header--fast .hamburger span,
+  body.home .header--fast .logo-primary,
+  body.home .header--fast .logo-alternate,
+  body.home .header--fast .logo-primary img,
+  body.home .header--fast .logo-alternate img,
+  body.home .header--fast.header--light .logo-primary,
+  body.home .header--fast.header--light .logo-alternate,
+  body.home .header--fast.header--light .logo-primary img,
+  body.home .header--fast.header--light .logo-alternate img,
+  body.home .header--fast [data-logo],
+  body.home .header--fast [data-logo] .logo-primary,
+  body.home .header--fast.header--light [data-logo] .logo-primary,
+  body.home .header--fast.header--light .logo-alternate,
+  body.home .header--fast .logo--small .logo-primary img,
+  body.home .header--fast.header--light .logo--small .logo-primary img,
+  body.home .header--fast.header--dark [data-logo]:not(.logo--small) .logo-primary {
+    transition-delay: 0ms !important;
+    transition-duration: 150ms !important;
+  }
+}
+
+/* Hero content margin transition when header switches to light mode on home page */
+@media (min-width: 1280px) {
+  body.home [data-hero-content] {
+    transition: margin 1000ms ease-out;
+  }
+
+  body.home.header-scrolled [data-hero-content] {
+    margin-top: 0 !important;
+  }
+}
+
+/* =============================================================================
+   LOGO
+   ============================================================================= */
+
+[data-logo] {
+  @apply flex-shrink-0;
+}
+
+[data-logo] a {
+  @apply no-underline block relative;
+}
+
+[data-logo] img {
+  @apply block h-auto;
+}
+
+.header--light .logo-primary img,
+.header--light .logo-alternate img {
+  @apply transition-none lg:duration-[1450ms] ease-in;
+}
+
+.header--dark .logo-primary img,
+.header--dark .logo-alternate img {
+  @apply lg:transition-all lg:duration-[1500ms] ease-out;
+}
+
+body.home .header--light {
+  @apply lg:!delay-[1450ms];
+}
+
+/* .header--light .logo--small .logo-alternate img {
+  @apply !delay-[2000ms];
+} */
+
+.header--light .logo--small .logo-primary img {
+  @apply !opacity-100 lg:transition-all lg:duration-1000 ease-in;
+}
+
+/* Logo wrapper spans - start hidden to prevent flash */
+.logo-primary,
+.logo-alternate {
+  @apply block;
+  /* @apply opacity-0 transition-opacity duration-300 ease-in-out; */
+}
+
+/* Position alternate logo absolutely so they can overlap during transition */
+.logo-alternate {
+  @apply absolute top-0 left-0;
+}
+
+/* Dark header (home page top): show primary logo, hide alternate */
+.header--dark .logo-primary {
+  @apply opacity-100;
+}
+
+.header--dark .logo-alternate {
+  @apply opacity-0;
+}
+
+.header--light [data-logo] .logo-primary {
+  @apply pt-0 lg:transition-all lg:duration-1000 ease-out;
+}
+
+body.home .header--light [data-logo] .logo-primary {
+  @apply lg:!delay-[750ms];
+}
+
+.header--light .logo-alternate {
+  @apply opacity-100;
+}
+
+body.home .header--light .logo-alternate {
+  @apply lg:delay-[1450ms];
+}
+
+[data-logo] img {
+  @apply w-[140px] lg:w-[180px];
+}
+
+/* Mobile: always one size */
+@media (max-width: 1023px) {
+  [data-logo] img {
+    @apply w-[140px];
+  }
+}
+
+/* =============================================================================
+   RESPONSIVE DISPLAY
+   ============================================================================= */
+
+/* Desktop elements - hide on mobile */
+.primary-nav {
+  @apply flex;
+}
+
+.search-toggle {
+  @apply flex items-center justify-end w-10 h-10 p-2 pr-0;
+  @apply transition-colors duration-300;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.search-toggle:hover {
+  @apply opacity-80;
+}
+
+.search-toggle svg {
+  @apply w-5 h-5;
+}
+
+/* Mobile elements - hide on desktop */
+.mobile-menu-toggle {
+  @apply flex lg:hidden items-center justify-center w-10 h-10 p-2;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* =============================================================================
+   DESKTOP NAVIGATION
+   ============================================================================= */
+
+/* Top level menu */
+.nav-menu {
+  @apply flex items-center gap-2;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Top level items */
+.nav-menu > li {
+  @apply static;
+}
+
+/* Parent items with children - flex layout for link + button */
+.nav-menu > li.menu-item-has-children {
+  @apply flex items-center;
+}
+
+/* Top level links */
+.nav-menu > li > a {
+  @apply flex items-center px-4 py-2;
+  @apply no-underline font-medium tracking-[0.01em];
+  @apply transition-colors duration-300;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Links in parent items - reduce right padding since button follows */
+.nav-menu > li.menu-item-has-children > a {
+  @apply pr-1;
+}
+
+.nav-menu > li > a:hover {
+  @apply opacity-80;
+}
+
+/* Chevron toggle button (for parent items with mega menu) */
+.nav-menu > li > button[data-mega-toggle] {
+  @apply flex items-center justify-center p-2;
+  @apply transition-colors duration-300;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.nav-menu > li > button[data-mega-toggle]:hover {
+  @apply opacity-80;
+}
+
+/* Chevron icon in toggle buttons */
+.nav-menu > li > button[data-mega-toggle] svg {
+  @apply w-4 h-4;
+  @apply transition-transform duration-300;
+}
+
+/* Rotate chevron when expanded */
+.nav-menu > li > button[aria-expanded="true"] svg {
+  @apply rotate-180;
+}
+
+/* =============================================================================
+   MEGA MENU
+   ============================================================================= */
+
+.mega-menu {
+  @apply fixed left-0 right-0 w-full bg-brand-10 shadow-lg;
+  @apply transition-all duration-300 ease-out;
+  top: 0;
+  opacity: 0;
+  pointer-events: none; /* Prevent interaction when closed */
+  visibility: hidden; /* Hidden by default */
+  z-index: 40; /* Below header (z-50) but above content */
+}
+
+/* Override WordPress admin bar offset - JS sets top dynamically */
+.home.admin-bar .mega-menu {
+  @apply lg:!-mt-8;
+}
+
+/* Visible state - applied immediately on open, removed after close transition */
+.mega-menu.is-visible {
+  visibility: visible;
+}
+
+/* Open state - fade in and slide from top of header */
+.mega-menu.is-open {
+  opacity: 1;
+  pointer-events: auto; /* Allow interaction when open */
+}
+
+/* Mega menu content wrapper */
+.mega-menu-content {
+  @apply container mx-auto p-8 2xl:p-10 2xl:!pt-12;
+  @apply grid lg:grid-cols-3 2xl:lg:grid-cols-4 gap-8;
+  /* grid-template-columns: repeat(auto-fit, minmax(250px, 4fr)); */
+}
+
+/* Mega menu column */
+.mega-menu-column {
+  @apply flex flex-col gap-3;
+}
+
+/* Category header (tier 2) */
+.mega-menu-column > a {
+  @apply relative pl-6 text-lg leading-none mb-2 font-semibold text-green-deep underline decoration-2 decoration-transparent transition-all duration-300;
+}
+
+.mega-menu-column > a::before {
+  content: "";
+  @apply absolute left-0 top-1/2 -translate-y-1/2 w-4 h-4;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='%23d1d436'%3E%3Cpath d='M17.9,10.5L9,1.7c-.8-.8-2.1-.8-2.9,0-.8.8-.8,2.1,0,2.9l7.4,7.4-7.4,7.4c-.8.8-.8,2.1,0,2.9s.9.6,1.5.6,1.1-.2,1.5-.6l8.9-8.9c.4-.4.6-.9.6-1.5s-.2-1.1-.6-1.5Z'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+.mega-menu-column > a:hover {
+  @apply decoration-green-deep;
+}
+
+/* Category links list (tier 3) */
+.mega-menu-links {
+  @apply flex flex-col gap-2;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mega-menu-links li a {
+  @apply text-brand-black text-base underline decoration-transparent decoration-2 transition-all duration-300;
+  font-size: 15px;
+}
+
+.mega-menu-links li a:hover {
+  @apply text-green-deep decoration-green-deep;
+}
+
+/* =============================================================================
+   DESKTOP SEARCH
+   ============================================================================= */
+
+/* Search backdrop - 20% opacity overlay when search is open */
+.search-backdrop {
+  @apply fixed inset-0 w-full h-full;
+  @apply opacity-0 invisible;
+  @apply transition-opacity duration-300 ease-out;
+  background-color: rgba(41, 39, 37, 0.5); /* brand-black #292725 at 20% */
+  z-index: 55; /* Below search overlay (z-60) but above header (z-50) */
+  cursor: pointer;
+}
+
+.search-backdrop:not([hidden]) {
+  @apply opacity-100 visible;
+}
+
+/* Search overlay - slides down from above header */
+.search-overlay {
+  @apply fixed flex items-center h-28 left-0 right-0 w-full;
+  @apply bg-white shadow-lg;
+  @apply transition-transform duration-300 ease-out;
+  top: 0;
+  transform: translateY(-100%);
+  z-index: 60; /* Above header (z-50) so it covers nav items */
+}
+
+/* Account for WordPress admin bar */
+.admin-bar .search-overlay {
+  top: 32px;
+}
+
+@media (max-width: 782px) {
+  .admin-bar .search-overlay {
+    top: 46px;
+  }
+}
+
+/* Open state - slide down into view */
+.search-overlay:not([hidden]) {
+  transform: translateY(0);
+}
+
+/* Inner container - flex row with form and close button */
+.search-overlay-inner {
+  @apply flex h-full items-center justify-between px-4 lg:px-8 py-6;
+}
+
+/* Search form - takes most of the width */
+.search-overlay-form {
+  @apply relative flex-1;
+  @apply mr-4;
+}
+
+.search-overlay input[type="search"],
+.search-overlay #search-field {
+  @apply w-full px-4 py-3 pr-12;
+  @apply bg-brand-10 text-brand-black;
+  @apply text-lg rounded-lg;
+  @apply outline-none;
+  border: none;
+}
+
+.search-overlay input[type="search"]:focus,
+.search-overlay #search-field:focus {
+  @apply outline-none ring-2 ring-green-deep;
+  border: none;
+}
+
+.search-overlay input[type="search"]::placeholder,
+.search-overlay #search-field::placeholder {
+  @apply text-brand-40;
+}
+
+/* Submit button inside form */
+.search-overlay .search-submit {
+  @apply absolute right-3 top-1/2;
+  transform: translateY(-50%);
+  @apply p-2;
+  @apply text-brand-black;
+  @apply transition-colors duration-300;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.search-overlay .search-submit:hover {
+  @apply text-green-deep;
+}
+
+.search-overlay .search-submit svg {
+  @apply w-5 h-5;
+}
+
+/* Search close button - positioned on far right */
+.search-close {
+  @apply flex-shrink-0;
+  @apply w-10 h-10 p-2;
+  @apply flex items-center justify-center;
+  @apply text-brand-black;
+  @apply transition-colors duration-300;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.search-close:hover {
+  @apply text-green-deep;
+}
+
+.search-close svg {
+  @apply w-6 h-6;
+}
+
+/* =============================================================================
+   MOBILE MENU
+   ============================================================================= */
+
+/* Hamburger icon */
+.hamburger {
+  @apply relative w-6 h-5;
+  @apply flex flex-col justify-between;
+}
+
+.hamburger span {
+  @apply block w-full h-[2px];
+  @apply transition-all duration-300;
+}
+
+/* Animate hamburger to X */
+.mobile-menu-toggle[aria-expanded="true"] .hamburger span:nth-child(1) {
+  transform: translateY(9px) rotate(45deg);
+}
+
+.mobile-menu-toggle[aria-expanded="true"] .hamburger span:nth-child(2) {
+  @apply opacity-0;
+}
+
+.mobile-menu-toggle[aria-expanded="true"] .hamburger span:nth-child(3) {
+  transform: translateY(-9px) rotate(-45deg);
+}
+
+/* Mobile menu drawer */
+.mobile-menu {
+  @apply fixed top-0 left-0 right-0;
+  @apply w-full;
+  @apply bg-white;
+  @apply overflow-y-auto;
+  @apply opacity-0 invisible;
+  @apply transition-all duration-300 ease-in-out;
+  transform: translateX(100%);
+  z-index: 45; /* Below header (z-50) so header stays on top */
+  padding-top: 0px; /* Space for header */
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  border-top: 2px solid #e5e7eb; /* Tailwind brand-30 */
+}
+
+.mobile-menu:not([hidden]) {
+  @apply opacity-100 visible;
+  transform: translateX(0);
+}
+
+/* Mobile nav menu */
+.mobile-nav-menu {
+  @apply flex flex-col;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Mobile menu items */
+.mobile-nav-menu > li {
+  @apply border-b border-brand-20;
+}
+
+/* Mobile parent items with children - flex layout for link + button, wrap for submenu */
+.mobile-nav-menu > li.menu-item-has-children {
+  @apply flex flex-wrap items-center justify-between;
+}
+
+/* Mobile top level links */
+.mobile-nav-menu > li > a {
+  @apply block px-6 py-4;
+  @apply text-brand-black font-medium no-underline;
+  @apply transition-colors duration-300;
+  font-size: 18px;
+}
+
+/* Links in parent items - flex grow to fill available space */
+.mobile-nav-menu > li.menu-item-has-children > a {
+  @apply flex-1;
+}
+
+.mobile-nav-menu > li > a:active {
+  @apply bg-brand-10;
+}
+
+/* Chevron toggle button (for parent items with submenu) */
+.mobile-nav-menu > li > button[data-mobile-submenu-toggle] {
+  @apply flex items-center justify-center;
+  @apply px-6 py-4;
+  @apply text-brand-black;
+  @apply transition-colors duration-300;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mobile-nav-menu > li > button[data-mobile-submenu-toggle]:active {
+  @apply bg-brand-10;
+}
+
+/* Chevron in mobile toggle buttons */
+.mobile-nav-menu > li > button[data-mobile-submenu-toggle] svg {
+  @apply w-5 h-5;
+  @apply transition-transform duration-300;
+}
+
+.mobile-nav-menu > li > button[aria-expanded="true"] svg {
+  @apply rotate-180;
+}
+
+/* Mobile submenu */
+.mobile-submenu {
+  @apply w-full bg-brand-10;
+  @apply max-h-0 overflow-hidden;
+  @apply transition-all duration-300 ease-in-out;
+}
+
+.mobile-submenu:not([hidden]) {
+  @apply max-h-[1000px];
+  padding: 8px 0;
+}
+
+/* Mobile submenu column */
+.mobile-submenu-column {
+  @apply flex flex-col;
+}
+
+/* Mobile category header */
+.mobile-submenu-column > a {
+  @apply block px-6 py-3;
+  @apply text-green-deep font-semibold no-underline;
+  @apply border-l-2 border-transparent;
+  @apply transition-all duration-300;
+  font-size: 16px;
+}
+
+.mobile-submenu-column > a:active {
+  @apply border-l-green-deep bg-white;
+}
+
+/* Mobile category links */
+.mobile-submenu-links {
+  @apply flex flex-col;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.mobile-submenu-links li a {
+  @apply block px-6 py-2 pl-8;
+  @apply text-brand-black no-underline;
+  @apply border-l-2 border-transparent;
+  @apply transition-all duration-300;
+  font-size: 15px;
+}
+
+.mobile-submenu-links li a:active {
+  @apply border-l-green-deep bg-white;
+}
+
+/* Mobile search */
+.mobile-search {
+  @apply max-lg:h-[232px] px-6 py-6 border-t-2 border-brand-30;
+}
+
+.mobile-search form {
+  @apply relative;
+}
+
+.mobile-search input[type="search"] {
+  @apply w-full px-4 py-3 pr-12;
+  @apply border border-brand-30 bg-white;
+  @apply text-brand-black;
+  @apply outline-none;
+}
+
+.mobile-search input[type="search"]:focus {
+  @apply border-brand-black;
+}
+
+.mobile-search button[type="submit"] {
+  @apply absolute right-0 top-1/2;
+  transform: translateY(-50%);
+  @apply p-3;
+  @apply text-brand-black;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.mobile-search button[type="submit"] svg {
+  @apply w-5 h-5;
+}
+
+/* =============================================================================
+   ACCESSIBILITY - Focus Styles
+   ============================================================================= */
+
+/* Focus visible for all interactive elements */
+[data-header] button:focus-visible,
+[data-header] a:focus-visible {
+  @apply outline-2 outline-offset-2 outline-green-deep;
+  outline-style: solid;
+}
+
+/* Dark header (home page) - use light accent color for visibility */
+.header--dark button:focus-visible,
+.header--dark a:focus-visible {
+  @apply outline-green-accent1;
+}
+
+/* Focus within mega menu */
+.mega-menu a:focus-visible {
+  @apply outline-2 outline-offset-2 outline-green-deep;
+  outline-style: solid;
+}
+
+/* Focus in search overlay */
+.search-overlay input:focus-visible,
+.search-overlay button:focus-visible {
+  @apply outline-2 outline-offset-2 outline-green-deep;
+  outline-style: solid;
+}
+
+/* Focus in mobile menu */
+.mobile-menu button:focus-visible,
+.mobile-menu a:focus-visible,
+.mobile-menu input:focus-visible {
+  @apply outline-2 outline-offset-2 outline-green-deep;
+  outline-style: solid;
+}
+
+/* =============================================================================
+   UTILITY CLASSES
+   ============================================================================= */
+
+/* Screen reader only */
+.sr-only {
+  @apply absolute w-px h-px p-0 -m-px overflow-hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Prevent body scroll when overlay open */
+body.scroll-locked {
+  @apply overflow-hidden;
+}
+
+/* Navigation chevron icons - override default SVG styling */
+#menu-main-menu > li.menu-item.menu-item-has-children > button > svg,
+.mobile-nav-menu > li.menu-item-has-children > button > svg {
+  @apply shadow-none fill-none stroke-green-accent1 stroke-[3px];
+}

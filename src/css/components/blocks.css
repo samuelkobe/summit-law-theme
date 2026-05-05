@@ -1,0 +1,33 @@
+@tailwind components;
+
+/**
+ * Block Spacing Utilities
+ *
+ * Manages vertical spacing between ACF blocks to prevent doubled padding
+ * when blocks with white backgrounds are stacked.
+ *
+ * Usage:
+ * - Add `block-white` class to white-bg blocks (replaces their py-* classes)
+ * - Colored-bg blocks (CTA, form, hero) keep their existing py-* padding
+ */
+
+/* =============================================================================
+   WHITE BACKGROUND BLOCKS
+   ============================================================================= */
+
+/* White blocks: full padding by default */
+section.block-white,
+div.block-white {
+  @apply py-12 lg:py-24;
+}
+
+/* When white block sections are stacked, remove top padding from the second */
+/* Handles both direct adjacency and style tags between sections */
+section.block-white + section.block-white,
+section.block-white + style + section.block-white,
+div.block-white + section.block-white,
+div.block-white + style + section.block-white,
+section.block-white + div.block-white,
+section.block-white + style + div.block-white {
+  @apply pt-0;
+}

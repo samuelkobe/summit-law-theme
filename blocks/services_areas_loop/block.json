@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/services-areas-loop",
+  "title": "Services Areas Loop - Summit Law LLP",
+  "description": "A block for displaying sibling service areas on a child service page.",
+  "category": "formatting",
+  "icon": "portfolio",
+  "keywords": ["services", "areas", "loop", "siblings", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "services_areas_loop.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

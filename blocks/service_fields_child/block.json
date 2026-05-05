@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/service-fields-child",
+  "title": "Child Service Fields - Service Post Type",
+  "description": "A block for displaying the fields of a child service.",
+  "category": "formatting",
+  "icon": "portfolio",
+  "keywords": ["services", "child", "practice areas", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "service_fields_child.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}

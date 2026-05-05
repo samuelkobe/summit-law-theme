@@ -1,0 +1,146 @@
+/**
+ * Search Results Styles
+ *
+ * Styling for the search results page including:
+ * - Filter sidebar
+ * - Results grid
+ * - Mobile filter accordion
+ * - No results state
+ */
+
+@layer components {
+  /* =============================================================================
+     SEARCH RESULTS LAYOUT
+     ============================================================================= */
+
+  .search-results {
+    @apply bg-white;
+  }
+
+  /* =============================================================================
+     FILTER SIDEBAR
+     ============================================================================= */
+
+  .search-filters {
+    @apply lg:sticky lg:top-32;
+  }
+
+  /* Mobile filter toggle */
+  .search-filter-toggle {
+    @apply cursor-pointer;
+  }
+
+  .search-filter-toggle[aria-expanded="true"] {
+    @apply rounded-b-none;
+  }
+
+  .search-filter-toggle[aria-expanded="true"] + .search-filters {
+    @apply bg-brand-10 rounded-b-lg p-4 mb-4;
+  }
+
+  /* Refine search form */
+  .search-refine-form input[type="search"] {
+    @apply text-base;
+  }
+
+  .search-refine-form input[type="search"]::-webkit-search-cancel-button {
+    @apply hidden;
+  }
+
+  /* Ensure search submit button stays vertically centered */
+  .search-refine-form .relative {
+    @apply flex items-center;
+  }
+
+  .search-refine-form button[type="submit"] {
+    @apply absolute right-3 top-1/2 transform -translate-y-1/2;
+  }
+
+  .search-refine-form button[type="submit"] svg {
+    @apply m-0;
+  }
+
+  /* =============================================================================
+     RESULTS GRID
+     ============================================================================= */
+
+  .search-results-grid {
+    @apply gap-x-6 gap-y-8;
+  }
+
+  .search-result-card {
+    @apply flex flex-col;
+  }
+
+  .search-result-card img {
+    @apply transition-transform duration-500;
+  }
+
+  .search-result-card:hover img {
+    @apply scale-[1.02];
+  }
+
+  /* =============================================================================
+     PAGINATION - Search Results
+     ============================================================================= */
+
+  .search-results .nav-links {
+    @apply flex items-center justify-center gap-2 mt-12;
+  }
+
+  .search-results .page-numbers {
+    @apply px-4 py-2 rounded-lg text-brand-black transition-all duration-300;
+  }
+
+  .search-results .page-numbers:not(.current):not(.dots) {
+    @apply hover:bg-brand-10;
+  }
+
+  .search-results .page-numbers.current {
+    @apply bg-green-deep text-white;
+  }
+
+  .search-results .page-numbers.dots {
+    @apply cursor-default;
+  }
+
+  .search-results .page-numbers.prev,
+  .search-results .page-numbers.next {
+    @apply font-medium;
+  }
+
+  /* =============================================================================
+     PAGINATION - Global Archives (Insights, Cases, Team, Generic)
+     ============================================================================= */
+
+  .site-main .pagination,
+  .site-main .nav-links {
+    @apply flex items-center justify-center gap-2 mt-12;
+  }
+
+  .site-main .page-numbers {
+    @apply px-4 py-2 rounded-lg text-brand-black transition-all duration-300;
+  }
+
+  .site-main .page-numbers:not(.current):not(.dots) {
+    @apply hover:bg-brand-10;
+  }
+
+  .site-main .page-numbers.current {
+    @apply bg-green-deep text-white;
+  }
+
+  .site-main .page-numbers.dots {
+    @apply cursor-default;
+  }
+
+  .site-main .page-numbers.prev,
+  .site-main .page-numbers.next {
+    @apply font-medium;
+  }
+
+  /* Ensure SVG chevrons align properly with text */
+  .site-main .page-numbers svg {
+    @apply inline-block align-middle;
+  }
+}

@@ -1,0 +1,241 @@
+{
+    "key": "group_696536577dda7",
+    "title": "BLOCK: Post Loop",
+    "fields": [
+        {
+            "key": "field_696536b48a546",
+            "label": "Post Type?",
+            "name": "post_type",
+            "aria-label": "",
+            "type": "button_group",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "insights": "Insights",
+                "cases": "Cases",
+                "both": "Both"
+            },
+            "default_value": "both",
+            "return_format": "value",
+            "allow_null": 0,
+            "allow_in_bindings": 0,
+            "layout": "horizontal"
+        },
+        {
+            "key": "field_69653b1ad54f8",
+            "label": "Post Images?",
+            "name": "post_image",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "Turn the posts' images 'on' or 'off'.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 1,
+            "allow_in_bindings": 0,
+            "ui_on_text": "On",
+            "ui_off_text": "Off",
+            "ui": 1
+        },
+        {
+            "key": "field_6965745cb4410",
+            "label": "Loop Type?",
+            "name": "loop_type",
+            "aria-label": "",
+            "type": "true_false",
+            "instructions": "Select whether to display featured posts or the most recent posts.",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_696536b48a546",
+                        "operator": "!=",
+                        "value": "both"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "",
+            "default_value": 0,
+            "allow_in_bindings": 0,
+            "ui_on_text": "Featured",
+            "ui_off_text": "Recent",
+            "ui": 1
+        },
+        {
+            "key": "field_696536578a544",
+            "label": "Insights",
+            "name": "insights",
+            "aria-label": "",
+            "type": "relationship",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_696536b48a546",
+                        "operator": "==",
+                        "value": "insights"
+                    },
+                    {
+                        "field": "field_6965745cb4410",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "post_type": [
+                "post"
+            ],
+            "post_status": [
+                "publish"
+            ],
+            "taxonomy": "",
+            "filters": [
+                "search"
+            ],
+            "return_format": "object",
+            "min": "",
+            "max": "",
+            "allow_in_bindings": 0,
+            "elements": "",
+            "bidirectional": 0,
+            "bidirectional_target": []
+        },
+        {
+            "key": "field_696536a98a545",
+            "label": "Cases",
+            "name": "cases",
+            "aria-label": "",
+            "type": "relationship",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_696536b48a546",
+                        "operator": "==",
+                        "value": "cases"
+                    },
+                    {
+                        "field": "field_6965745cb4410",
+                        "operator": "==",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "post_type": [
+                "case"
+            ],
+            "post_status": [
+                "publish"
+            ],
+            "taxonomy": "",
+            "filters": [
+                "search"
+            ],
+            "return_format": "object",
+            "min": "",
+            "max": "",
+            "allow_in_bindings": 0,
+            "elements": "",
+            "bidirectional": 0,
+            "bidirectional_target": []
+        },
+        {
+            "key": "field_696537028a547",
+            "label": "Posts",
+            "name": "",
+            "aria-label": "",
+            "type": "message",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_696536b48a546",
+                        "operator": "==",
+                        "value": "both"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_696536b48a546",
+                        "operator": "==",
+                        "value": "insights"
+                    },
+                    {
+                        "field": "field_6965745cb4410",
+                        "operator": "!=",
+                        "value": "1"
+                    }
+                ],
+                [
+                    {
+                        "field": "field_696536b48a546",
+                        "operator": "==",
+                        "value": "cases"
+                    },
+                    {
+                        "field": "field_6965745cb4410",
+                        "operator": "!=",
+                        "value": "1"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "message": "The block will display the latest posts based on your chosen settings.",
+            "new_lines": "wpautop",
+            "esc_html": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "acf\/posts-loop"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "",
+    "show_in_rest": 0,
+    "display_title": "",
+    "modified": 1768257151
+}

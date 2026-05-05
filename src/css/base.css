@@ -1,0 +1,340 @@
+/* Component imports must come first */
+@import "./components/navigation.css";
+@import "./components/content.css";
+@import "./components/search.css";
+@import "./components/blocks.css";
+@import "./components/form.css";
+@import "./components/mediation-intake.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Smooth scroll for anchor links (respects user preference for reduced motion) */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  /* Global body styles */
+  body {
+    @apply bg-white;
+    font-weight: 400;
+    font-family:
+      "Hanken Grotesk",
+      system-ui,
+      Segoe UI,
+      Arial,
+      sans-serif;
+    font-size: clamp(16px, 1vw + 14px, 18px);
+    line-height: 1.6;
+    /* color removed - use Tailwind utilities instead */
+  }
+
+  /* Global focus styles - accent1 green for all interactive elements */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  [tabindex]:focus-visible {
+    @apply outline-2 outline-offset-2 outline-green-accent1;
+    outline-style: solid;
+  }
+
+  /* Override for inputs that should use deep green (better contrast on light backgrounds) */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    @apply outline-green-deep;
+  }
+  /* PP Museum - Multiple weights */
+  @font-face {
+    font-family: "PP Museum";
+    src: url("../fonts/PPMuseum-Light.woff2") format("woff2");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "PP Museum";
+    src: url("../fonts/PPMuseum-LightItalic.woff2") format("woff2");
+    font-weight: 300;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "PP Museum";
+    src: url("../fonts/PPMuseum-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "PP Museum";
+    src: url("../fonts/PPMuseum-RegularItalic.woff2") format("woff2");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "PP Museum";
+    src: url("../fonts/PPMuseum-Ultrabold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "PP Museum";
+    src: url("../fonts/PPMuseum-UltraboldItalic.woff2") format("woff2");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  /* Hanken Grotesk - Variable Font */
+  @font-face {
+    font-family: "Hanken Grotesk";
+    src: url("../fonts/HankenGrotesk-VariableFont_wght.woff2") format("woff2");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Hanken Grotesk";
+    src: url("../fonts/HankenGrotesk-Italic-VariableFont_wght.woff2")
+      format("woff2");
+    font-weight: 100 900;
+    font-style: italic;
+    font-display: swap;
+  }
+
+  /* CSS Custom Properties - Colors only (typography now in Tailwind) */
+  :root {
+    --c-deep: #29472d;
+    --c-nearblack: #292725;
+    --c-accent1: #e2ef4a;
+    --c-accent2: #d1d436;
+    --c-n10: #f7f3f2;
+    --c-n20: #efe8e6;
+    --c-n30: #dad3cf;
+    --c-n40: #b7b0ab;
+    --c-white: #ffffff;
+  }
+
+  html {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    color: #292725; /* brand-black - using regular CSS so utilities can override */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .form-col.editor-only {
+    display: none;
+    visibility: hidden;
+  }
+
+  /* Hairline divider */
+  .rule {
+    @apply border-t-[0.5px] border-brand-black;
+  }
+
+  /* Typography - Opt-in via classes */
+  /* Use class="h1" on any element to get h1 styling */
+  /* This prevents conflicts with Tailwind utilities */
+  .h1 {
+    @apply font-museum font-normal leading-tight text-green-deep tracking-[-0.02em] text-h1 antialiased;
+  }
+
+  .h2 {
+    @apply font-museum font-normal leading-tight text-green-deep tracking-[-0.015em] text-h2 antialiased;
+  }
+
+  .h3 {
+    @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.01em] text-h3 antialiased;
+  }
+
+  .wp-block-heading.h3 {
+    @apply !font-museum;
+  }
+
+  .wp-block-heading.h3.summit-quote {
+    @apply !font-museum !-mb-8 !pl-0;
+  }
+
+  .h4 {
+    @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.005em] text-h4 antialiased;
+  }
+
+  .h5 {
+    @apply font-hanken font-medium leading-snug text-brand-black text-h5 antialiased;
+  }
+
+  .h6 {
+    @apply font-hanken font-semibold uppercase leading-snug tracking-wider text-brand-black text-h6 antialiased;
+  }
+
+  /* Auto-apply to WordPress content areas */
+  .wp-block-spacer {
+    @apply bg-white;
+  }
+
+  /* Heading styles - scoped to DIRECT children only to avoid overriding ACF blocks */
+  .entry-content > h1,
+  .page-content > h1 {
+    @apply font-museum font-normal leading-tight text-green-deep tracking-[-0.02em] text-h1;
+  }
+
+  .entry-content > h2,
+  .page-content > h2 {
+    @apply font-museum font-normal leading-tight text-green-deep tracking-[-0.015em] text-h2;
+  }
+
+  .entry-content > h3,
+  .page-content > h3 {
+    @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.01em] text-h3;
+  }
+  .entry-content > h3.wp-block-heading,
+  .page-content > h3.wp-block-heading {
+    @apply !font-museum;
+  }
+
+  .entry-content > h4,
+  .page-content > h4 {
+    @apply font-hanken font-medium leading-tight text-brand-black tracking-[-0.005em] text-h4;
+  }
+
+  .entry-content > h5,
+  .page-content > h5 {
+    @apply font-hanken font-medium leading-snug text-brand-black text-h5;
+  }
+
+  .entry-content > h6,
+  .page-content > h6 {
+    @apply font-hanken font-semibold uppercase leading-snug tracking-wider text-brand-black text-h6;
+  }
+}
+
+@layer components {
+  /* WordPress Content Area Typography - scoped to DIRECT children only */
+  .entry-content > p,
+  .page-content > p {
+    @apply leading-relaxed;
+  }
+
+  /* Links - Only apply to CORE BLOCKS within entry-content/page-content */
+  /* Uses direct child selectors to avoid styling links inside ACF blocks */
+  .entry-content > p a:not(.btn),
+  .entry-content > ul a:not(.btn),
+  .entry-content > ol a:not(.btn),
+  .entry-content > blockquote a:not(.btn),
+  .page-content > p a:not(.btn),
+  .page-content > ul a:not(.btn),
+  .page-content > ol a:not(.btn),
+  .page-content > blockquote a:not(.btn) {
+    @apply underline text-green-deep decoration-[0.08em] underline-offset-[0.15em] transition-colors duration-300;
+  }
+
+  .entry-content > p a:not(.btn):hover,
+  .entry-content > ul a:not(.btn):hover,
+  .entry-content > ol a:not(.btn):hover,
+  .entry-content > blockquote a:not(.btn):hover,
+  .page-content > p a:not(.btn):hover,
+  .page-content > ul a:not(.btn):hover,
+  .page-content > ol a:not(.btn):hover,
+  .page-content > blockquote a:not(.btn):hover {
+    @apply text-brand-black;
+  }
+
+  /* Original components layer content below */
+  /* Buttons */
+  .btn {
+    @apply font-semibold max-w-[100%] w-fit py-3 px-6 rounded-[8px] text-base lg:text-lg leading-normal lg:leading-7 tracking-[0.05em] hover:cursor-pointer shadow-md hover:shadow-lg transition-all duration-300;
+    /* Default: primary style */
+    @apply bg-green-deep hover:bg-brand-black text-white;
+  }
+
+  .btn.alt {
+    /* Override colors for alt variant */
+    @apply bg-green-accent1 hover:bg-green-accent2 text-brand-black;
+  }
+
+  .btn.outlined {
+    /* Override colors for outlined variant */
+    @apply border-2 border-brand-40 text-green-deep bg-transparent shadow-none hover:shadow-lg;
+  }
+
+  /* Forms */
+  .label {
+    @apply text-brand-black text-h6;
+  }
+
+  .input,
+  .textarea,
+  .select {
+    @apply w-full p-3 border border-brand-30 bg-brand-10 text-brand-black rounded-none outline-none;
+  }
+
+  .input:focus,
+  .textarea:focus,
+  .select:focus {
+    @apply shadow-none border-brand-black;
+  }
+
+  /* Contact Form 7 form fields */
+  .wpcf7 input[type="text"],
+  .wpcf7 input[type="email"],
+  .wpcf7 input[type="tel"],
+  .wpcf7 input[type="url"],
+  .wpcf7 input[type="number"],
+  .wpcf7 input[type="date"],
+  .wpcf7 textarea,
+  .wpcf7 select {
+    @apply bg-brand-10;
+  }
+
+  /* .wpcf7 input[type="text"]:focus,
+  .wpcf7 input[type="email"]:focus,
+  .wpcf7 input[type="tel"]:focus,
+  .wpcf7 input[type="url"]:focus,
+  .wpcf7 input[type="number"]:focus,
+  .wpcf7 input[type="date"]:focus,
+  .wpcf7 textarea:focus,
+  .wpcf7 select:focus {
+    @apply shadow-none border-brand-black;
+  } */
+
+  .help {
+    @apply opacity-80 text-brand-black text-h6;
+  }
+
+  /* Form tone: errors and success */
+  .error {
+    @apply p-2 border-l-[0.5px] bg-brand-20 border-brand-black text-brand-black;
+  }
+
+  .success {
+    @apply p-2 border-l-[0.5px] border-l-green-deep bg-brand-10 text-brand-black;
+  }
+
+  /* 1. Hide the default Amelia trophy icon */
+  .am-fs__congrats-main img {
+    display: none !important;
+  }
+
+  /* 2. Set your Site Icon as the new background */
+  .am-fs__congrats-main {
+    background-image: var(--site-icon-url);
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: 80px auto; /* Scale it to a visible size */
+    padding-top: 100px !important; /* Move the 'Congratulations' text below the icon */
+  }
+}

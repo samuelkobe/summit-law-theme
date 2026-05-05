@@ -1,0 +1,190 @@
+/**
+ * Mobile Menu Navigation
+ *
+ * Handles mobile menu drawer interactions:
+ * - Open/close mobile drawer
+ * - Expand/collapse submenus inline
+ * - Lock body scroll when open
+ * - Focus management
+ */
+
+import ScrollLock from '../utils/scroll-lock.js';
+import FocusTrap from '../utils/focus-trap.js';
+
+export default class MobileMenu {
+  constructor() {
+    this.toggle = document.querySelector('[data-mobile-toggle]');
+    this.menu = document.querySelector('[data-mobile-menu]');
+    this.submenuToggles = document.querySelectorAll('[data-mobile-submenu-toggle]');
+    this.focusTrap = null;
+    this.desktopBreakpoint = 1024; // Tailwind lg breakpoint
+
+    this.init();
+  }
+
+  /**
+   * Initialize mobile menu
+   */
+  init() {
+    if (!this.toggle || !this.menu) {
+      return;
+    }
+
+    // Mobile menu drawer toggle
+    this.toggle.addEventListener('click', () => this.toggleMenu());
+
+    // Submenu toggles
+    this.submenuToggles.forEach(toggle => {
+      toggle.addEventListener('click', (e) => this.toggleSubmenu(e));
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => this.handleEscape(e));
+
+    // Close mobile menu when resizing to desktop
+    window.addEventListener('resize', () => this.handleResize());
+  }
+
+  /**
+   * Handle window resize - close menu when entering desktop size
+   */
+  handleResize() {
+    if (window.innerWidth >= this.desktopBreakpoint) {
+      const isMenuOpen = this.toggle.getAttribute('aria-expanded') === 'true';
+      if (isMenuOpen) {
+        this.closeMenu();
+      }
+    }
+  }
+
+  /**
+   * Toggle mobile menu drawer
+   */
+  toggleMenu() {
+    const isExpanded = this.toggle.getAttribute('aria-expanded') === 'true';
+
+    if (isExpanded) {
+      this.closeMenu();
+    } else {
+      this.openMenu();
+    }
+  }
+
+  /**
+   * Open mobile menu
+   */
+  openMenu() {
+    // Show menu
+    this.menu.removeAttribute('hidden');
+
+    // Update ARIA
+    this.toggle.setAttribute('aria-expanded', 'true');
+
+    // Lock body scroll
+    ScrollLock.lock();
+
+    // Trap focus
+    this.focusTrap = new FocusTrap(this.menu);
+    this.focusTrap.activate();
+  }
+
+  /**
+   * Close mobile menu
+   */
+  closeMenu() {
+    // Hide menu
+    this.menu.setAttribute('hidden', '');
+
+    // Update ARIA
+    this.toggle.setAttribute('aria-expanded', 'false');
+
+    // Unlock body scroll
+    ScrollLock.unlock();
+
+    // Release focus trap
+    if (this.focusTrap) {
+      this.focusTrap.deactivate();
+      this.focusTrap = null;
+    }
+
+    // Return focus to toggle
+    this.toggle.focus();
+
+    // Close all open submenus
+    this.closeAllSubmenus();
+  }
+
+  /**
+   * Toggle submenu
+   *
+   * @param {Event} event Click event
+   */
+  toggleSubmenu(event) {
+    const button = event.currentTarget;
+    const submenuId = button.getAttribute('aria-controls');
+    const submenu = document.getElementById(submenuId);
+
+    if (!submenu) {
+      return;
+    }
+
+    const isExpanded = button.getAttribute('aria-expanded') === 'true';
+    const currentLabel = button.getAttribute('aria-label');
+
+    if (isExpanded) {
+      // Close submenu
+      submenu.setAttribute('hidden', '');
+      button.setAttribute('aria-expanded', 'false');
+      // Update aria-label and title
+      if (currentLabel) {
+        button.setAttribute('aria-label', currentLabel.replace('Close', 'Open'));
+        button.setAttribute('title', currentLabel.replace('Close', 'Open'));
+      }
+    } else {
+      // Open submenu
+      submenu.removeAttribute('hidden');
+      button.setAttribute('aria-expanded', 'true');
+      // Update aria-label and title
+      if (currentLabel) {
+        button.setAttribute('aria-label', currentLabel.replace('Open', 'Close'));
+        button.setAttribute('title', currentLabel.replace('Open', 'Close'));
+      }
+    }
+  }
+
+  /**
+   * Close all submenus
+   */
+  closeAllSubmenus() {
+    this.submenuToggles.forEach(toggle => {
+      const submenuId = toggle.getAttribute('aria-controls');
+      const submenu = document.getElementById(submenuId);
+
+      if (submenu) {
+        submenu.setAttribute('hidden', '');
+        toggle.setAttribute('aria-expanded', 'false');
+        // Reset aria-label and title to "Open" state
+        const currentLabel = toggle.getAttribute('aria-label');
+        if (currentLabel) {
+          toggle.setAttribute('aria-label', currentLabel.replace('Close', 'Open'));
+          toggle.setAttribute('title', currentLabel.replace('Close', 'Open'));
+        }
+      }
+    });
+  }
+
+  /**
+   * Handle Escape key
+   *
+   * @param {KeyboardEvent} event Keyboard event
+   */
+  handleEscape(event) {
+    if (event.key === 'Escape') {
+      const isMenuOpen = this.toggle.getAttribute('aria-expanded') === 'true';
+
+      if (isMenuOpen) {
+        this.closeMenu();
+      }
+    }
+  }
+}

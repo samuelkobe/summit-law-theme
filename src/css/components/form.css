@@ -1,0 +1,293 @@
+/**
+ * Contact Form 7 Styles
+ *
+ * Custom styling for WPCF7 forms used on the site.
+ */
+
+/* Form Fields */
+.wpcf7-form input,
+.wpcf7-form textarea,
+.wpcf7-form .wpcf7-select {
+  @apply text-green-deep text-base mb-2 lg:mb-4 xl:mb-6 rounded-lg font-normal border-transparent focus:outline-none outline-none ring-2 ring-transparent focus:ring-2 focus:ring-transparent focus:text-green-deep focus:border-green-accent2 px-2 py-2 lg:py-3 xl:p-3 w-full max-w-full shadow-md focus:shadow-xl transition-all duration-300;
+}
+
+.wpcf7-form input::placeholder,
+.wpcf7-form textarea::placeholder {
+  @apply font-normal text-brand-40;
+}
+
+.wpcf7-form input {
+  @apply h-10 lg:h-11 xl:h-12;
+}
+
+.wpcf7-form textarea {
+  @apply h-32;
+}
+
+.wpcf7-form .wpcf7-checkbox {
+  @apply flex flex-col w-full mt-3 mb-2 lg:mb-4 xl:mb-6;
+}
+
+/* Add spacing between form-label and checkbox that follows */
+.wpcf7-form .form-label + .wpcf7-form-control-wrap .wpcf7-checkbox {
+  @apply mt-2;
+}
+
+.wpcf7-form .wpcf7-list-item.first,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.first,
+.wpcf7-form .wpcf7-list-item.last,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.last,
+.wpcf7-form .wpcf7-list-item,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item {
+  @apply flex flex-row items-start gap-4;
+}
+
+.wpcf7-form .wpcf7-list-item.first label,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.first label,
+.wpcf7-form .wpcf7-list-item.last label,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.last label,
+.wpcf7-form .wpcf7-list-item label,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item label {
+  @apply flex flex-row-reverse gap-4 items-center cursor-pointer;
+}
+
+/* Custom Checkbox Styles */
+.wpcf7-form input[type="checkbox"] {
+  @apply appearance-none w-6 h-6 min-w-[1.5rem] border-2 border-green-accent1 bg-white rounded cursor-pointer transition-all duration-200 relative flex-shrink-0;
+}
+
+.wpcf7-form input[type="checkbox"]:checked {
+  @apply bg-green-accent1 border-green-accent1;
+}
+
+.wpcf7-form input[type="checkbox"]:checked::after {
+  content: "";
+  @apply absolute inset-0 flex items-center justify-center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2329472d' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-size: 14px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.wpcf7-form input[type="checkbox"]:focus {
+  @apply outline-none ring-2 ring-green-accent2 ring-offset-2;
+}
+
+.wpcf7-form input[type="checkbox"]:hover:not(:checked) {
+  @apply border-green-accent2 bg-green-accent1/10;
+}
+
+.wpcf7-form .wpcf7-list-item.first label input,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.first label input,
+.wpcf7-form .wpcf7-list-item.last label input,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.last label input,
+.wpcf7-form .wpcf7-list-item label input,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item label input {
+  @apply inline-block;
+}
+
+.wpcf7-form .wpcf7-list-item.first label .wpcf7-list-item-label,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.first label .wpcf7-list-item-label,
+.wpcf7-form .wpcf7-list-item.last label .wpcf7-list-item-label,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item.last label .wpcf7-list-item-label,
+.wpcf7-form .wpcf7-list-item label .wpcf7-list-item-label,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item label .wpcf7-list-item-label {
+  @apply text-base lg:text-lg xl:text-xl text-white leading-normal;
+}
+
+.wpcf7-form .wpcf7-list-item,
+.wpcf7-form .wpcf7-checkbox .wpcf7-list-item {
+  @apply ml-0;
+}
+
+.wpcf7-form input.wpcf7-submit {
+  @apply mt-2 text-base lg:text-lg xl:text-xl py-1 px-6 lg:px-8 font-normal lg:font-medium font-sans tracking-wider shadow-md hover:shadow-xl text-green-deep flex w-fit bg-green-accent1 hover:bg-green-accent2 hover:border-green-accent2 border-2 lg:border-[3px] border-green-accent1 cursor-pointer transition-all duration-300;
+}
+
+.wpcf7-form .wpcf7-select {
+  @apply inline-block h-9 lg:h-10 xl:h-12 py-1 text-base font-normal text-green-deep w-full max-w-full min-w-[180px] bg-[#ffffff] placeholder-brand-30;
+  box-shadow: 0 1px 0 1px rgba(0, 0, 0, 0.04);
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7.57 3.75'%3E%3Cpolygon points='1.22 0.5 6.36 0.5 3.79 3.04 3.79 3.04 1.22 0.5' style='fill:%2329472d;stroke:%2329472d;stroke-miterlimit:10'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, repeat;
+  background-position:
+    right 0.7em top 50%,
+    0 0;
+  background-size:
+    0.65em auto,
+    100%;
+}
+
+/* When the empty value option is selected (placeholder state) */
+.wpcf7-form .wpcf7-select:has(option[value=""]:checked) {
+  @apply text-brand-40;
+}
+
+.wpcf7-form .ajax-loader {
+  @apply absolute m-0 -left-3 top-3;
+}
+
+.wpcf7-form input,
+.wpcf7-form textarea,
+.wpcf7-form .wpcf7-select {
+  @apply border-2 border-green-accent1;
+}
+
+.wpcf7-form h2,
+.wpcf7-form h3,
+.wpcf7-form h4 {
+  @apply col-span-12 text-brand-black font-bold inline-block mt-1 lg:mt-2;
+}
+
+.wpcf7-form h2 {
+  @apply text-xl lg:text-2xl xl:text-3xl mt-3 lg:mt-4;
+}
+
+.wpcf7-form h3 {
+  @apply text-lg lg:text-xl xl:text-2xl italic;
+}
+
+.wpcf7-form h4 {
+  @apply text-base lg:text-lg xl:text-xl -mb-3 lg:-mb-4 xl:-mb-6;
+}
+
+.wpcf7-form .form-wrapper:first-child .form-col:first-child h2 {
+  @apply mt-0 !important;
+}
+
+.wpcf7-form .form-label {
+  @apply text-sm lg:text-base xl:text-lg text-inherit font-normal mb-1 inline-block;
+}
+
+/* Labels wrapping selects (without .form-label class) */
+.wpcf7-form .form-col > p > label {
+  @apply text-sm lg:text-base xl:text-lg text-inherit font-normal;
+}
+
+.wpcf7-form .form-note {
+  @apply text-xs text-brand-30 mb-1 inline-block;
+}
+
+/* Form Structure */
+.wpcf7-form {
+}
+
+.form-wrapper {
+  @apply flex flex-wrap gap-x-4 lg:gap-x-6;
+}
+
+.form-wrapper .form-col {
+  @apply flex flex-col w-full;
+}
+
+.form-wrapper .col-half {
+  @apply w-full md:w-[calc(50%-0.5rem)] lg:w-[calc(50%-0.75rem)];
+}
+
+.form-wrapper .col-third {
+  @apply w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-1rem)];
+}
+
+.form-wrapper .col-quarter {
+  @apply w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(25%-1.125rem)];
+}
+
+.form-wrapper .col-two-third {
+  @apply w-full lg:w-[calc(66.666%-0.5rem)];
+}
+
+.form-wrapper .col-three-quarter {
+  @apply w-full lg:w-[calc(75%-0.375rem)];
+}
+
+.form-wrapper .col-five-sixth {
+  @apply w-full sm:w-[calc(83.333%-0.25rem)];
+}
+
+.form-wrapper .col-sixth {
+  @apply w-full sm:w-[calc(16.666%-0.25rem)];
+}
+
+.wpcf7-form *[dir="rtl"] .wpcf7-select,
+.wpcf7-form :root:lang(ar) .wpcf7-select,
+.wpcf7-form :root:lang(iw) .wpcf7-select {
+  background-position:
+    left 0.7em top 50%,
+    0 0;
+  padding: 0.6em 0.8em 0.5em 1.4em;
+}
+
+.wpcf7-spinner {
+  @apply absolute top-0 right-0;
+}
+
+.wpcf7 form.invalid > div.wpcf7-response-output {
+  @apply text-lg border-transparent !mx-0 !my-8 text-green-accent2 font-bold !p-0;
+}
+
+.wpcf7 form.sent > div.wpcf7-response-output {
+  @apply text-lg border-transparent !mx-0 !my-8 text-green-accent2 font-bold !p-0;
+}
+
+.wpcf7 form.failed > div.wpcf7-response-output,
+.wpcf7 form.aborted > div.wpcf7-response-output {
+  @apply text-lg border-transparent !mx-0 !my-8 font-bold !p-0;
+  color: #d43600;
+}
+
+#wpcf7-f1687-o1 > form > div:nth-child(6) > div > div > p > span > span > span {
+  @apply ml-0 !important;
+}
+
+#agreement {
+  @apply h-8 w-8 !important;
+}
+
+.wpcf7-not-valid-tip {
+  @apply bg-transparent text-base text-green-accent2 font-bold transform -translate-y-3 lg:-translate-y-5;
+}
+
+.wpcf7-form-control-wrap[data-name="message"] .wpcf7-not-valid-tip {
+  @apply transform -translate-y-5 lg:-translate-y-7;
+}
+
+/* WordPress Password Protected Form */
+.post-password-form {
+  @apply max-w-md mx-auto text-center py-16 lg:py-24 px-4;
+}
+
+.post-password-form p:first-of-type {
+  @apply text-lg lg:text-xl text-brand-40 mb-6;
+}
+
+.post-password-form p:last-of-type {
+  @apply flex flex-col items-center gap-4;
+}
+
+.post-password-form label {
+  @apply text-base lg:text-lg font-medium text-green-deep w-full;
+}
+
+.post-password-form input[type="password"] {
+  @apply w-full mt-2 px-4 py-3 text-base text-green-deep bg-brand-10 border-2 border-green-accent1 rounded-lg shadow-md focus:shadow-xl focus:border-green-accent2 focus:outline-none transition-all duration-300;
+}
+
+.post-password-form input[type="submit"] {
+  @apply font-semibold py-3 px-8 text-base lg:text-lg tracking-[0.05em] rounded-[8px] shadow-md hover:shadow-lg bg-green-deep hover:bg-brand-black text-white cursor-pointer transition-all duration-300 w-full sm:w-auto;
+}
+
+/* Autofill background color override */
+input:-internal-autofill-selected {
+  @apply bg-green-accent1/15 !important;
+}
+
+/* Additional autofill states for better browser support */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px rgba(209, 212, 54, 0.15) inset !important;
+  -webkit-text-fill-color: #29472d !important;
+}

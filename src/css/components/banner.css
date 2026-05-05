@@ -1,0 +1,175 @@
+/* Register Tailwind transform custom properties so they can be animated in keyframes */
+@property --tw-scale-x {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+@property --tw-scale-y {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 1;
+}
+
+.banner-after-content {
+  @apply after:content-['']
+  after:absolute
+  max-md:after:left-6
+  max-md:after:-bottom-8
+  max-md:after:w-[calc(100%-48px)]
+  max-md:after:h-[2px]
+  after:bg-green-accent1
+  md:after:right-[calc(8.333333333dvw)]
+  md:after:top-0
+  md:after:w-[2px]
+  md:after:h-full;
+}
+
+/* Animation states - starts hidden */
+.banner-after-content::after {
+  @apply transform-gpu;
+  transform-origin: left top;
+}
+
+.banner-after-content:not(.animate-line):not(.show-line)::after {
+  @apply max-md:scale-x-0 md:scale-y-0;
+}
+
+/* Show line immediately without animation */
+.banner-after-content.show-line::after {
+  @apply max-md:scale-x-100 md:scale-y-100;
+}
+
+/* Animated state — use Tailwind custom properties so keyframes don't conflict with transform stack */
+.banner-after-content.animate-line::after {
+  animation: growLine 0.8s ease-out forwards;
+}
+
+/* Mobile: grow left to right (scaleX) */
+@keyframes growLine {
+  from {
+    --tw-scale-x: 0;
+  }
+  to {
+    --tw-scale-x: 1;
+  }
+}
+
+/* Desktop: grow top to bottom (scaleY) */
+@media (min-width: 768px) {
+  @keyframes growLine {
+    from {
+      --tw-scale-y: 0;
+    }
+    to {
+      --tw-scale-y: 1;
+    }
+  }
+}
+
+/* H2 with line after - fills remaining space */
+.h2-line-after {
+  @apply flex items-center gap-4 after:content-[''] after:flex-[0.75] after:ml-4 after:h-[3px] after:bg-green-accent1 after:transform-gpu;
+  position: relative;
+}
+
+.h2-line-after.alt-line-after {
+  @apply after:bg-brand-30;
+}
+
+/* Animation states for h2 line */
+.h2-line-after::after {
+  transform-origin: left center;
+}
+
+.h2-line-after:not(.animate-line):not(.show-line)::after {
+  @apply scale-x-0;
+}
+
+/* Show line immediately without animation */
+.h2-line-after.show-line::after {
+  @apply scale-x-100;
+}
+
+/* Animated state */
+.h2-line-after.animate-line::after {
+  animation: growLineHorizontal 0.8s ease-out forwards;
+}
+
+/* Horizontal grow animation for h2 — use Tailwind custom property */
+@keyframes growLineHorizontal {
+  from {
+    --tw-scale-x: 0;
+  }
+  to {
+    --tw-scale-x: 1;
+  }
+}
+
+/* Home banner with before and after decorative lines */
+.home-before-after-content {
+  @apply relative;
+}
+
+/* Before line: top-right corner, spans left to middle */
+.home-before-after-content::before {
+  content: "";
+  @apply absolute -top-2 lg:top-4 right-0 w-1/2 xl:w-[41.667%] h-[2px] lg:h-[3px] bg-green-accent1 mx-8;
+  transform-origin: right center;
+  @apply transition-opacity duration-300;
+}
+
+/* Fade out before line immediately on scroll (desktop only) */
+@media (min-width: 1024px) {
+  .page-scrolled .home-before-after-content.animate-line::before,
+  .page-scrolled .home-before-after-content.show-line::before {
+    @apply opacity-0;
+  }
+}
+
+/* After line: bottom-left corner, spans right to middle */
+.home-before-after-content::after {
+  content: "";
+  @apply absolute -bottom-6 lg:bottom-8 left-0 w-1/2 h-[2px] lg:h-[3px] bg-green-accent1 mx-8;
+  transform-origin: left center;
+}
+
+/* Animation states - starts hidden */
+.home-before-after-content:not(.animate-line):not(.show-line)::before,
+.home-before-after-content:not(.animate-line):not(.show-line)::after {
+  @apply scale-x-0;
+}
+
+/* Show lines immediately without animation */
+.home-before-after-content.show-line::before,
+.home-before-after-content.show-line::after {
+  @apply scale-x-100;
+}
+
+/* Animated state */
+.home-before-after-content.animate-line::before {
+  animation: growLineFromRight 0.8s ease-out forwards;
+}
+
+.home-before-after-content.animate-line::after {
+  animation: growLineFromLeft 0.8s ease-out forwards;
+}
+
+/* Grow from right to left */
+@keyframes growLineFromRight {
+  from {
+    --tw-scale-x: 0;
+  }
+  to {
+    --tw-scale-x: 1;
+  }
+}
+
+/* Grow from left to right */
+@keyframes growLineFromLeft {
+  from {
+    --tw-scale-x: 0;
+  }
+  to {
+    --tw-scale-x: 1;
+  }
+}

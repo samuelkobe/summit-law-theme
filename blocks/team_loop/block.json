@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "acf/team-loop",
+  "title": "Team Loop - Summit Law LLP",
+  "description": "A block for displaying a loop of team members.",
+  "category": "formatting",
+  "icon": "groups",
+  "keywords": ["team", "loop", "acf", "summit law llp"],
+  "acf": {
+    "mode": "preview",
+    "renderTemplate": "team_loop.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": true,
+    "jsx": true
+  }
+}
