@@ -31,10 +31,52 @@ function summit_register_mediation_intake_cpt() {
 		'show_in_menu'    => true,
 		'menu_icon'       => 'dashicons-clipboard',
 		'supports'        => [ 'title' ],
-		'capability_type' => 'post',
+		'capability_type' => [ 'mediation_intake', 'mediation_intakes' ],
+		'map_meta_cap'    => true,
 	] );
 }
 add_action( 'init', 'summit_register_mediation_intake_cpt' );
+
+// =============================================================================
+// CPT Role Capabilities — One-Time Setup
+// =============================================================================
+
+/**
+ * Grant mediation intake capabilities to administrator and manager roles.
+ * Runs once and stores a flag so it never repeats on every request.
+ * Re-run by deleting the _summit_intake_caps_v1 option.
+ */
+function summit_intake_setup_caps() {
+	if ( get_option( '_summit_intake_caps_v1' ) ) return;
+
+	$caps = [
+		'edit_mediation_intake',
+		'read_mediation_intake',
+		'delete_mediation_intake',
+		'edit_mediation_intakes',
+		'edit_others_mediation_intakes',
+		'publish_mediation_intakes',
+		'read_private_mediation_intakes',
+		'delete_mediation_intakes',
+		'delete_private_mediation_intakes',
+		'delete_published_mediation_intakes',
+		'delete_others_mediation_intakes',
+		'edit_private_mediation_intakes',
+		'edit_published_mediation_intakes',
+		'create_mediation_intakes',
+	];
+
+	foreach ( [ 'administrator', 'manager' ] as $role_name ) {
+		$role = get_role( $role_name );
+		if ( ! $role ) continue;
+		foreach ( $caps as $cap ) {
+			$role->add_cap( $cap );
+		}
+	}
+
+	update_option( '_summit_intake_caps_v1', true );
+}
+add_action( 'admin_init', 'summit_intake_setup_caps' );
 
 // =============================================================================
 // Hide "Add New Intake" UI
@@ -715,35 +757,6 @@ function summit_intake_submit() {
 		$booking_date      = '';
 	}
 
-	// Query the Zoom join URL from Amelia's tables — more reliable than the hook
-	// because Amelia creates the Zoom meeting after amelia_after_appointment_booking_saved fires.
-	$zoom_join_url = '';
-	if ( $amelia_booking_id ) {
-		global $wpdb;
-		$zoom_json = $wpdb->get_var( $wpdb->prepare(
-			"SELECT a.zoomMeeting
-			 FROM {$wpdb->prefix}amelia_customer_bookings cb
-			 JOIN {$wpdb->prefix}amelia_appointments a ON a.id = cb.appointmentId
-			 WHERE cb.id = %d
-			 LIMIT 1",
-			$amelia_booking_id
-		) );
-		// DEBUG — remove once Zoom URL is confirmed working
-		$cb_cols = $wpdb->get_col( "SHOW COLUMNS FROM {$wpdb->prefix}amelia_customer_bookings" );
-		error_log( '[Summit Intake] amelia_customer_bookings columns: ' . implode( ', ', $cb_cols ) );
-		$cb_row = $wpdb->get_row( $wpdb->prepare(
-			"SELECT * FROM {$wpdb->prefix}amelia_customer_bookings WHERE id = %d LIMIT 1",
-			$amelia_booking_id
-		), ARRAY_A );
-		error_log( '[Summit Intake] customer_booking row: ' . var_export( $cb_row, true ) );
-		error_log( '[Summit Intake] booking_id=' . $amelia_booking_id . ' zoom_json=' . var_export( $zoom_json, true ) );
-		if ( $zoom_json ) {
-			$zoom_data = json_decode( $zoom_json, true );
-			error_log( '[Summit Intake] zoom_data=' . var_export( $zoom_data, true ) );
-			$zoom_join_url = $zoom_data['joinUrl'] ?? '';
-		}
-	}
-
 	// Create the intake post
 	$post_id = wp_insert_post( [
 		'post_type'   => 'mediation_intake',
@@ -760,11 +773,9 @@ function summit_intake_submit() {
 	update_field( 'amelia_booking_id', $amelia_booking_id ?: '', $post_id );
 	if ( $booking_date ) {
 		update_field( 'booking_date', $booking_date, $post_id );
+		update_post_meta( $post_id, '_summit_intake_booking_date_raw', $booking_date );
 	}
 	update_field( 'team_member', $team_member, $post_id );
-	if ( $zoom_join_url ) {
-		update_post_meta( $post_id, '_summit_intake_zoom_url', esc_url_raw( $zoom_join_url ) );
-	}
 
 	// Save plaintiffs repeater
 	$plaintiff_rows = [];
@@ -816,25 +827,41 @@ function summit_intake_submit() {
 	$mediator_post = $team_member ? get_post( $team_member ) : null;
 	$mediator_name = ( $mediator_post instanceof WP_Post ) ? $mediator_post->post_title : $team_member_name;
 
-	// Collect all counsel emails (deduplicated)
-	$all_counsel_emails = [];
+	// Collect all counsel emails + names (deduplicated, parallel arrays)
+	$counsel_email_map = []; // email => name, insertion-ordered
 	foreach ( array_merge( $plaintiff_rows, $defendant_rows, $third_party_rows ) as $party ) {
 		$email = $party['counsel_email'] ?? '';
-		if ( $email ) {
-			$all_counsel_emails[] = $email;
+		if ( $email && ! isset( $counsel_email_map[ $email ] ) ) {
+			$counsel_email_map[ $email ] = $party['counsel_name'] ?: $party['name'] ?: '';
 		}
 	}
-	$all_counsel_emails = array_values( array_unique( $all_counsel_emails ) );
+	$all_counsel_emails = array_keys( $counsel_email_map );
+	$all_counsel_names  = array_values( $counsel_email_map );
 
 	// Format booking date in the site's local timezone
 	$booking_date_formatted = '';
 	if ( $booking_date ) {
 		$dt                     = new DateTimeImmutable( $booking_date, wp_timezone() );
 		$booking_date_formatted = wp_date( 'F j, Y \a\t g:i a', $dt->getTimestamp() );
+		update_post_meta( $post_id, '_summit_intake_booking_date', $booking_date_formatted );
 	}
 
 	// Strip "Intake — " prefix to get a clean case name
 	$case_name = preg_replace( '/^Intake\s*[—\-]+\s*/u', '', $post_title );
+
+	// Build flat, human-readable party lists for the email body
+	$format_party_list = function( $rows ) {
+		return implode( "\n", array_map( function( $r ) {
+			$line = $r['name'];
+			if ( $r['counsel_name'] ) {
+				$line .= ' — Counsel: ' . $r['counsel_name'];
+				if ( $r['counsel_email'] ) {
+					$line .= ' (' . $r['counsel_email'] . ')';
+				}
+			}
+			return $line;
+		}, $rows ) );
+	};
 
 	summit_intake_dispatch_webhook( $post_id, [
 		'intake_id'          => $post_id,
@@ -843,21 +870,173 @@ function summit_intake_submit() {
 		'booking_date_raw'   => $booking_date,
 		'mediator_name'      => $mediator_name,
 		'all_counsel_emails' => $all_counsel_emails,
-		'counsel_emails_to'  => implode( ', ', $all_counsel_emails ),
-		'zoom_join_url'      => $zoom_join_url,
+		'counsel_emails_to'  => implode( ',', $all_counsel_emails ),
+		'counsel_names_to'   => implode( ',', $all_counsel_names ),
+		'plaintiff_list'     => $format_party_list( $plaintiff_rows ),
+		'defendant_list'     => $format_party_list( $defendant_rows ),
+		'third_party_list'   => $format_party_list( $third_party_rows ),
 		'plaintiffs'         => $plaintiff_rows,
 		'defendants'         => $defendant_rows,
 		'third_parties'      => $third_party_rows,
 		'amelia_booking_id'  => $amelia_booking_id ?: null,
 	] );
 
+	// ---
+	// Reminder system: agreement requests, brief requests, and cron scheduling.
+	// All logic lives in inc/mediation-reminders.php.
+	// ---
+	$all_parties = array_merge( $plaintiff_rows, $defendant_rows, $third_party_rows );
+	$days_until  = $booking_date
+		? (int) ceil( ( strtotime( $booking_date ) - time() ) / DAY_IN_SECONDS )
+		: 999;
+	$expedited   = $days_until <= 30;
+
+	if ( $expedited ) {
+		update_post_meta( $post_id, '_summit_intake_expedited', true );
+	}
+
+	// Send agreement request immediately to all counsel.
+	foreach ( $all_parties as $party ) {
+		if ( ! empty( $party['counsel_email'] ) ) {
+			summit_reminders_dispatch( $post_id, 'agreement_request', $party['counsel_email'], $party['counsel_name'] ?? '' );
+		}
+	}
+
+	if ( $booking_date ) {
+		// Schedule agreement reminder crons.
+		summit_reminders_schedule_agreement( $post_id, $booking_date );
+
+		if ( $days_until < 20 ) {
+			// Expedited: brief request fires immediately (no time to wait for 20-day cron).
+			foreach ( $all_parties as $party ) {
+				if ( ! empty( $party['counsel_email'] ) ) {
+					summit_reminders_dispatch( $post_id, 'brief_request', $party['counsel_email'], $party['counsel_name'] ?? '' );
+				}
+			}
+		} else {
+			// Standard: schedule brief request at 20 days out.
+			summit_reminders_schedule_brief_request( $post_id, $booking_date );
+		}
+
+		// Brief reminder at 10 days (scheduled only if still in the future).
+		summit_reminders_schedule_brief_reminder( $post_id, $booking_date );
+	}
+
+	// ---
+	// Counsel upload portal: generate a unique token per counsel email.
+	// Tokens are stored as transients that auto-expire at the booking date.
+	// ---
+	$upload_url_map = [];
+	$expiry = $booking_date ? ( strtotime( $booking_date ) - time() ) : 0;
+
+	foreach ( $all_parties as $party ) {
+		$email = $party['counsel_email'] ?? '';
+		if ( ! $email || isset( $upload_url_map[ $email ] ) ) continue;
+
+		$token = bin2hex( random_bytes( 16 ) );
+		$url   = home_url( '/mediation-upload/' . $token . '/' );
+
+		if ( $expiry > 0 ) {
+			set_transient( 'summit_upload_' . $token, [
+				'post_id'      => $post_id,
+				'email'        => $email,
+				'counsel_name' => $party['counsel_name'] ?? '',
+				'case_name'    => $case_name,
+				'booking_date' => get_post_meta( $post_id, '_summit_intake_booking_date', true ),
+			], $expiry );
+		}
+
+		$upload_url_map[ $email ] = $url;
+	}
+
+	if ( $upload_url_map ) {
+		update_post_meta( $post_id, '_summit_counsel_upload_urls', $upload_url_map );
+	}
+
 	wp_send_json_success( [
-		'intake_id'        => $post_id,
+		'intake_id'         => $post_id,
 		'amelia_booking_id' => $amelia_booking_id ?: null,
 	] );
 }
 add_action( 'wp_ajax_summit_intake_submit', 'summit_intake_submit' );
 add_action( 'wp_ajax_nopriv_summit_intake_submit', 'summit_intake_submit' );
+
+// =============================================================================
+// Admin Meta Box — Counsel Upload Links
+// =============================================================================
+
+function summit_intake_upload_links_meta_box() {
+	add_meta_box(
+		'summit_intake_upload_links',
+		'Counsel Upload Links',
+		'summit_intake_render_upload_links_box',
+		'mediation_intake',
+		'normal',
+		'default'
+	);
+}
+add_action( 'add_meta_boxes', 'summit_intake_upload_links_meta_box' );
+
+function summit_intake_render_upload_links_box( $post ) {
+	$url_map = get_post_meta( $post->ID, '_summit_counsel_upload_urls', true );
+
+	if ( empty( $url_map ) || ! is_array( $url_map ) ) {
+		echo '<p style="color:#666;">No upload links generated yet. Links are created when an intake is submitted via the booking form.</p>';
+		return;
+	}
+
+	// Build a lookup of email → counsel name from ACF repeater rows.
+	$parties = array_merge(
+		get_field( 'plaintiffs', $post->ID ) ?: [],
+		get_field( 'defendants', $post->ID ) ?: [],
+		get_field( 'third_parties', $post->ID ) ?: []
+	);
+	$name_map = [];
+	foreach ( $parties as $party ) {
+		$e = $party['counsel_email'] ?? '';
+		if ( $e && ! isset( $name_map[ $e ] ) ) {
+			$name_map[ $e ] = $party['counsel_name'] ?? '';
+		}
+	}
+	?>
+	<table class="widefat striped" style="margin-top:4px;">
+		<thead>
+			<tr>
+				<th>Counsel Name</th>
+				<th>Email</th>
+				<th>Upload URL</th>
+				<th style="width:80px;"></th>
+			</tr>
+		</thead>
+		<tbody>
+		<?php foreach ( $url_map as $email => $url ) : ?>
+			<tr>
+				<td><?php echo esc_html( $name_map[ $email ] ?? '—' ); ?></td>
+				<td><?php echo esc_html( $email ); ?></td>
+				<td style="font-family:monospace;font-size:12px;word-break:break-all;"><?php echo esc_html( $url ); ?></td>
+				<td>
+					<button type="button" class="button summit-copy-upload-url"
+						data-url="<?php echo esc_attr( $url ); ?>">Copy</button>
+				</td>
+			</tr>
+		<?php endforeach; ?>
+		</tbody>
+	</table>
+	<script>
+	(function(){
+		document.querySelectorAll('.summit-copy-upload-url').forEach(function(btn){
+			btn.addEventListener('click', function(){
+				var url = this.getAttribute('data-url');
+				navigator.clipboard.writeText(url).then(function(){
+					btn.textContent = 'Copied!';
+					setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+				});
+			});
+		});
+	})();
+	</script>
+	<?php
+}
 
 // =============================================================================
 // WP-Cron — Orphaned Upload Cleanup
@@ -954,20 +1133,33 @@ add_action( 'before_delete_post', 'summit_intake_delete_attached_files' );
  * GET /wp-json/summit/v1/intake-by-booking?booking_id=39&key=SECRET
  */
 function summit_intake_register_rest_routes() {
+	$key_arg = [
+		'required'          => true,
+		'sanitize_callback' => 'sanitize_text_field',
+	];
+	$booking_id_arg = [
+		'required'          => true,
+		'validate_callback' => fn( $v ) => is_numeric( $v ) && $v > 0,
+		'sanitize_callback' => 'absint',
+	];
+
 	register_rest_route( 'summit/v1', '/intake-by-booking', [
 		'methods'             => 'GET, POST',
 		'callback'            => 'summit_intake_lookup_by_booking',
-		'permission_callback' => '__return_true', // Auth handled inside via secret key
+		'permission_callback' => '__return_true',
 		'args'                => [
-			'booking_id' => [
-				'required'          => true,
-				'validate_callback' => fn( $v ) => is_numeric( $v ) && $v > 0,
-				'sanitize_callback' => 'absint',
-			],
-			'key' => [
-				'required'          => true,
-				'sanitize_callback' => 'sanitize_text_field',
-			],
+			'booking_id' => $booking_id_arg,
+			'key'        => $key_arg,
+		],
+	] );
+
+	register_rest_route( 'summit/v1', '/zoom-by-booking', [
+		'methods'             => 'GET',
+		'callback'            => 'summit_intake_zoom_by_booking',
+		'permission_callback' => '__return_true',
+		'args'                => [
+			'booking_id' => $booking_id_arg,
+			'key'        => $key_arg,
 		],
 	] );
 }
@@ -1013,7 +1205,6 @@ function summit_intake_lookup_by_booking( WP_REST_Request $request ) {
 
 	$mediator_post = $team_member ? get_post( absint( is_array( $team_member ) ? ( $team_member['ID'] ?? 0 ) : $team_member ) ) : null;
 	$mediator_name = ( $mediator_post instanceof WP_Post ) ? $mediator_post->post_title : '';
-	$zoom_join_url = get_post_meta( $post_id, '_summit_intake_zoom_url', true ) ?: '';
 
 	$booking_date_formatted = '';
 	if ( $booking_date ) {
@@ -1041,11 +1232,46 @@ function summit_intake_lookup_by_booking( WP_REST_Request $request ) {
 		'mediator_name'      => $mediator_name,
 		'all_counsel_emails' => $all_counsel_emails,
 		'counsel_emails_to'  => implode( ', ', $all_counsel_emails ),
-		'zoom_join_url'      => $zoom_join_url,
 		'plaintiffs'         => $plaintiffs,
 		'defendants'         => $defendants,
 		'third_parties'      => $third_parties,
 		'amelia_booking_id'  => $booking_id,
+	], 200 );
+}
+
+/**
+ * Return the Zoom join URL for a given Amelia customer booking ID.
+ * Called by OttoKit after a delay, once Amelia has written the Zoom meeting.
+ *
+ * GET /wp-json/summit/v1/zoom-by-booking?booking_id=51&key=SECRET
+ */
+function summit_intake_zoom_by_booking( WP_REST_Request $request ) {
+	$stored_key = get_option( 'summit_intake_lookup_secret_key', '' );
+	if ( ! $stored_key || ! hash_equals( $stored_key, $request->get_param( 'key' ) ) ) {
+		return new WP_REST_Response( [ 'error' => 'Unauthorized.' ], 401 );
+	}
+
+	$booking_id = $request->get_param( 'booking_id' );
+
+	global $wpdb;
+	$zoom_json = $wpdb->get_var( $wpdb->prepare(
+		"SELECT a.zoomMeeting
+		 FROM {$wpdb->prefix}amelia_appointments a
+		 JOIN {$wpdb->prefix}amelia_customer_bookings cb ON a.id = cb.appointmentId
+		 WHERE cb.id = %d
+		 LIMIT 1",
+		$booking_id
+	) );
+
+	$zoom_join_url = '';
+	if ( $zoom_json ) {
+		$zoom_data     = json_decode( $zoom_json, true );
+		$zoom_join_url = $zoom_data['joinUrl'] ?? '';
+	}
+
+	return new WP_REST_Response( [
+		'zoom_join_url'     => $zoom_join_url,
+		'amelia_booking_id' => $booking_id,
 	], 200 );
 }
 
@@ -1077,9 +1303,10 @@ function summit_intake_ajax_regenerate_key() {
 	update_option( 'summit_intake_lookup_secret_key', $new_key );
 
 	wp_send_json_success( [
-		'key'   => $new_key,
-		'url'   => rest_url( 'summit/v1/intake-by-booking' ) . '?booking_id=BOOKING_ID&key=' . rawurlencode( $new_key ),
-		'nonce' => wp_create_nonce( 'summit_regen_key_nonce' ), // Fresh nonce for next call
+		'key'      => $new_key,
+		'url'      => rest_url( 'summit/v1/intake-by-booking' ) . '?booking_id=BOOKING_ID&key=' . rawurlencode( $new_key ),
+		'zoom_url' => rest_url( 'summit/v1/zoom-by-booking' ) . '?booking_id=BOOKING_ID&key=' . rawurlencode( $new_key ),
+		'nonce'    => wp_create_nonce( 'summit_regen_key_nonce' ),
 	] );
 }
 add_action( 'wp_ajax_summit_regenerate_lookup_key', 'summit_intake_ajax_regenerate_key' );
@@ -1095,16 +1322,18 @@ function summit_intake_settings_footer_js() {
 	?>
 	<script>
 	(function () {
-		const keyInput   = document.getElementById('summit-lookup-key');
-		const revealBtn  = document.getElementById('summit-reveal-key');
-		const copyKeyBtn = document.getElementById('summit-copy-key');
-		const regenBtn   = document.getElementById('summit-regen-key');
-		const urlInput   = document.getElementById('summit-lookup-url');
-		const copyUrlBtn = document.getElementById('summit-copy-url');
+		const keyInput      = document.getElementById('summit-lookup-key');
+		const revealBtn     = document.getElementById('summit-reveal-key');
+		const copyKeyBtn    = document.getElementById('summit-copy-key');
+		const regenBtn      = document.getElementById('summit-regen-key');
+		const urlInput      = document.getElementById('summit-lookup-url');
+		const copyUrlBtn    = document.getElementById('summit-copy-url');
+		const zoomUrlInput  = document.getElementById('summit-zoom-url');
+		const copyZoomBtn   = document.getElementById('summit-copy-zoom-url');
 
 		let revealed = false;
 
-		// Reveal / Hide — toggles both the key field and the URL display together
+		// Reveal / Hide — toggles key field and both URL displays together
 		if (keyInput && revealBtn) {
 			revealBtn.addEventListener('click', function () {
 				revealed = !revealed;
@@ -1114,6 +1343,11 @@ function summit_intake_settings_footer_js() {
 					urlInput.value = revealed
 						? urlInput.dataset.realUrl
 						: urlInput.dataset.redactedUrl;
+				}
+				if (zoomUrlInput) {
+					zoomUrlInput.value = revealed
+						? zoomUrlInput.dataset.realUrl
+						: zoomUrlInput.dataset.redactedUrl;
 				}
 			});
 		}
@@ -1138,6 +1372,16 @@ function summit_intake_settings_footer_js() {
 			});
 		}
 
+		// Copy Zoom URL
+		if (copyZoomBtn && zoomUrlInput) {
+			copyZoomBtn.addEventListener('click', function () {
+				navigator.clipboard.writeText(zoomUrlInput.dataset.realUrl || zoomUrlInput.value).then(function () {
+					copyZoomBtn.textContent = 'Copied!';
+					setTimeout(function () { copyZoomBtn.textContent = 'Copy'; }, 2000);
+				});
+			});
+		}
+
 		// Regenerate — AJAX, updates both fields in place without a page reload
 		if (regenBtn) {
 			regenBtn.addEventListener('click', function () {
@@ -1158,17 +1402,25 @@ function summit_intake_settings_footer_js() {
 				.then(function (r) { return r.json(); })
 				.then(function (data) {
 					if (!data.success) { return; }
-					const newKey = data.data.key;
-					const newUrl = data.data.url;
-					const redacted = urlInput ? urlInput.dataset.redactedUrl.replace(/•+/, '••••••••') : '';
+					const newKey      = data.data.key;
+					const newUrl      = data.data.url;
+					const newZoomUrl  = data.data.zoom_url;
+					const redacted    = urlInput ? urlInput.dataset.redactedUrl.replace(/•+/, '••••••••') : '';
+					const redactedZoom = zoomUrlInput ? zoomUrlInput.dataset.redactedUrl.replace(/•+/, '••••••••') : '';
 
 					// Update key field
 					if (keyInput) { keyInput.value = newKey; }
 
-					// Update URL field data and display
+					// Update lookup URL field
 					if (urlInput) {
 						urlInput.dataset.realUrl = newUrl;
 						urlInput.value = revealed ? newUrl : redacted;
+					}
+
+					// Update Zoom URL field
+					if (zoomUrlInput) {
+						zoomUrlInput.dataset.realUrl = newZoomUrl;
+						zoomUrlInput.value = revealed ? newZoomUrl : redactedZoom;
 					}
 
 					// Refresh nonce for the next regeneration
@@ -1191,13 +1443,13 @@ add_action( 'admin_footer', 'summit_intake_settings_footer_js' );
 // =============================================================================
 
 /**
- * Register the Permissions sub-page under Mediation Intakes.
+ * Register the Settings sub-page under Mediation Intakes.
  */
 function summit_intake_add_settings_page() {
 	add_submenu_page(
 		'edit.php?post_type=mediation_intake',
-		'Permissions',
-		'Permissions',
+		'Settings',
+		'Settings',
 		'manage_options',
 		'summit-intake-permissions',
 		'summit_intake_render_settings_page'
@@ -1283,6 +1535,20 @@ function summit_intake_register_settings() {
 		'summit-intake-settings',
 		'summit_intake_notifications_section'
 	);
+
+	register_setting( 'summit_intake_settings', 'summit_intake_kelly_email', [
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_email',
+		'default'           => '',
+	] );
+
+	add_settings_field(
+		'summit_intake_kelly_email',
+		'Document Upload Notification Email',
+		'summit_intake_render_kelly_email_field',
+		'summit-intake-settings',
+		'summit_intake_notifications_section'
+	);
 }
 
 /**
@@ -1305,20 +1571,26 @@ function summit_intake_render_webhook_url_field() {
 		'<input type="url" name="summit_intake_ottokit_webhook_url" value="%s" class="regular-text" placeholder="https://...">',
 		esc_attr( $url )
 	);
-	echo '<p class="description">This URL is provided by OttoKit when you create a "Catch Webhook" trigger step.</p>';
+	echo '<p class="description">Provided by OttoKit when you create a "Catch Webhook" trigger step.</p>';
 }
 
 /**
  * Render the lookup secret key field — read-only with reveal, copy, and regenerate controls.
- * The URL display shows the key redacted; the Copy button always copies the real URL.
+ * Shows both the cancellation lookup URL and the Zoom URL endpoint.
  */
 function summit_intake_render_lookup_secret_field() {
-	$key          = get_option( 'summit_intake_lookup_secret_key', '' );
-	$real_url     = $key
+	$key              = get_option( 'summit_intake_lookup_secret_key', '' );
+	$real_url         = $key
 		? rest_url( 'summit/v1/intake-by-booking' ) . '?booking_id=BOOKING_ID&key=' . rawurlencode( $key )
 		: '';
-	$redacted_url = $key
+	$redacted_url     = $key
 		? rest_url( 'summit/v1/intake-by-booking' ) . '?booking_id=BOOKING_ID&key=••••••••'
+		: '';
+	$real_zoom_url    = $key
+		? rest_url( 'summit/v1/zoom-by-booking' ) . '?booking_id=BOOKING_ID&key=' . rawurlencode( $key )
+		: '';
+	$redacted_zoom_url = $key
+		? rest_url( 'summit/v1/zoom-by-booking' ) . '?booking_id=BOOKING_ID&key=••••••••'
 		: '';
 	?>
 	<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
@@ -1354,10 +1626,40 @@ function summit_intake_render_lookup_secret_field() {
 			>
 			<button type="button" id="summit-copy-url" class="button">Copy</button>
 		</div>
-		<p class="description">Replace <code>BOOKING_ID</code> with <code>@{Appointmentid}</code> in OttoKit. Use the Copy button — the key is hidden in the display.</p>
+		<p class="description">Replace <code>BOOKING_ID</code> with the booking ID variable in OttoKit. Use the Copy button — the key is hidden in the display.</p>
+	</div>
+
+	<div style="margin-top:14px;">
+		<strong style="display:block;margin-bottom:6px;">OttoKit Zoom URL</strong>
+		<div style="display:flex;align-items:center;gap:8px;">
+			<input
+				type="text"
+				id="summit-zoom-url"
+				value="<?php echo esc_attr( $redacted_zoom_url ); ?>"
+				data-real-url="<?php echo esc_attr( $real_zoom_url ); ?>"
+				data-redacted-url="<?php echo esc_attr( $redacted_zoom_url ); ?>"
+				readonly
+				style="font-family:monospace;width:100%;max-width:580px;"
+			>
+			<button type="button" id="summit-copy-zoom-url" class="button">Copy</button>
+		</div>
+		<p class="description">Used by OttoKit to fetch the Zoom join URL after a delay. Replace <code>BOOKING_ID</code> with the booking ID variable.</p>
 	</div>
 	<?php
 }
+/**
+ * Render the Kelly notification email input.
+ */
+function summit_intake_render_kelly_email_field() {
+	$email = get_option( 'summit_intake_kelly_email', '' );
+	printf(
+		'<input type="email" name="summit_intake_kelly_email" value="%s" class="regular-text" placeholder="%s">',
+		esc_attr( $email ),
+		esc_attr( get_option( 'admin_email' ) )
+	);
+	echo '<p class="description">Notified when counsel uploads a document via their unique upload URL. Falls back to the site admin email if blank.</p>';
+}
+
 add_action( 'admin_init', 'summit_intake_register_settings' );
 
 /**

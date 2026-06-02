@@ -184,6 +184,116 @@
                     "prepend": "",
                     "append": "",
                     "parent_repeater": "field_intake_plaintiffs"
+                },
+                {
+                    "key": "field_intake_plaintiff_agreement_signed",
+                    "label": "Agreement Signed",
+                    "name": "mediation_agreement_signed",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "",
+                    "ui_off_text": "",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_plaintiffs"
+                },
+                {
+                    "key": "field_intake_plaintiff_discovery_call",
+                    "label": "Discovery Call Completed",
+                    "name": "discovery_call_completed",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "",
+                    "ui_off_text": "",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_plaintiffs"
+                },
+                {
+                    "key": "field_intake_plaintiff_brief_received",
+                    "label": "Brief Received",
+                    "name": "mediation_brief_received",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "",
+                    "ui_off_text": "",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_plaintiffs"
+                },
+                {
+                    "key": "field_intake_plaintiff_agreement_file",
+                    "label": "Agreement File",
+                    "name": "mediation_agreement_file",
+                    "aria-label": "",
+                    "type": "file",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "id",
+                    "library": "all",
+                    "min_size": "",
+                    "max_size": "",
+                    "mime_types": "pdf, doc, docx",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_plaintiffs"
+                },
+                {
+                    "key": "field_intake_plaintiff_brief_file",
+                    "label": "Brief File",
+                    "name": "mediation_brief_file",
+                    "aria-label": "",
+                    "type": "file",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "id",
+                    "library": "all",
+                    "min_size": "",
+                    "max_size": "",
+                    "mime_types": "pdf, doc, docx",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_plaintiffs"
                 }
             ]
         },
@@ -269,6 +379,116 @@
                     "placeholder": "",
                     "prepend": "",
                     "append": "",
+                    "parent_repeater": "field_intake_defendants"
+                },
+                {
+                    "key": "field_intake_defendant_agreement_signed",
+                    "label": "Agreement Signed",
+                    "name": "mediation_agreement_signed",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "",
+                    "ui_off_text": "",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_defendants"
+                },
+                {
+                    "key": "field_intake_defendant_discovery_call",
+                    "label": "Discovery Call Completed",
+                    "name": "discovery_call_completed",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "",
+                    "ui_off_text": "",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_defendants"
+                },
+                {
+                    "key": "field_intake_defendant_brief_received",
+                    "label": "Brief Received",
+                    "name": "mediation_brief_received",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "",
+                    "ui_off_text": "",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_defendants"
+                },
+                {
+                    "key": "field_intake_defendant_agreement_file",
+                    "label": "Agreement File",
+                    "name": "mediation_agreement_file",
+                    "aria-label": "",
+                    "type": "file",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "id",
+                    "library": "all",
+                    "min_size": "",
+                    "max_size": "",
+                    "mime_types": "pdf, doc, docx",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_defendants"
+                },
+                {
+                    "key": "field_intake_defendant_brief_file",
+                    "label": "Brief File",
+                    "name": "mediation_brief_file",
+                    "aria-label": "",
+                    "type": "file",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "id",
+                    "library": "all",
+                    "min_size": "",
+                    "max_size": "",
+                    "mime_types": "pdf, doc, docx",
+                    "allow_in_bindings": 0,
                     "parent_repeater": "field_intake_defendants"
                 }
             ]
@@ -378,6 +598,116 @@
                     "parent_repeater": "field_intake_third_parties"
                 },
                 {
+                    "key": "field_intake_tp_agreement_signed",
+                    "label": "Agreement Signed",
+                    "name": "mediation_agreement_signed",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "",
+                    "ui_off_text": "",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_third_parties"
+                },
+                {
+                    "key": "field_intake_tp_discovery_call",
+                    "label": "Discovery Call Completed",
+                    "name": "discovery_call_completed",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "",
+                    "ui_off_text": "",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_third_parties"
+                },
+                {
+                    "key": "field_intake_tp_brief_received",
+                    "label": "Brief Received",
+                    "name": "mediation_brief_received",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "",
+                    "ui_off_text": "",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_third_parties"
+                },
+                {
+                    "key": "field_intake_tp_agreement_file",
+                    "label": "Agreement File",
+                    "name": "mediation_agreement_file",
+                    "aria-label": "",
+                    "type": "file",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "id",
+                    "library": "all",
+                    "min_size": "",
+                    "max_size": "",
+                    "mime_types": "pdf, doc, docx",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_third_parties"
+                },
+                {
+                    "key": "field_intake_tp_brief_file",
+                    "label": "Brief File",
+                    "name": "mediation_brief_file",
+                    "aria-label": "",
+                    "type": "file",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "id",
+                    "library": "all",
+                    "min_size": "",
+                    "max_size": "",
+                    "mime_types": "pdf, doc, docx",
+                    "allow_in_bindings": 0,
+                    "parent_repeater": "field_intake_third_parties"
+                },
+                {
                     "key": "field_69e8113255d82",
                     "label": "Statement of Claim",
                     "name": "claim_file",
@@ -423,5 +753,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1776817015
+    "modified": 1780074096
 }

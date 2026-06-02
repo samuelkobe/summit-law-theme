@@ -14,6 +14,8 @@ require_once get_template_directory() . '/inc/class-mega-menu-walker.php';
 require_once get_template_directory() . '/inc/vcard-generator.php';
 require_once get_template_directory() . '/inc/schema.php';
 require_once get_template_directory() . '/inc/mediation-intake.php';
+require_once get_template_directory() . '/inc/mediation-reminders.php';
+require_once get_template_directory() . '/inc/mediation-upload.php';
 
 /**
  * Theme Setup
