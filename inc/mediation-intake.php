@@ -781,9 +781,11 @@ function summit_intake_submit() {
 	$plaintiff_rows = [];
 	foreach ( $plaintiffs as $p ) {
 		$plaintiff_rows[] = [
-			'name'          => sanitize_text_field( $p['name'] ?? '' ),
-			'counsel_name'  => sanitize_text_field( $p['counsel_name'] ?? '' ),
-			'counsel_email' => sanitize_email( $p['counsel_email'] ?? '' ),
+			'name'            => sanitize_text_field( $p['name'] ?? '' ),
+			'counsel_name'    => sanitize_text_field( $p['counsel_name'] ?? '' ),
+			'counsel_email'   => sanitize_email( $p['counsel_email'] ?? '' ),
+			'assistant_name'  => sanitize_text_field( $p['assistant_name'] ?? '' ),
+			'assistant_email' => sanitize_email( $p['assistant_email'] ?? '' ),
 		];
 	}
 	update_field( 'plaintiffs', $plaintiff_rows, $post_id );
@@ -792,9 +794,11 @@ function summit_intake_submit() {
 	$defendant_rows = [];
 	foreach ( $defendants as $d ) {
 		$defendant_rows[] = [
-			'name'          => sanitize_text_field( $d['name'] ?? '' ),
-			'counsel_name'  => sanitize_text_field( $d['counsel_name'] ?? '' ),
-			'counsel_email' => sanitize_email( $d['counsel_email'] ?? '' ),
+			'name'            => sanitize_text_field( $d['name'] ?? '' ),
+			'counsel_name'    => sanitize_text_field( $d['counsel_name'] ?? '' ),
+			'counsel_email'   => sanitize_email( $d['counsel_email'] ?? '' ),
+			'assistant_name'  => sanitize_text_field( $d['assistant_name'] ?? '' ),
+			'assistant_email' => sanitize_email( $d['assistant_email'] ?? '' ),
 		];
 	}
 	update_field( 'defendants', $defendant_rows, $post_id );
@@ -807,10 +811,12 @@ function summit_intake_submit() {
 			delete_post_meta( $claim_id, '_summit_intake_upload_time' );
 		}
 		$third_party_rows[] = [
-			'name'          => sanitize_text_field( $tp['name'] ?? '' ),
-			'counsel_name'  => sanitize_text_field( $tp['counsel_name'] ?? '' ),
-			'counsel_email' => sanitize_email( $tp['counsel_email'] ?? '' ),
-			'claim_file'    => $claim_id ?: '',
+			'name'            => sanitize_text_field( $tp['name'] ?? '' ),
+			'counsel_name'    => sanitize_text_field( $tp['counsel_name'] ?? '' ),
+			'counsel_email'   => sanitize_email( $tp['counsel_email'] ?? '' ),
+			'assistant_name'  => sanitize_text_field( $tp['assistant_name'] ?? '' ),
+			'assistant_email' => sanitize_email( $tp['assistant_email'] ?? '' ),
+			'claim_file'      => $claim_id ?: '',
 		];
 	}
 	update_field( 'third_parties', $third_party_rows, $post_id );
@@ -827,12 +833,17 @@ function summit_intake_submit() {
 	$mediator_post = $team_member ? get_post( $team_member ) : null;
 	$mediator_name = ( $mediator_post instanceof WP_Post ) ? $mediator_post->post_title : $team_member_name;
 
-	// Collect all counsel emails + names (deduplicated, parallel arrays)
+	// Collect all counsel + assistant emails/names (deduplicated, parallel arrays).
+	// Assistants are merged in so the existing OttoKit loop covers them automatically.
 	$counsel_email_map = []; // email => name, insertion-ordered
 	foreach ( array_merge( $plaintiff_rows, $defendant_rows, $third_party_rows ) as $party ) {
 		$email = $party['counsel_email'] ?? '';
 		if ( $email && ! isset( $counsel_email_map[ $email ] ) ) {
 			$counsel_email_map[ $email ] = $party['counsel_name'] ?: $party['name'] ?: '';
+		}
+		$asst_email = $party['assistant_email'] ?? '';
+		if ( $asst_email && ! isset( $counsel_email_map[ $asst_email ] ) ) {
+			$counsel_email_map[ $asst_email ] = $party['assistant_name'] ?: '';
 		}
 	}
 	$all_counsel_emails = array_keys( $counsel_email_map );
@@ -895,10 +906,13 @@ function summit_intake_submit() {
 		update_post_meta( $post_id, '_summit_intake_expedited', true );
 	}
 
-	// Send agreement request immediately to all counsel.
+	// Send agreement request immediately to all counsel and their assistants.
 	foreach ( $all_parties as $party ) {
 		if ( ! empty( $party['counsel_email'] ) ) {
 			summit_reminders_dispatch( $post_id, 'agreement_request', $party['counsel_email'], $party['counsel_name'] ?? '' );
+		}
+		if ( ! empty( $party['assistant_email'] ) ) {
+			summit_reminders_dispatch( $post_id, 'agreement_request', $party['assistant_email'], $party['assistant_name'] ?? '' );
 		}
 	}
 
@@ -911,6 +925,9 @@ function summit_intake_submit() {
 			foreach ( $all_parties as $party ) {
 				if ( ! empty( $party['counsel_email'] ) ) {
 					summit_reminders_dispatch( $post_id, 'brief_request', $party['counsel_email'], $party['counsel_name'] ?? '' );
+				}
+				if ( ! empty( $party['assistant_email'] ) ) {
+					summit_reminders_dispatch( $post_id, 'brief_request', $party['assistant_email'], $party['assistant_name'] ?? '' );
 				}
 			}
 		} else {
@@ -947,6 +964,12 @@ function summit_intake_submit() {
 		}
 
 		$upload_url_map[ $email ] = $url;
+
+		// Assistant shares the same upload URL as their counsel.
+		$asst_email = $party['assistant_email'] ?? '';
+		if ( $asst_email && ! isset( $upload_url_map[ $asst_email ] ) ) {
+			$upload_url_map[ $asst_email ] = $url;
+		}
 	}
 
 	if ( $upload_url_map ) {
@@ -1707,9 +1730,13 @@ function summit_intake_mailto_url( $post_id ) {
 
 	$emails = [];
 	foreach ( array_merge( $plaintiffs, $defendants, $third_parties ) as $party ) {
-		$email = sanitize_email( $party['counsel_email'] ?? '' );
-		if ( $email ) {
-			$emails[] = $email;
+		$counsel_email = sanitize_email( $party['counsel_email'] ?? '' );
+		if ( $counsel_email ) {
+			$emails[] = $counsel_email;
+		}
+		$asst_email = sanitize_email( $party['assistant_email'] ?? '' );
+		if ( $asst_email ) {
+			$emails[] = $asst_email;
 		}
 	}
 	$emails = array_values( array_unique( $emails ) );
@@ -1934,7 +1961,7 @@ function summit_intake_bundle_html( $post, $booking_date, $mediator, $plaintiffs
 	// Build party rows
 	$build_party_rows = function( array $parties ) {
 		if ( empty( $parties ) ) {
-			return '<tr><td colspan="3" style="color:#888;">None recorded</td></tr>';
+			return '<tr><td colspan="5" style="color:#888;">None recorded</td></tr>';
 		}
 		$rows = '';
 		foreach ( $parties as $p ) {
@@ -1942,6 +1969,8 @@ function summit_intake_bundle_html( $post, $booking_date, $mediator, $plaintiffs
 				. '<td>' . esc_html( $p['name'] ?? '' ) . '</td>'
 				. '<td>' . esc_html( $p['counsel_name'] ?? '' ) . '</td>'
 				. '<td>' . esc_html( $p['counsel_email'] ?? '' ) . '</td>'
+				. '<td>' . esc_html( $p['assistant_name'] ?? '' ) . '</td>'
+				. '<td>' . esc_html( $p['assistant_email'] ?? '' ) . '</td>'
 				. '</tr>';
 		}
 		return $rows;
@@ -1952,7 +1981,7 @@ function summit_intake_bundle_html( $post, $booking_date, $mediator, $plaintiffs
 	$third_party_block = '';
 	if ( ! empty( $third_parties ) ) {
 		$third_party_block = '<h2>Third Parties</h2>'
-			. '<table><thead><tr><th>Name</th><th>Counsel</th><th>Counsel Email</th></tr></thead>'
+			. '<table><thead><tr><th>Name</th><th>Counsel</th><th>Counsel Email</th><th>Legal Assistant</th><th>Assistant Email</th></tr></thead>'
 			. '<tbody>' . $build_party_rows( $third_parties ) . '</tbody></table>';
 	}
 
@@ -2003,13 +2032,13 @@ function summit_intake_bundle_html( $post, $booking_date, $mediator, $plaintiffs
 
 <h2>Plaintiffs</h2>
 <table>
-  <thead><tr><th>Name</th><th>Counsel</th><th>Counsel Email</th></tr></thead>
+  <thead><tr><th>Name</th><th>Counsel</th><th>Counsel Email</th><th>Legal Assistant</th><th>Assistant Email</th></tr></thead>
   <tbody>{$plaintiff_rows}</tbody>
 </table>
 
 <h2>Defendants</h2>
 <table>
-  <thead><tr><th>Name</th><th>Counsel</th><th>Counsel Email</th></tr></thead>
+  <thead><tr><th>Name</th><th>Counsel</th><th>Counsel Email</th><th>Legal Assistant</th><th>Assistant Email</th></tr></thead>
   <tbody>{$defendant_rows}</tbody>
 </table>
 

@@ -238,14 +238,18 @@ function summit_agreement_reminder_check( $post_id ) {
 	);
 	foreach ( $parties as $party ) {
 		if ( ! empty( $party['mediation_agreement_signed'] ) ) continue;
-		if ( empty( $party['counsel_email'] ) ) continue;
-		summit_reminders_dispatch( $post_id, 'agreement_reminder', $party['counsel_email'], $party['counsel_name'] ?? '' );
+		if ( ! empty( $party['counsel_email'] ) ) {
+			summit_reminders_dispatch( $post_id, 'agreement_reminder', $party['counsel_email'], $party['counsel_name'] ?? '' );
+		}
+		if ( ! empty( $party['assistant_email'] ) ) {
+			summit_reminders_dispatch( $post_id, 'agreement_reminder', $party['assistant_email'], $party['assistant_name'] ?? '' );
+		}
 	}
 }
 add_action( 'summit_agreement_reminder_check', 'summit_agreement_reminder_check' );
 
 /**
- * Fires 20 days before booking. Sends brief request to all counsel.
+ * Fires 20 days before booking. Sends brief request to all counsel and their assistants.
  */
 function summit_brief_request_send( $post_id ) {
 	$parties = array_merge(
@@ -254,8 +258,12 @@ function summit_brief_request_send( $post_id ) {
 		get_field( 'third_parties', $post_id ) ?: []
 	);
 	foreach ( $parties as $party ) {
-		if ( empty( $party['counsel_email'] ) ) continue;
-		summit_reminders_dispatch( $post_id, 'brief_request', $party['counsel_email'], $party['counsel_name'] ?? '' );
+		if ( ! empty( $party['counsel_email'] ) ) {
+			summit_reminders_dispatch( $post_id, 'brief_request', $party['counsel_email'], $party['counsel_name'] ?? '' );
+		}
+		if ( ! empty( $party['assistant_email'] ) ) {
+			summit_reminders_dispatch( $post_id, 'brief_request', $party['assistant_email'], $party['assistant_name'] ?? '' );
+		}
 	}
 }
 add_action( 'summit_brief_request_send', 'summit_brief_request_send' );
@@ -271,8 +279,12 @@ function summit_brief_reminder_check( $post_id ) {
 	);
 	foreach ( $parties as $party ) {
 		if ( ! empty( $party['mediation_brief_received'] ) ) continue;
-		if ( empty( $party['counsel_email'] ) ) continue;
-		summit_reminders_dispatch( $post_id, 'brief_reminder', $party['counsel_email'], $party['counsel_name'] ?? '' );
+		if ( ! empty( $party['counsel_email'] ) ) {
+			summit_reminders_dispatch( $post_id, 'brief_reminder', $party['counsel_email'], $party['counsel_name'] ?? '' );
+		}
+		if ( ! empty( $party['assistant_email'] ) ) {
+			summit_reminders_dispatch( $post_id, 'brief_reminder', $party['assistant_email'], $party['assistant_name'] ?? '' );
+		}
 	}
 }
 add_action( 'summit_brief_reminder_check', 'summit_brief_reminder_check' );

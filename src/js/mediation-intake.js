@@ -9,8 +9,8 @@
 export default class MediationIntake {
   constructor() {
     this.state = {
-      plaintiffs: [{ name: "", counsel_name: "", counsel_email: "" }],
-      defendants: [{ name: "", counsel_name: "", counsel_email: "" }],
+      plaintiffs: [{ name: "", counsel_name: "", counsel_email: "", assistant_name: "", assistant_email: "" }],
+      defendants: [{ name: "", counsel_name: "", counsel_email: "", assistant_name: "", assistant_email: "" }],
       thirdParties: [],
       titleOfProceedingsId: null,
       thirdPartyClaimIds: [],
@@ -185,6 +185,8 @@ export default class MediationIntake {
         <input type="text" placeholder="Name" data-field="name" value="${this.esc(data.name || "")}">
         <input type="text" placeholder="Counsel Name" data-field="counsel_name" value="${this.esc(data.counsel_name || "")}">
         <input type="email" placeholder="Counsel Email" data-field="counsel_email" value="${this.esc(data.counsel_email || "")}">
+        <input type="text" placeholder="Legal Assistant / Law Clerk Name (optional)" data-field="assistant_name" value="${this.esc(data.assistant_name || "")}">
+        <input type="email" placeholder="Legal Assistant / Law Clerk Email (optional)" data-field="assistant_email" value="${this.esc(data.assistant_email || "")}">
         ${showRemove ? `<button type="button" class="intake-remove-entry" aria-label="Remove ${label}">&times;</button>` : ""}
       </div>
     `;
@@ -263,7 +265,7 @@ export default class MediationIntake {
    */
   addPartyRow(wrapper, type) {
     const stateKey = this.stateKeyFor(type);
-    const newEntry = { name: "", counsel_name: "", counsel_email: "" };
+    const newEntry = { name: "", counsel_name: "", counsel_email: "", assistant_name: "", assistant_email: "" };
     this.state[stateKey].push(newEntry);
     const index = this.state[stateKey].length - 1;
 
@@ -376,7 +378,7 @@ export default class MediationIntake {
   bindEmailValidation(wrapper) {
     // Show error when leaving an invalid field, then sync button
     wrapper.addEventListener("focusout", (e) => {
-      if (!e.target.matches('[data-field="counsel_email"]')) return;
+      if (!e.target.matches('[data-field="counsel_email"], [data-field="assistant_email"]')) return;
       const val = e.target.value.trim();
       if (val && !this.isValidEmail(val)) {
         this.showEmailError(e.target);
@@ -388,7 +390,7 @@ export default class MediationIntake {
 
     // Clear error immediately as the user types a valid (or empty) value, then sync button
     wrapper.addEventListener("input", (e) => {
-      if (!e.target.matches('[data-field="counsel_email"]')) return;
+      if (!e.target.matches('[data-field="counsel_email"], [data-field="assistant_email"]')) return;
       const val = e.target.value.trim();
       if (!val || this.isValidEmail(val)) {
         this.clearEmailError(e.target);
@@ -409,7 +411,7 @@ export default class MediationIntake {
     if (!this.continueBtn) return;
 
     const hasInvalidEmail = Array.from(
-      wrapper.querySelectorAll('[data-field="counsel_email"]'),
+      wrapper.querySelectorAll('[data-field="counsel_email"], [data-field="assistant_email"]'),
     ).some((input) => {
       const val = input.value.trim();
       return val && !this.isValidEmail(val);
@@ -442,6 +444,10 @@ export default class MediationIntake {
           entry.querySelector('[data-field="counsel_name"]')?.value || "",
         counsel_email:
           entry.querySelector('[data-field="counsel_email"]')?.value || "",
+        assistant_name:
+          entry.querySelector('[data-field="assistant_name"]')?.value || "",
+        assistant_email:
+          entry.querySelector('[data-field="assistant_email"]')?.value || "",
       }));
     });
   }
@@ -550,17 +556,20 @@ export default class MediationIntake {
       ...this.state.defendants,
       ...this.state.thirdParties,
     ]) {
-      const email = (p.counsel_email || "").trim();
-      if (email && !this.isValidEmail(email)) {
-        hasEmailError = true;
-        break;
+      for (const field of ["counsel_email", "assistant_email"]) {
+        const email = (p[field] || "").trim();
+        if (email && !this.isValidEmail(email)) {
+          hasEmailError = true;
+          break;
+        }
       }
+      if (hasEmailError) break;
     }
 
     if (hasEmailError) {
       if (wrapper) {
         // Form is still in the DOM — show inline errors and retry button
-        wrapper.querySelectorAll('[data-field="counsel_email"]').forEach((input) => {
+        wrapper.querySelectorAll('[data-field="counsel_email"], [data-field="assistant_email"]').forEach((input) => {
           const val = input.value.trim();
           if (val && !this.isValidEmail(val)) {
             this.showEmailError(input);

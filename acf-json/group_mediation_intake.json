@@ -186,6 +186,46 @@
                     "parent_repeater": "field_intake_plaintiffs"
                 },
                 {
+                    "key": "field_intake_plaintiff_assistant_name",
+                    "label": "Legal Assistant / Law Clerk Name",
+                    "name": "assistant_name",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_intake_plaintiffs"
+                },
+                {
+                    "key": "field_intake_plaintiff_assistant_email",
+                    "label": "Legal Assistant / Law Clerk Email",
+                    "name": "assistant_email",
+                    "aria-label": "",
+                    "type": "email",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_intake_plaintiffs"
+                },
+                {
                     "key": "field_intake_plaintiff_agreement_signed",
                     "label": "Agreement Signed",
                     "name": "mediation_agreement_signed",
@@ -365,6 +405,46 @@
                     "key": "field_intake_defendant_counsel_email",
                     "label": "Counsel Email",
                     "name": "counsel_email",
+                    "aria-label": "",
+                    "type": "email",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_intake_defendants"
+                },
+                {
+                    "key": "field_intake_defendant_assistant_name",
+                    "label": "Legal Assistant / Law Clerk Name",
+                    "name": "assistant_name",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_intake_defendants"
+                },
+                {
+                    "key": "field_intake_defendant_assistant_email",
+                    "label": "Legal Assistant / Law Clerk Email",
+                    "name": "assistant_email",
                     "aria-label": "",
                     "type": "email",
                     "instructions": "",
@@ -598,6 +678,46 @@
                     "parent_repeater": "field_intake_third_parties"
                 },
                 {
+                    "key": "field_intake_tp_assistant_name",
+                    "label": "Legal Assistant / Law Clerk Name",
+                    "name": "assistant_name",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_intake_third_parties"
+                },
+                {
+                    "key": "field_intake_tp_assistant_email",
+                    "label": "Legal Assistant / Law Clerk Email",
+                    "name": "assistant_email",
+                    "aria-label": "",
+                    "type": "email",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": "",
+                    "parent_repeater": "field_intake_third_parties"
+                },
+                {
                     "key": "field_intake_tp_agreement_signed",
                     "label": "Agreement Signed",
                     "name": "mediation_agreement_signed",
@@ -753,5 +873,5 @@
     "display_title": "",
     "allow_ai_access": false,
     "ai_description": "",
-    "modified": 1780074096
+    "modified": 1780412732
 }
