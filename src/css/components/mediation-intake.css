@@ -44,7 +44,11 @@
 }
 
 .amelia-v2-booking #amelia-container .intake-party-entry input {
-  @apply w-full lg:flex-1 lg:min-w-0 px-3 py-2 text-sm text-green-deep bg-brand-10 border-2 border-green-accent1 rounded-lg shadow-sm transition-all duration-300;
+  @apply w-full lg:flex-[1_1_100%] lg:min-w-0 px-3 py-2 text-sm text-green-deep bg-brand-10 border-2 border-green-accent1 rounded-lg shadow-sm transition-all duration-300;
+}
+
+.amelia-v2-booking #amelia-container .intake-party-entry input:first-of-type {
+  @apply lg:flex-[1_1_85%];
 }
 
 .amelia-v2-booking #amelia-container .intake-party-entry input:focus {
@@ -63,7 +67,7 @@
 /* Remove button for additional rows */
 .amelia-v2-booking #amelia-container .intake-remove-entry {
   @apply absolute right-0 top-1 lg:static
-         flex-shrink-0 w-8 h-8 flex items-center justify-center text-brand-40 hover:text-red-500 bg-transparent border-none cursor-pointer rounded-full hover:bg-red-50 transition-colors duration-200 text-lg leading-none;
+         flex-shrink-0 w-8 h-8 lg:mb-[6px] lg:pb-[2px] flex items-center justify-center text-brand-40 hover:text-red-500 bg-transparent border-none cursor-pointer rounded-full hover:bg-red-50 transition-colors duration-200 text-lg leading-none;
 }
 
 /* Add button */
@@ -138,7 +142,10 @@
 }
 
 /* Invalid email field border */
-.amelia-v2-booking #amelia-container .intake-party-entry input.intake-field-error {
+.amelia-v2-booking
+  #amelia-container
+  .intake-party-entry
+  input.intake-field-error {
   @apply border-red-500;
 }
 
@@ -156,4 +163,15 @@
   #amelia-container
   .mediation-intake-fields.intake-submitting {
   @apply opacity-60 pointer-events-none;
+}
+
+/* Remove blue background from Amelia dialog close button */
+.el-dialog__headerbtn {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Override Amelia's Element UI primary colour on close button hover */
+.el-dialog__headerbtn:hover .el-dialog__close {
+  color: inherit !important;
 }

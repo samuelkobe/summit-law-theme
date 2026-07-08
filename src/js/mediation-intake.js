@@ -9,8 +9,24 @@
 export default class MediationIntake {
   constructor() {
     this.state = {
-      plaintiffs: [{ name: "", counsel_name: "", counsel_email: "", assistant_name: "", assistant_email: "" }],
-      defendants: [{ name: "", counsel_name: "", counsel_email: "", assistant_name: "", assistant_email: "" }],
+      plaintiffs: [
+        {
+          name: "",
+          counsel_name: "",
+          counsel_email: "",
+          assistant_name: "",
+          assistant_email: "",
+        },
+      ],
+      defendants: [
+        {
+          name: "",
+          counsel_name: "",
+          counsel_email: "",
+          assistant_name: "",
+          assistant_email: "",
+        },
+      ],
       thirdParties: [],
       titleOfProceedingsId: null,
       thirdPartyClaimIds: [],
@@ -110,14 +126,17 @@ export default class MediationIntake {
     this.bindFileUploads(wrapper);
     this.syncStateFromInputs(wrapper);
     this.bindEmailValidation(wrapper);
+    this.bindRequiredValidation(wrapper);
 
     // Store a reference to Amelia's Continue button so we can toggle disabled
     const ameliaRoot =
       infoForm.closest('[id^="amelia-v2-booking"]') ||
       infoForm.closest("#amelia-container") ||
       document.body;
-    this.continueBtn =
-      ameliaRoot.querySelector(".am-button-continue") || null;
+    this.continueBtn = ameliaRoot.querySelector(".am-button-continue") || null;
+
+    // Disable immediately — required fields start empty
+    this.updateContinueButton(wrapper);
   }
 
   /**
@@ -126,7 +145,7 @@ export default class MediationIntake {
   buildHTML() {
     return `
       <h4 class="mediation-intake-fields__heading">Mediation Case Information</h4>
-      <p class="mediation-intake-fields__subtext">Please provide the parties involved in this mediation. If you are a party or counsel, please re-enter your details below so we have a complete case record.</p>
+      <p class="mediation-intake-fields__subtext">List all parties to this mediation. If you are a party or counsel, re-enter your details here for a complete case record.</p>
 
       ${this.buildPartyGroup("plaintiff", "Plaintiff", this.state.plaintiffs)}
       ${this.buildPartyGroup("defendant", "Defendant", this.state.defendants)}
@@ -182,12 +201,12 @@ export default class MediationIntake {
     const entryHTML = `
       <div class="intake-party-entry" data-index="${index}">
         <span class="intake-party-entry__label">${label} ${index + 1}</span>
-        <input type="text" placeholder="Name" data-field="name" value="${this.esc(data.name || "")}">
+        <input type="text" placeholder="Full Name" data-field="name" value="${this.esc(data.name || "")}">
+        ${showRemove ? `<button type="button" class="intake-remove-entry" aria-label="Remove ${label}">&times;</button>` : ""}
         <input type="text" placeholder="Counsel Name" data-field="counsel_name" value="${this.esc(data.counsel_name || "")}">
         <input type="email" placeholder="Counsel Email" data-field="counsel_email" value="${this.esc(data.counsel_email || "")}">
         <input type="text" placeholder="Legal Assistant / Law Clerk Name (optional)" data-field="assistant_name" value="${this.esc(data.assistant_name || "")}">
         <input type="email" placeholder="Legal Assistant / Law Clerk Email (optional)" data-field="assistant_email" value="${this.esc(data.assistant_email || "")}">
-        ${showRemove ? `<button type="button" class="intake-remove-entry" aria-label="Remove ${label}">&times;</button>` : ""}
       </div>
     `;
 
@@ -265,7 +284,13 @@ export default class MediationIntake {
    */
   addPartyRow(wrapper, type) {
     const stateKey = this.stateKeyFor(type);
-    const newEntry = { name: "", counsel_name: "", counsel_email: "", assistant_name: "", assistant_email: "" };
+    const newEntry = {
+      name: "",
+      counsel_name: "",
+      counsel_email: "",
+      assistant_name: "",
+      assistant_email: "",
+    };
     this.state[stateKey].push(newEntry);
     const index = this.state[stateKey].length - 1;
 
@@ -275,8 +300,7 @@ export default class MediationIntake {
 
     // The new element is a .intake-tp-block wrapper (third party) or .intake-party-entry
     const newEl = entriesContainer.lastElementChild;
-    const partyEntry =
-      newEl.querySelector(".intake-party-entry") || newEl;
+    const partyEntry = newEl.querySelector(".intake-party-entry") || newEl;
     this.bindInputListeners(partyEntry, wrapper);
 
     // Bind file upload on new third party rows
@@ -378,7 +402,12 @@ export default class MediationIntake {
   bindEmailValidation(wrapper) {
     // Show error when leaving an invalid field, then sync button
     wrapper.addEventListener("focusout", (e) => {
-      if (!e.target.matches('[data-field="counsel_email"], [data-field="assistant_email"]')) return;
+      if (
+        !e.target.matches(
+          '[data-field="counsel_email"], [data-field="assistant_email"]',
+        )
+      )
+        return;
       const val = e.target.value.trim();
       if (val && !this.isValidEmail(val)) {
         this.showEmailError(e.target);
@@ -390,7 +419,12 @@ export default class MediationIntake {
 
     // Clear error immediately as the user types a valid (or empty) value, then sync button
     wrapper.addEventListener("input", (e) => {
-      if (!e.target.matches('[data-field="counsel_email"], [data-field="assistant_email"]')) return;
+      if (
+        !e.target.matches(
+          '[data-field="counsel_email"], [data-field="assistant_email"]',
+        )
+      )
+        return;
       const val = e.target.value.trim();
       if (!val || this.isValidEmail(val)) {
         this.clearEmailError(e.target);
@@ -411,13 +445,17 @@ export default class MediationIntake {
     if (!this.continueBtn) return;
 
     const hasInvalidEmail = Array.from(
-      wrapper.querySelectorAll('[data-field="counsel_email"], [data-field="assistant_email"]'),
+      wrapper.querySelectorAll(
+        '[data-field="counsel_email"], [data-field="assistant_email"]',
+      ),
     ).some((input) => {
       const val = input.value.trim();
       return val && !this.isValidEmail(val);
     });
 
-    if (hasInvalidEmail) {
+    const shouldDisable = hasInvalidEmail || this.hasRequiredFieldGaps(wrapper);
+
+    if (shouldDisable) {
       this.continueBtn.disabled = true;
       this.continueBtn.classList.add("is-disabled");
       this._intakeDisabledBtn = true;
@@ -427,6 +465,99 @@ export default class MediationIntake {
       this.continueBtn.classList.remove("is-disabled");
       this._intakeDisabledBtn = false;
     }
+  }
+
+  /**
+   * Return true if any required intake field is empty or the title file is missing.
+   */
+  hasRequiredFieldGaps(wrapper) {
+    const firstPlaintiff = wrapper.querySelector(
+      '[data-entries="plaintiff"] .intake-party-entry',
+    );
+    const firstDefendant = wrapper.querySelector(
+      '[data-entries="defendant"] .intake-party-entry',
+    );
+
+    const requiredFields = [
+      firstPlaintiff?.querySelector('[data-field="name"]'),
+      firstPlaintiff?.querySelector('[data-field="counsel_name"]'),
+      firstPlaintiff?.querySelector('[data-field="counsel_email"]'),
+      firstDefendant?.querySelector('[data-field="name"]'),
+      firstDefendant?.querySelector('[data-field="counsel_name"]'),
+      firstDefendant?.querySelector('[data-field="counsel_email"]'),
+    ];
+
+    return (
+      requiredFields.some((el) => !el || !el.value.trim()) ||
+      !this.state.titleOfProceedingsId
+    );
+  }
+
+  /**
+   * Mark a required field as invalid and insert a "required" error message.
+   */
+  showRequiredError(input) {
+    input.classList.add("intake-field-error");
+    if (!input.nextElementSibling?.classList.contains("intake-required-error")) {
+      const msg = document.createElement("span");
+      msg.className = "intake-error-message intake-required-error";
+      msg.textContent = "This field is required.";
+      input.insertAdjacentElement("afterend", msg);
+    }
+  }
+
+  /**
+   * Remove the required error state from a field.
+   */
+  clearRequiredError(input) {
+    input.classList.remove("intake-field-error");
+    const msg = input.nextElementSibling;
+    if (msg?.classList.contains("intake-required-error")) msg.remove();
+  }
+
+  /**
+   * Show "required" errors on blur and re-check the Continue button state for
+   * the mandatory fields in the first plaintiff and first defendant entries.
+   */
+  bindRequiredValidation(wrapper) {
+    const isFirstEntry = (target, type) => {
+      const entry = target.closest(".intake-party-entry");
+      return (
+        entry &&
+        entry ===
+          wrapper.querySelector(`[data-entries="${type}"] .intake-party-entry`)
+      );
+    };
+
+    wrapper.addEventListener("focusout", (e) => {
+      const field = e.target.dataset.field;
+      if (!["name", "counsel_name", "counsel_email"].includes(field)) return;
+      if (
+        !isFirstEntry(e.target, "plaintiff") &&
+        !isFirstEntry(e.target, "defendant")
+      )
+        return;
+
+      if (!e.target.value.trim()) {
+        this.showRequiredError(e.target);
+      } else {
+        this.clearRequiredError(e.target);
+      }
+      this.updateContinueButton(wrapper);
+    });
+
+    wrapper.addEventListener("input", (e) => {
+      const field = e.target.dataset.field;
+      if (!["name", "counsel_name", "counsel_email"].includes(field)) return;
+      if (
+        !isFirstEntry(e.target, "plaintiff") &&
+        !isFirstEntry(e.target, "defendant")
+      )
+        return;
+
+      if (e.target.value.trim()) this.clearRequiredError(e.target);
+      this.updateContinueButton(wrapper);
+    });
   }
 
   /**
@@ -496,6 +627,7 @@ export default class MediationIntake {
         // Store in state
         if (uploadType === "titleOfProceedings") {
           this.state.titleOfProceedingsId = attachment_id;
+          this.updateContinueButton(wrapper);
         } else if (uploadType === "claim") {
           this.state.thirdPartyClaimIds[claimIndex] = attachment_id;
         }
@@ -513,6 +645,7 @@ export default class MediationIntake {
             .addEventListener("click", () => {
               if (uploadType === "titleOfProceedings") {
                 this.state.titleOfProceedingsId = null;
+                this.updateContinueButton(wrapper);
               } else if (uploadType === "claim") {
                 this.state.thirdPartyClaimIds[claimIndex] = null;
               }
@@ -569,14 +702,18 @@ export default class MediationIntake {
     if (hasEmailError) {
       if (wrapper) {
         // Form is still in the DOM — show inline errors and retry button
-        wrapper.querySelectorAll('[data-field="counsel_email"], [data-field="assistant_email"]').forEach((input) => {
-          const val = input.value.trim();
-          if (val && !this.isValidEmail(val)) {
-            this.showEmailError(input);
-          } else {
-            this.clearEmailError(input);
-          }
-        });
+        wrapper
+          .querySelectorAll(
+            '[data-field="counsel_email"], [data-field="assistant_email"]',
+          )
+          .forEach((input) => {
+            const val = input.value.trim();
+            if (val && !this.isValidEmail(val)) {
+              this.showEmailError(input);
+            } else {
+              this.clearEmailError(input);
+            }
+          });
         this.showRetryUI(wrapper);
       } else {
         // Amelia has already navigated away — show error near the congrats screen

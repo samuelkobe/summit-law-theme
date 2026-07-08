@@ -4,7 +4,7 @@
  *
  * Provides a unique, expiring URL per counsel for uploading their signed
  * Mediation Agreement and Mediation Brief. Files land in the protected
- * /summit-intake/ directory. Kelly is notified via wp_mail() on each upload.
+ * /summit-intake/ directory. The legal assistant is notified via wp_mail() on each upload.
  *
  * URL structure: /mediation-upload/{32-hex-token}/
  * Token stored as transient: summit_upload_{token}, expires at booking date.
@@ -35,10 +35,77 @@ add_action( 'template_redirect', function () {
 
 	$data = get_transient( 'summit_upload_' . $token );
 
-	// Render the portal page — passing $token and $data as locals.
+	// Token-gated agreement PDF download — ?dl=agreement appended to the portal URL.
+	if ( isset( $_GET['dl'] ) && $_GET['dl'] === 'agreement' ) {
+		summit_upload_serve_agreement_pdf( $token, $data );
+		exit;
+	}
+
+	// Handle POST before rendering — PRG pattern prevents re-submission on refresh.
+	if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
+		$is_valid = is_array( $data ) && empty( $data['status'] );
+		if ( $is_valid ) {
+			$messages = summit_upload_handle_post( $token, $data );
+			$redirect = add_query_arg(
+				'upload_result', rawurlencode( wp_json_encode( $messages ) ),
+				home_url( 'mediation-upload/' . $token . '/' )
+			);
+		} else {
+			$redirect = home_url( 'mediation-upload/' . $token . '/' );
+		}
+		wp_redirect( $redirect );
+		exit;
+	}
+
+	// Render the portal page — GET only from here.
 	summit_upload_render_portal( $token, $data );
 	exit;
 }, 1 );
+
+// =============================================================================
+// Agreement PDF Download (token-gated)
+// =============================================================================
+
+/**
+ * Serve the agreement PDF template to a counsel who holds a valid upload token.
+ * The token proves they are a named party on an active intake — no login needed.
+ *
+ * @param string     $token Upload token (32-char hex).
+ * @param array|false $data  Transient data or false if expired.
+ */
+function summit_upload_serve_agreement_pdf( $token, $data ) {
+	// Reject expired or invalid tokens.
+	$is_valid = is_array( $data ) && empty( $data['status'] );
+	if ( ! $is_valid ) {
+		status_header( 403 );
+		die( 'This download link has expired or is no longer valid.' );
+	}
+
+	$pdf_id = absint( get_option( 'summit_intake_agreement_pdf', 0 ) );
+	if ( ! $pdf_id ) {
+		status_header( 404 );
+		die( 'Agreement PDF not found.' );
+	}
+
+	$file_path = get_attached_file( $pdf_id );
+	if ( ! $file_path || ! file_exists( $file_path ) ) {
+		status_header( 404 );
+		die( 'Agreement PDF not found on disk.' );
+	}
+
+	// Bypass the direct-access block so our server-side readfile() is allowed.
+	define( 'SUMMIT_INTAKE_SERVING_FILE', true );
+
+	$filename = get_the_title( $pdf_id ) ?: 'Mediation-Agreement';
+	$filename = sanitize_file_name( $filename ) . '.pdf';
+
+	nocache_headers();
+	header( 'Content-Type: application/pdf' );
+	header( 'Content-Disposition: attachment; filename="' . $filename . '"' );
+	header( 'Content-Length: ' . filesize( $file_path ) );
+	readfile( $file_path );
+	exit;
+}
 
 // =============================================================================
 // Portal Renderer
@@ -51,10 +118,17 @@ add_action( 'template_redirect', function () {
  * @param array|false $data  Transient data or false if expired/not found.
  */
 function summit_upload_render_portal( $token, $data ) {
-	// Handle POST submission before rendering.
+	// Treat invalidated tombstones as non-uploadable (but distinct from fully expired).
+	$is_valid      = is_array( $data ) && empty( $data['status'] );
+	$is_invalidated = is_array( $data ) && ( $data['status'] ?? '' ) === 'invalidated';
+
+	// Decode messages passed via redirect from the POST handler (PRG pattern).
 	$messages = [];
-	if ( 'POST' === $_SERVER['REQUEST_METHOD'] && $data ) {
-		$messages = summit_upload_handle_post( $token, $data );
+	if ( isset( $_GET['upload_result'] ) ) {
+		$decoded = json_decode( urldecode( $_GET['upload_result'] ), true );
+		if ( is_array( $decoded ) ) {
+			$messages = $decoded;
+		}
 	}
 
 	// Minimal standalone HTML — no WP theme wrapper needed.
@@ -80,15 +154,38 @@ function summit_upload_render_portal( $token, $data ) {
 				border-radius: 8px;
 				max-width: 560px;
 				margin: 0 auto;
-				padding: 36px 40px;
+				overflow: hidden;
 			}
-			.logo {
-				font-size: 13px;
-				font-weight: 600;
-				letter-spacing: .08em;
+			.card-header {
+				background: #29472d;
+				padding: 28px 36px 32px;
+				display: flex;
+				align-items: center;
+				gap: 16px;
+			}
+			.card-header img {
+				display: block;
+				height: 44px;
+				width: auto;
+				flex-shrink: 0;
+			}
+			.card-header-text .name {
+				font-size: 18px;
+				font-weight: 400;
+				color: #ffffff;
+				letter-spacing: 0.02em;
+				margin: 0;
+				font-family: Georgia, 'Times New Roman', serif;
+			}
+			.card-header-text .sub {
+				font-size: 11px;
+				color: #a8c4ab;
+				letter-spacing: 0.12em;
 				text-transform: uppercase;
-				color: #555;
-				margin-bottom: 28px;
+				margin: 4px 0 0;
+			}
+			.card-body {
+				padding: 32px 36px 36px;
 			}
 			h1 { font-size: 22px; margin: 0 0 6px; }
 			.meta { color: #555; font-size: 14px; margin-bottom: 28px; }
@@ -98,15 +195,22 @@ function summit_upload_render_portal( $token, $data ) {
 			.hint { font-size: 13px; color: #666; margin-bottom: 10px; }
 			input[type="file"] { display: block; width: 100%; margin-bottom: 20px; }
 			button[type="submit"] {
-				background: #1a3a5c;
+				background: #29472d;
 				color: #fff;
 				border: none;
-				padding: 10px 24px;
-				border-radius: 4px;
+				padding: 12px 24px;
+				border-radius: 8px;
 				font-size: 15px;
+				font-weight: 600;
+				letter-spacing: 0.05em;
 				cursor: pointer;
+				box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
+				transition: background 0.3s, box-shadow 0.3s;
 			}
-			button[type="submit"]:hover { background: #12294a; }
+			button[type="submit"]:hover {
+				background: #292725;
+				box-shadow: 0 10px 15px -3px rgba(0,0,0,.1), 0 4px 6px -2px rgba(0,0,0,.05);
+			}
 			.notice {
 				padding: 12px 16px;
 				border-radius: 4px;
@@ -115,6 +219,42 @@ function summit_upload_render_portal( $token, $data ) {
 			}
 			.notice-success { background: #edf7ed; border-left: 4px solid #4caf50; color: #1b5e20; }
 			.notice-error   { background: #fdecea; border-left: 4px solid #e53935; color: #7f0000; }
+			.uploaded-state {
+				display: flex;
+				align-items: flex-start;
+				gap: 10px;
+				padding: 12px 16px;
+				background: #f0f4f0;
+				border-left: 4px solid #29472d;
+				border-radius: 4px;
+				font-size: 14px;
+				color: #333;
+				margin-bottom: 20px;
+			}
+			.uploaded-state .checkmark {
+				flex-shrink: 0;
+				width: 20px;
+				height: 20px;
+				background: #29472d;
+				border-radius: 50%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				margin-top: 1px;
+			}
+			.uploaded-state .checkmark svg {
+				display: block;
+			}
+			.uploaded-state .uploaded-info strong {
+				display: block;
+				color: #29472d;
+				margin-bottom: 2px;
+			}
+			.uploaded-state .uploaded-info .reupload-note {
+				margin-top: 4px;
+				font-size: 13px;
+				color: #666;
+			}
 			.expired {
 				text-align: center;
 				padding: 40px 0 20px;
@@ -125,16 +265,65 @@ function summit_upload_render_portal( $token, $data ) {
 	</head>
 	<body>
 	<div class="card">
-		<div class="logo">Summit Law LLP</div>
+		<?php
+	$portal_logo_url = '';
+	$portal_logo_id  = get_theme_mod( 'custom_logo' );
+	if ( $portal_logo_id ) {
+		$portal_logo_src = wp_get_attachment_image_src( $portal_logo_id, 'full' );
+		$portal_logo_url = $portal_logo_src ? esc_url( $portal_logo_src[0] ) : '';
+	}
+	?>
+	<div class="card-header">
+		<?php if ( $portal_logo_url ) : ?>
+			<img src="<?php echo $portal_logo_url; ?>" alt="Summit Law LLP">
+		<?php endif; ?>
+		<div class="card-header-text">
+			<p class="name">Summit Law LLP</p>
+			<p class="sub">Mediation Services</p>
+		</div>
+	</div>
+	<div class="card-body">
 
-	<?php if ( ! $data ) : ?>
+	<?php if ( $is_invalidated ) :
+		$contact_email = get_option( 'summit_intake_notification_email', '' ) ?: get_option( 'admin_email' );
+		$mailto_subject = rawurlencode( 'Request: Updated Document Upload Link' );
+		$mailto_body    = rawurlencode(
+			"Hello,\n\n" .
+			"I received a Mediation Agreement email from Summit Law LLP, but my document upload link appears to be no longer active.\n\n" .
+			"Could you please send me an updated upload link at your earliest convenience?\n\n" .
+			"Thank you,"
+		);
+		$mailto_href = 'mailto:' . $contact_email . '?subject=' . $mailto_subject . '&body=' . $mailto_body;
+	?>
 		<div class="expired">
-			<h2>Link Expired or Invalid</h2>
-			<p>This upload link is no longer active. It may have expired after the booking date or been used previously.</p>
+			<h2>Link No Longer Valid</h2>
+			<p>This upload link has been updated. Your previous link is no longer active.</p>
+			<p>Please email <a href="<?php echo esc_attr( $mailto_href ); ?>"><?php echo esc_html( $contact_email ); ?></a> to request an updated upload link.</p>
+		</div>
+
+	<?php elseif ( ! $is_valid ) : ?>
+		<div class="expired">
+			<h2>Link Expired</h2>
+			<p>This upload link has expired. The mediation booking date has passed.</p>
 			<p>Please contact Summit Law LLP if you need assistance.</p>
 		</div>
 
-	<?php else : ?>
+	<?php else :
+		$agreement_pdf_id = absint( get_option( 'summit_intake_agreement_pdf', 0 ) );
+		$contact_email    = get_option( 'summit_intake_notification_email', '' ) ?: get_option( 'admin_email' );
+		$email_md5        = md5( sanitize_email( $data['email'] ) );
+		$post_id          = absint( $data['post_id'] );
+
+		$agreement_id   = absint( get_post_meta( $post_id, '_summit_intake_agreement_file_' . $email_md5, true ) );
+		$brief_id       = absint( get_post_meta( $post_id, '_summit_intake_brief_file_'    . $email_md5, true ) );
+
+		$agreement_date = $agreement_id ? get_the_date( 'F j, Y \a\t g:i a', $agreement_id ) : '';
+		$brief_date     = $brief_id     ? get_the_date( 'F j, Y \a\t g:i a', $brief_id )     : '';
+
+		$checkmark = '<div class="checkmark"><svg width="11" height="9" viewBox="0 0 11 9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 4L4 7L10 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+
+		$show_form = ! $agreement_id || ! $brief_id;
+	?>
 		<h1>Document Upload</h1>
 		<div class="meta">
 			<span><strong>Case:</strong> <?php echo esc_html( $data['case_name'] ); ?></span>
@@ -142,33 +331,73 @@ function summit_upload_render_portal( $token, $data ) {
 			<span><strong>Booking date:</strong> <?php echo esc_html( $data['booking_date'] ); ?></span>
 		</div>
 
+		<?php if ( $agreement_pdf_id && ! $agreement_id ) :
+			$agreement_dl_url = add_query_arg( 'dl', 'agreement', home_url( 'mediation-upload/' . $token . '/' ) );
+		?>
+		<div style="margin-bottom:20px;padding:12px 16px;background:#f0f4f8;border-left:4px solid #1a3a5c;border-radius:4px;font-size:14px;">
+			Need a copy of the Mediation Agreement?
+			<a href="<?php echo esc_url( $agreement_dl_url ); ?>" style="color:#1a3a5c;font-weight:600;margin-left:4px;">Download it here &darr;</a>
+		</div>
+		<?php endif; ?>
+
 		<?php foreach ( $messages as $msg ) : ?>
 			<div class="notice notice-<?php echo esc_attr( $msg['type'] ); ?>">
 				<?php echo esc_html( $msg['text'] ); ?>
 			</div>
 		<?php endforeach; ?>
 
+		<?php if ( $agreement_id ) : ?>
+			<label>Mediation Agreement</label>
+			<div class="uploaded-state">
+				<?php echo $checkmark; ?>
+				<div class="uploaded-info">
+					<strong>Agreement received</strong>
+					Uploaded on <?php echo esc_html( $agreement_date ); ?>
+					<p class="reupload-note">If you need to replace this file, please contact <a href="mailto:<?php echo esc_attr( $contact_email ); ?>" style="color:#29472d;"><?php echo esc_html( $contact_email ); ?></a>.</p>
+				</div>
+			</div>
+		<?php endif; ?>
+
+		<?php if ( $brief_id ) : ?>
+			<?php if ( $agreement_id ) : ?><hr><?php endif; ?>
+			<label>Mediation Brief</label>
+			<div class="uploaded-state">
+				<?php echo $checkmark; ?>
+				<div class="uploaded-info">
+					<strong>Brief received</strong>
+					Uploaded on <?php echo esc_html( $brief_date ); ?>
+					<p class="reupload-note">If you need to replace this file, please contact <a href="mailto:<?php echo esc_attr( $contact_email ); ?>" style="color:#29472d;"><?php echo esc_html( $contact_email ); ?></a>.</p>
+				</div>
+			</div>
+		<?php endif; ?>
+
+		<?php if ( $show_form ) : ?>
 		<form method="post" enctype="multipart/form-data">
 			<?php wp_nonce_field( 'summit_upload_' . $token, 'summit_upload_nonce' ); ?>
 			<input type="hidden" name="summit_upload_token" value="<?php echo esc_attr( $token ); ?>">
 
-			<label for="agreement_file">Mediation Agreement <span style="font-weight:400;color:#666;">(optional)</span></label>
-			<p class="hint">Upload your signed Mediation Agreement. Accepted formats: PDF, DOC, DOCX. Max 10 MB.</p>
-			<input type="file" id="agreement_file" name="agreement_file" accept=".pdf,.doc,.docx">
+			<?php if ( ! $agreement_id ) : ?>
+				<?php if ( $brief_id ) : ?><hr><?php endif; ?>
+				<label for="agreement_file">Mediation Agreement</label>
+				<p class="hint">Upload your signed Mediation Agreement. You can return to this page at any time to submit your Mediation Brief when it is ready. Accepted formats: PDF, DOC, DOCX. Max 10 MB.</p>
+				<input type="file" id="agreement_file" name="agreement_file" accept=".pdf,.doc,.docx">
+			<?php endif; ?>
+
+			<?php if ( ! $brief_id ) : ?>
+				<?php if ( ! $agreement_id ) : ?><hr><?php endif; ?>
+				<label for="brief_file">Mediation Brief</label>
+				<p class="hint">Upload your Mediation Brief. If you have not yet submitted your signed Mediation Agreement, you may also do so above. Accepted formats: PDF, DOC, DOCX. Max 10 MB.</p>
+				<input type="file" id="brief_file" name="brief_file" accept=".pdf,.doc,.docx">
+			<?php endif; ?>
 
 			<hr>
-
-			<label for="brief_file">Mediation Brief <span style="font-weight:400;color:#666;">(optional)</span></label>
-			<p class="hint">Upload your Mediation Brief. Accepted formats: PDF, DOC, DOCX. Max 10 MB.</p>
-			<input type="file" id="brief_file" name="brief_file" accept=".pdf,.doc,.docx">
-
-			<hr>
-
-			<button type="submit">Upload Documents</button>
+			<button type="submit">Upload Document(s)</button>
 		</form>
+		<?php endif; ?>
 	<?php endif; ?>
 
-	</div>
+	</div><!-- /.card-body -->
+	</div><!-- /.card -->
 	</body>
 	</html>
 	<?php
@@ -356,11 +585,11 @@ function summit_upload_update_acf_file( $post_id, $email, $acf_field, $attachmen
 }
 
 // =============================================================================
-// Kelly Notification
+// Upload Notification
 // =============================================================================
 
 /**
- * Send a notification email to Kelly when a counsel uploads a document.
+ * Send a notification email to the legal assistant when a counsel uploads a document.
  *
  * @param int    $post_id      Intake post ID.
  * @param string $counsel_name Uploading counsel's name.
@@ -370,20 +599,22 @@ function summit_upload_update_acf_file( $post_id, $email, $acf_field, $attachmen
  * @param string $booking_date Formatted booking date string.
  */
 function summit_upload_notify_assistant( $post_id, $counsel_name, $email, $doc_type, $case_name, $booking_date ) {
-	$to = get_option( 'summit_intake_kelly_email', '' ) ?: get_option( 'admin_email' );
+	$to = get_option( 'summit_intake_notification_email', '' ) ?: get_option( 'admin_email' );
 	if ( ! $to ) return;
 
 	$edit_url  = admin_url( 'post.php?post=' . $post_id . '&action=edit' );
 	$login_url = wp_login_url( $edit_url );
-	$subject   = '[Summit Law] ' . $doc_type . ' uploaded — ' . $case_name . ' (' . $counsel_name . ')';
+	$subject   = $doc_type . ' Uploaded — ' . $case_name . ' — Summit Law LLP';
 
-	$body  = $counsel_name . ' (' . $email . ') has uploaded their ' . $doc_type . ' for ' . $case_name . ".\n";
-	$body .= 'Booking date: ' . $booking_date . "\n\n";
-	$body .= "Review and toggle the relevant field in WP admin:\n";
-	$body .= $login_url . "\n";
-	$body .= "(If you're already logged in, this link will take you straight to the intake.)\n";
+	$body = '<b>' . esc_html( $counsel_name ) . '</b> (' . esc_html( $email ) . ') has uploaded their <b>' . esc_html( $doc_type ) . '</b> for <b>' . esc_html( $case_name ) . '</b>.'
+		. "\n\nBooking Date: " . esc_html( $booking_date )
+		. "\n\nPlease log in to review the submission and update the relevant status field on the intake record."
+		. "\n\n<a href=\"" . esc_url( $login_url ) . "\" style=\"color:#29472d;font-weight:600;\">View Intake Record</a>";
 
-	$headers = [ 'From: Mediation Notifications – Summit Law LLP <info@summitlaw.ca>' ];
+	$headers = [
+		'Content-Type: text/html; charset=UTF-8',
+		'From: Mediation — Summit Law LLP <info@summitlaw.ca>',
+	];
 
-	wp_mail( $to, $subject, $body, $headers );
+	wp_mail( $to, $subject, summit_intake_email_wrap( nl2br( $body ) ), $headers );
 }
