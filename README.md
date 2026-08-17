@@ -6,6 +6,14 @@ Developed by [Web Ok](https://webok.ca).
 
 ---
 
+## License
+
+Copyright © 2024 Web Ok Solutions Inc. All rights reserved.
+
+This code is made available for portfolio and demonstration purposes only. It may not be copied, modified, distributed, sublicensed, or used in any project — commercial or otherwise — without explicit written permission from the author.
+
+---
+
 ## Tech Stack
 
 - **Build tool:** Vite 6
