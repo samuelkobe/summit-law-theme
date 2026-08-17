@@ -26,3 +26,9 @@ Thumbs.db
 
 # Old assets (now using Vite)
 assets/css/main.css
+
+# Claude Code local files
+.claude/
+
+# Local Sites symlink folder (created by Local by Flywheel)
+Sites/

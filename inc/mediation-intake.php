@@ -695,6 +695,138 @@ add_filter( 'ajax_query_attachments_args', 'summit_intake_hide_from_media_librar
 // OttoKit Webhook Dispatch
 // =============================================================================
 
+// =============================================================================
+// Microsoft Graph API — Calendar Event Enrichment
+// =============================================================================
+
+/**
+ * Fetch (and cache) a Microsoft Graph API access token using client credentials.
+ * Returns null if credentials are not configured or the token request fails.
+ */
+function summit_ms_graph_get_token() {
+	$cached = get_transient( '_summit_ms_graph_token' );
+	if ( $cached ) return $cached;
+
+	$tenant = get_option( 'summit_ms_tenant_id', '' );
+	$client = get_option( 'summit_ms_client_id', '' );
+	$secret = get_option( 'summit_ms_client_secret', '' );
+	if ( ! $tenant || ! $client || ! $secret ) return null;
+
+	$response = wp_remote_post(
+		"https://login.microsoftonline.com/{$tenant}/oauth2/v2.0/token",
+		[
+			'body' => [
+				'grant_type'    => 'client_credentials',
+				'client_id'     => $client,
+				'client_secret' => $secret,
+				'scope'         => 'https://graph.microsoft.com/.default',
+			],
+			'timeout' => 15,
+		]
+	);
+
+	if ( is_wp_error( $response ) ) return null;
+
+	$body = json_decode( wp_remote_retrieve_body( $response ), true );
+	if ( empty( $body['access_token'] ) ) {
+		error_log( 'Summit MS Graph token error: ' . ( $body['error_description'] ?? wp_remote_retrieve_body( $response ) ) );
+		return null;
+	}
+
+	$ttl = max( 60, (int) ( $body['expires_in'] ?? 3600 ) - 120 );
+	set_transient( '_summit_ms_graph_token', $body['access_token'], $ttl );
+	return $body['access_token'];
+}
+
+/**
+ * Update the Microsoft Calendar event created by Amelia with the intake case name
+ * and a structured description containing party and session details.
+ *
+ * Uses application-level Graph API access (client credentials) so no per-user
+ * OAuth tokens are required — one Azure AD app covers all mailboxes in the tenant.
+ *
+ * @param int    $post_id              Mediation intake post ID.
+ * @param string $case_name            Human-readable case label (e.g. "Smith v Jones").
+ * @param string $booking_date_formatted Formatted booking date string.
+ * @param array  $plaintiff_rows       Saved plaintiff ACF rows.
+ * @param array  $defendant_rows       Saved defendant ACF rows.
+ * @param array  $third_party_rows     Saved third-party ACF rows.
+ */
+function summit_ms_update_calendar_event( $post_id, $case_name, $booking_date_formatted, $plaintiff_rows, $defendant_rows, $third_party_rows ) {
+	global $wpdb;
+
+	$booking_id = get_field( 'amelia_booking_id', $post_id );
+	if ( ! $booking_id ) return;
+
+	// Fetch the Amelia appointment: Outlook event ID + provider email.
+	// outlookCalendarEventId is Amelia's standard column name; fall back gracefully if absent.
+	$row = $wpdb->get_row( $wpdb->prepare(
+		"SELECT a.outlookCalendarEventId AS event_id, u.email AS provider_email
+		 FROM {$wpdb->prefix}amelia_customer_bookings cb
+		 JOIN {$wpdb->prefix}amelia_appointments a ON a.id = cb.appointmentId
+		 JOIN {$wpdb->prefix}amelia_users u ON u.id = a.providerId
+		 WHERE cb.id = %d
+		 LIMIT 1",
+		$booking_id
+	) );
+
+	if ( ! $row || empty( $row->event_id ) || empty( $row->provider_email ) ) return;
+
+	$token = summit_ms_graph_get_token();
+	if ( ! $token ) return;
+
+	// Build HTML body.
+	$intake_url  = get_admin_url( null, 'post.php?post=' . $post_id . '&action=edit' );
+	$format_rows = function( array $rows, string $label ) {
+		if ( ! $rows ) return '';
+		$lines = [ "<strong>{$label}</strong>" ];
+		foreach ( $rows as $r ) {
+			$line = '&bull; ' . esc_html( $r['name'] ?? '' );
+			if ( ! empty( $r['counsel_name'] ) ) {
+				$line .= ' — Counsel: ' . esc_html( $r['counsel_name'] );
+				if ( ! empty( $r['counsel_email'] ) ) {
+					$line .= ' (' . esc_html( $r['counsel_email'] ) . ')';
+				}
+			}
+			$lines[] = $line;
+		}
+		return implode( '<br>', $lines );
+	};
+
+	$sections = array_filter( [
+		'<strong>Case:</strong> ' . esc_html( $case_name ),
+		$booking_date_formatted ? '<strong>Date:</strong> ' . esc_html( $booking_date_formatted ) : '',
+		$format_rows( $plaintiff_rows, 'Plaintiffs' ),
+		$format_rows( $defendant_rows, 'Defendants' ),
+		$format_rows( $third_party_rows, 'Third Parties' ),
+		'<a href="' . esc_url( $intake_url ) . '">View Intake &rarr;</a>',
+	] );
+	$html_body = implode( '<br><br>', $sections );
+
+	$response = wp_remote_request(
+		'https://graph.microsoft.com/v1.0/users/' . rawurlencode( $row->provider_email ) . '/events/' . rawurlencode( $row->event_id ),
+		[
+			'method'  => 'PATCH',
+			'headers' => [
+				'Authorization' => 'Bearer ' . $token,
+				'Content-Type'  => 'application/json',
+			],
+			'body'    => wp_json_encode( [
+				'subject' => 'Mediation: ' . $case_name,
+				'body'    => [ 'contentType' => 'HTML', 'content' => $html_body ],
+			] ),
+			'timeout' => 15,
+		]
+	);
+
+	$code = wp_remote_retrieve_response_code( $response );
+	if ( $code < 200 || $code >= 300 ) {
+		error_log( 'Summit MS Graph calendar update failed (' . $code . '): ' . wp_remote_retrieve_body( $response ) );
+	}
+}
+
+// =============================================================================
+
 /**
  * Fire a non-blocking POST to the configured OttoKit webhook URL.
  * If no URL is saved, returns immediately without doing anything.
@@ -1001,7 +1133,12 @@ function summit_intake_submit() {
 		summit_reminders_schedule_session( $post_id, $booking_date );
 
 		// Discovery call initiation email to team.
-		summit_reminders_schedule_discovery_call( $post_id, $booking_date );
+		// If booking is within 45 days the scheduled cron would land in the past, so fire immediately.
+		if ( $days_until < 45 ) {
+			wp_schedule_single_event( time() + 300, 'summit_discovery_call_send', [ $post_id ] );
+		} else {
+			summit_reminders_schedule_discovery_call( $post_id, $booking_date );
+		}
 	}
 
 	// ---
@@ -1044,6 +1181,15 @@ function summit_intake_submit() {
 	// Notify the team so the conflict check can be initiated.
 	summit_intake_send_new_intake_notification( $post_id );
 
+	// Schedule a delayed update so Amelia has time to write outlookCalendarEventId first.
+	// Amelia writes the event ID during /bookings/success/{id} which runs concurrently with
+	// this AJAX handler and finishes several seconds later — 150s delay is safe margin.
+	wp_schedule_single_event(
+		time() + 150,
+		'summit_ms_calendar_event_update',
+		[ $post_id, $case_name, $booking_date_formatted, $plaintiff_rows, $defendant_rows, $third_party_rows ]
+	);
+
 	wp_send_json_success( [
 		'intake_id'         => $post_id,
 		'amelia_booking_id' => $amelia_booking_id ?: null,
@@ -1051,6 +1197,7 @@ function summit_intake_submit() {
 }
 add_action( 'wp_ajax_summit_intake_submit', 'summit_intake_submit' );
 add_action( 'wp_ajax_nopriv_summit_intake_submit', 'summit_intake_submit' );
+add_action( 'summit_ms_calendar_event_update', 'summit_ms_update_calendar_event', 10, 6 );
 
 // =============================================================================
 // Admin Meta Box — Counsel Upload Links
@@ -1848,6 +1995,23 @@ function summit_intake_register_settings() {
 		'default'           => '',
 	] );
 
+	// Microsoft Graph API (calendar event enrichment).
+	register_setting( 'summit_intake_integrations_settings', 'summit_ms_tenant_id', [
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_text_field',
+		'default'           => '',
+	] );
+	register_setting( 'summit_intake_integrations_settings', 'summit_ms_client_id', [
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_text_field',
+		'default'           => '',
+	] );
+	register_setting( 'summit_intake_integrations_settings', 'summit_ms_client_secret', [
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_text_field',
+		'default'           => '',
+	] );
+
 	add_settings_section(
 		'summit_intake_download_section',
 		'File Download Access',
@@ -1908,7 +2072,13 @@ function summit_intake_register_settings() {
 	register_setting( 'summit_intake_general_settings', 'summit_intake_notification_email', [
 		'type'              => 'string',
 		'sanitize_callback' => 'sanitize_email',
-		'default'           => '',
+		'default'           => 'info@summitlaw.ca',
+	] );
+
+	register_setting( 'summit_intake_general_settings', 'summit_intake_notification_email_list', [
+		'type'              => 'array',
+		'sanitize_callback' => 'summit_intake_sanitize_email_list',
+		'default'           => [ 'info@summitlaw.ca' ],
 	] );
 
 	add_settings_field(
@@ -2010,7 +2180,7 @@ function summit_intake_register_settings() {
 	register_setting( 'summit_intake_general_settings', 'summit_intake_cancellation_body', [
 		'type'              => 'string',
 		'sanitize_callback' => 'wp_kses_post',
-		'default'           => "Dear {counsel_name},\n\nWe are writing to let you know that the mediation session for {case_name}, which was scheduled for {booking_date} with {mediator_name}, has been cancelled.\n\nPlease contact us directly to reschedule or if you have any questions.\n\nThank you,\nSummit Law LLP",
+		'default'           => "Dear {counsel_name},\n\nWe are writing to let you know that the mediation session for {case_name}, which was scheduled for {booking_date} with {mediator_name}, has been cancelled.\n\nPlease refer to the mediation agreement for your obligation to cancellation fees. We will forward any invoices shortly.\n\nPlease contact us directly to reschedule or if you have any questions.\n\nThank you,\nSummit Law LLP",
 	] );
 }
 
@@ -2111,16 +2281,117 @@ function summit_intake_render_lookup_secret_field() {
 	<?php
 }
 /**
- * Render the upload notification email input.
+ * Sanitize the team email list option — deduplicate and validate each address.
+ */
+function summit_intake_sanitize_email_list( $raw ) {
+	if ( ! is_array( $raw ) ) {
+		return [ 'info@summitlaw.ca' ];
+	}
+	$clean = [];
+	foreach ( $raw as $email ) {
+		$sanitized = sanitize_email( $email );
+		if ( $sanitized && is_email( $sanitized ) ) {
+			$clean[] = $sanitized;
+		}
+	}
+	$clean = array_values( array_unique( $clean ) );
+	return $clean ?: [ 'info@summitlaw.ca' ];
+}
+
+/**
+ * Render the team notification email manager.
+ * Shows a radio-selectable list of emails with add/remove controls.
  */
 function summit_intake_render_notification_email_field() {
-	$email = get_option( 'summit_intake_notification_email', '' );
-	printf(
-		'<input type="email" name="summit_intake_notification_email" value="%s" class="regular-text" placeholder="%s">',
-		esc_attr( $email ),
-		esc_attr( get_option( 'admin_email' ) )
-	);
-	echo '<p class="description">Team email for document upload notifications, reminder summaries, and session alerts. Falls back to the site admin email if blank.</p>';
+	$list   = get_option( 'summit_intake_notification_email_list', [ 'info@summitlaw.ca' ] );
+	$active = get_option( 'summit_intake_notification_email', 'info@summitlaw.ca' );
+
+	if ( ! is_array( $list ) || empty( $list ) ) {
+		$list = [ 'info@summitlaw.ca' ];
+	}
+	if ( ! in_array( $active, $list, true ) ) {
+		$active = $list[0];
+	}
+	?>
+	<div id="summit-email-list-manager" style="max-width:420px;">
+		<div id="summit-email-rows">
+			<?php foreach ( $list as $email ) : ?>
+			<div class="summit-email-row" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+				<label style="display:flex;align-items:center;gap:8px;flex:1;cursor:pointer;">
+					<input type="radio"
+						   name="summit_intake_notification_email"
+						   value="<?php echo esc_attr( $email ); ?>"
+						   <?php checked( $active, $email ); ?>>
+					<input type="hidden"
+						   name="summit_intake_notification_email_list[]"
+						   value="<?php echo esc_attr( $email ); ?>">
+					<span><?php echo esc_html( $email ); ?></span>
+				</label>
+				<button type="button" class="button summit-remove-email" style="padding:1px 8px;line-height:1.8;" aria-label="Remove">&times;</button>
+			</div>
+			<?php endforeach; ?>
+		</div>
+
+		<div style="display:flex;gap:8px;margin-top:10px;">
+			<input type="email" id="summit-new-email-input" placeholder="Add email address…" style="flex:1;max-width:260px;" class="regular-text">
+			<button type="button" id="summit-add-email" class="button">Add</button>
+		</div>
+		<p class="description" style="margin-top:8px;">Select one active email. All internal notifications — reminders, uploads, session alerts — go to the selected address.</p>
+	</div>
+
+	<script>
+	(function () {
+		var rows    = document.getElementById('summit-email-rows');
+		var input   = document.getElementById('summit-new-email-input');
+		var addBtn  = document.getElementById('summit-add-email');
+
+		function bindRemove(btn) {
+			btn.addEventListener('click', function () {
+				var row      = this.closest('.summit-email-row');
+				var wasActive = row.querySelector('input[type="radio"]').checked;
+				row.remove();
+				if (wasActive) {
+					var first = rows.querySelector('input[type="radio"]');
+					if (first) first.checked = true;
+				}
+			});
+		}
+
+		document.querySelectorAll('.summit-remove-email').forEach(bindRemove);
+
+		addBtn.addEventListener('click', function () {
+			var email = input.value.trim();
+			if (!email || !email.includes('@')) return;
+
+			// Check for duplicate
+			var existing = rows.querySelectorAll('input[type="hidden"]');
+			for (var i = 0; i < existing.length; i++) {
+				if (existing[i].value === email) { input.value = ''; return; }
+			}
+
+			var row = document.createElement('div');
+			row.className = 'summit-email-row';
+			row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px;';
+			row.innerHTML =
+				'<label style="display:flex;align-items:center;gap:8px;flex:1;cursor:pointer;">' +
+					'<input type="radio" name="summit_intake_notification_email" value="' + email + '">' +
+					'<input type="hidden" name="summit_intake_notification_email_list[]" value="' + email + '">' +
+					'<span>' + email + '</span>' +
+				'</label>' +
+				'<button type="button" class="button summit-remove-email" style="padding:1px 8px;line-height:1.8;" aria-label="Remove">&times;</button>';
+
+			rows.appendChild(row);
+			bindRemove(row.querySelector('.summit-remove-email'));
+			input.value = '';
+		});
+
+		// Allow pressing Enter in the add input
+		input.addEventListener('keydown', function (e) {
+			if (e.key === 'Enter') { e.preventDefault(); addBtn.click(); }
+		});
+	})();
+	</script>
+	<?php
 }
 
 /**
@@ -2198,20 +2469,20 @@ function summit_intake_render_agreement_subject_field() {
 		'<input type="text" name="summit_intake_agreement_email_subject" value="%s" class="large-text">',
 		esc_attr( $subject )
 	);
-	echo '<p class="description">Available tags: <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code></p>';
+	echo '<p class="description">Available tags: <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code>, <code>{team_email}</code></p>';
 }
 
 /**
  * Render the agreement email body textarea.
  */
 function summit_intake_render_agreement_body_field() {
-	$default = "Dear {counsel_name},\n\nOur conflict check is complete, and we are pleased to confirm that Summit Law LLP is able to proceed with this mediation.\n\nPlease find attached the Mediation Agreement for {case_name}, scheduled for {booking_date} with {mediator_name}.\n\nPlease sign and return the agreement using your secure upload link:\n{upload_url}\n\nZoom Meeting: {zoom_url}\n\nThank you,\nSummit Law LLP";
+	$default = "Dear {counsel_name},\n\nOur conflict check is complete. We are pleased to confirm that Summit Law LLP is able to proceed with this mediation.\n\nPlease find attached the Mediation Agreement for {case_name}, scheduled for {booking_date} with {mediator_name}.\n\nPlease sign and return the agreement using your secure upload link:\n{upload_url}\n\nZoom Meeting: {zoom_url}\n\nThank you,\nSummit Law LLP";
 	$body    = get_option( 'summit_intake_agreement_email_body', $default );
 	printf(
 		'<textarea name="summit_intake_agreement_email_body" rows="12" class="large-text" style="font-family:monospace;">%s</textarea>',
 		esc_textarea( $body )
 	);
-	echo '<p class="description">Available tags: <code>{counsel_name}</code>, <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code>, <code>{upload_url}</code>, <code>{zoom_url}</code>. Calendar links (Google, Outlook, iCal) are appended automatically.</p>';
+	echo '<p class="description">Available tags: <code>{counsel_name}</code>, <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code>, <code>{upload_url}</code>, <code>{zoom_url}</code>, <code>{team_email}</code>. Calendar links (Google, Outlook, iCal) are appended automatically.</p>';
 }
 
 /**
@@ -2223,7 +2494,7 @@ function summit_intake_render_cancellation_subject_field() {
 		'<input type="text" name="summit_intake_cancellation_subject" value="%s" class="large-text">',
 		esc_attr( $subject )
 	);
-	echo '<p class="description">Available tags: <code>{counsel_name}</code>, <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code></p>';
+	echo '<p class="description">Available tags: <code>{counsel_name}</code>, <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code>, <code>{team_email}</code></p>';
 }
 
 /**
@@ -2236,7 +2507,7 @@ function summit_intake_render_cancellation_body_field() {
 		'<textarea name="summit_intake_cancellation_body" rows="8" class="large-text" style="font-family:monospace;">%s</textarea>',
 		esc_textarea( $body )
 	);
-	echo '<p class="description">Available tags: <code>{counsel_name}</code>, <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code></p>';
+	echo '<p class="description">Available tags: <code>{counsel_name}</code>, <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code>, <code>{team_email}</code></p>';
 }
 
 add_action( 'admin_init', 'summit_intake_register_settings' );
@@ -2790,7 +3061,7 @@ function summit_intake_render_settings_page() {
 					<th scope="row">Body</th>
 					<td>
 						<textarea name="summit_intake_new_intake_body" rows="8" class="large-text" style="font-family:monospace;"><?php
-							$default_body = "A new mediation intake has been submitted and is ready for review.\n\nCase: {case_name}\nSession Date: {booking_date}\nMediator: {mediator_name}\n\nPlease initiate the conflict check and review all party details before sending the Mediation Agreement.\n\nView intake: {intake_url}";
+							$default_body = "A new mediation intake has been submitted and is ready for review.\n\nCase: {case_name}\nSession Date: {booking_date}\nMediator: {mediator_name}\n\nPlease initiate the conflict check and review all party details before sending the Mediation Agreement.\n\n{intake_url}";
 							echo esc_textarea( get_option( 'summit_intake_new_intake_body', $default_body ) );
 						?></textarea>
 						<p class="description">Available tags: <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code>, <code>{intake_url}</code></p>
@@ -2822,7 +3093,7 @@ function summit_intake_render_settings_page() {
 						<textarea name="summit_intake_confirmation_body" rows="14" class="large-text" style="font-family:monospace;"><?php
 							echo esc_textarea( get_option( 'summit_intake_confirmation_body', '' ) );
 						?></textarea>
-						<p class="description">Available tags: <code>{counsel_name}</code>, <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code>, <code>{plaintiff_list}</code>, <code>{defendant_list}</code>, <code>{third_party_section}</code> (renders as a labelled line only when third parties exist, empty otherwise).</p>
+						<p class="description">Available tags: <code>{counsel_name}</code>, <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code>, <code>{plaintiff_list}</code>, <code>{defendant_list}</code>, <code>{third_party_section}</code>, <code>{team_email}</code>. (<code>{third_party_section}</code> renders as a labelled line only when third parties exist, empty otherwise.)</p>
 					</td>
 				</tr>
 				<tr>
@@ -2893,6 +3164,7 @@ function summit_intake_render_settings_page() {
 						<textarea name="summit_agreement_reminder_body" rows="8" class="large-text" style="font-family:monospace;"><?php
 							echo esc_textarea( get_option( 'summit_agreement_reminder_body', '' ) );
 						?></textarea>
+						<p class="description">Available tags: <code>{counsel_name}</code>, <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code>, <code>{upload_url}</code>, <code>{days_until_booking}</code>, <code>{team_email}</code></p>
 					</td>
 				</tr>
 			</table>
@@ -2914,6 +3186,7 @@ function summit_intake_render_settings_page() {
 						<textarea name="summit_brief_request_body" rows="8" class="large-text" style="font-family:monospace;"><?php
 							echo esc_textarea( get_option( 'summit_brief_request_body', '' ) );
 						?></textarea>
+						<p class="description">Available tags: <code>{counsel_name}</code>, <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code>, <code>{upload_url}</code>, <code>{team_email}</code></p>
 					</td>
 				</tr>
 			</table>
@@ -2939,6 +3212,7 @@ function summit_intake_render_settings_page() {
 						<textarea name="summit_brief_reminder_body" rows="8" class="large-text" style="font-family:monospace;"><?php
 							echo esc_textarea( get_option( 'summit_brief_reminder_body', '' ) );
 						?></textarea>
+						<p class="description">Available tags: <code>{counsel_name}</code>, <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code>, <code>{upload_url}</code>, <code>{days_until_booking}</code>, <code>{team_email}</code></p>
 					</td>
 				</tr>
 			</table>
@@ -2976,7 +3250,7 @@ function summit_intake_render_settings_page() {
 						<textarea name="summit_session_reminder_body" rows="8" class="large-text" style="font-family:monospace;"><?php
 							echo esc_textarea( get_option( 'summit_session_reminder_body', '' ) );
 						?></textarea>
-						<p class="description">Calendar links (Google, Outlook, iCal) are appended automatically when a Zoom URL is available. Available tags: <code>{counsel_name}</code>, <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code>, <code>{zoom_url}</code></p>
+						<p class="description">Calendar links (Google, Outlook, iCal) are appended automatically when a Zoom URL is available. Available tags: <code>{counsel_name}</code>, <code>{case_name}</code>, <code>{booking_date}</code>, <code>{mediator_name}</code>, <code>{zoom_url}</code>, <code>{team_email}</code></p>
 					</td>
 				</tr>
 			</table>
@@ -3079,6 +3353,38 @@ function summit_intake_render_settings_page() {
 				<tr>
 					<th scope="row">Lookup Secret Key</th>
 					<td><?php summit_intake_render_lookup_secret_field(); ?></td>
+				</tr>
+			</table>
+
+			<h2 class="title" style="margin-top:2em;">Microsoft Calendar Integration</h2>
+			<p class="description">When a new intake is submitted, the Amelia-created Microsoft Calendar event is automatically updated with the case name and party details. Requires an Azure AD app with <code>Calendars.ReadWrite</code> application permission and admin consent granted for the whole tenant.</p>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row">Tenant ID</th>
+					<td>
+						<input type="text" name="summit_ms_tenant_id"
+							value="<?php echo esc_attr( get_option( 'summit_ms_tenant_id', '' ) ); ?>"
+							class="regular-text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+						<p class="description">Azure Portal → Azure Active Directory → Overview → Directory (tenant) ID.</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">Application (Client) ID</th>
+					<td>
+						<input type="text" name="summit_ms_client_id"
+							value="<?php echo esc_attr( get_option( 'summit_ms_client_id', '' ) ); ?>"
+							class="regular-text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+						<p class="description">Azure Portal → App registrations → your app → Overview → Application (client) ID.</p>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">Client Secret Value</th>
+					<td>
+						<input type="password" name="summit_ms_client_secret"
+							value="<?php echo esc_attr( get_option( 'summit_ms_client_secret', '' ) ); ?>"
+							class="regular-text" autocomplete="new-password">
+						<p class="description">Azure Portal → App registrations → your app → Certificates &amp; secrets. Copy the value immediately — it is only shown once.</p>
+					</td>
 				</tr>
 			</table>
 			<?php submit_button(); ?>
@@ -3438,6 +3744,14 @@ function summit_intake_send_agreement_emails( $post_id ) {
 	$subject_tpl     = get_option( 'summit_intake_agreement_email_subject', $default_subject );
 	$body_tpl        = get_option( 'summit_intake_agreement_email_body', $default_body );
 
+	// Resolve {team_email} before per-party loop (same value for all recipients).
+	$_team_email_addr = get_option( 'summit_intake_notification_email', get_option( 'admin_email' ) );
+	$_team_email_link = $_team_email_addr
+		? '<a href="mailto:' . esc_attr( $_team_email_addr ) . '" style="color:#1a73e8;">' . esc_html( $_team_email_addr ) . '</a>'
+		: '';
+	$subject_tpl = str_replace( '{team_email}', $_team_email_addr, $subject_tpl );
+	$body_tpl    = str_replace( '{team_email}', $_team_email_link, $body_tpl );
+
 	// Build HTML calendar block when booking date is available.
 	$calendar_html = '';
 	$use_html      = false;
@@ -3532,13 +3846,14 @@ function summit_intake_send_new_intake_notification( $post_id ) {
 	$booking_date = get_post_meta( $post_id, '_summit_intake_booking_date', true );
 	$team_id      = get_field( 'team_member', $post_id );
 	$mediator     = $team_id ? get_the_title( $team_id ) : '';
-	$intake_url   = get_admin_url( null, 'post.php?post=' . $post_id . '&action=edit' );
+	$intake_url  = get_admin_url( null, 'post.php?post=' . $post_id . '&action=edit' );
+	$intake_link = '<a href="' . esc_url( $intake_url ) . '" style="color:#1a73e8;">View Intake →</a>';
 
 	$default_subject = 'New Mediation Intake — {case_name}';
-	$default_body    = "A new mediation intake has been submitted and is ready for review.\n\nCase: {case_name}\nSession Date: {booking_date}\nMediator: {mediator_name}\n\nPlease initiate the conflict check and review all party details before sending the Mediation Agreement.\n\nView intake: {intake_url}";
+	$default_body    = "A new mediation intake has been submitted and is ready for review.\n\nCase: {case_name}\nSession Date: {booking_date}\nMediator: {mediator_name}\n\nPlease initiate the conflict check and review all party details before sending the Mediation Agreement.\n\n{intake_url}";
 
 	$tags = [ '{case_name}', '{booking_date}', '{mediator_name}', '{intake_url}' ];
-	$vals = [ $case_name, $booking_date, $mediator, $intake_url ];
+	$vals = [ $case_name, $booking_date, $mediator, $intake_link ];
 
 	$subject = str_replace( $tags, $vals, get_option( 'summit_intake_new_intake_subject', $default_subject ) );
 	$body    = str_replace( $tags, $vals, get_option( 'summit_intake_new_intake_body', $default_body ) );
@@ -3567,7 +3882,7 @@ function summit_intake_send_confirmation_emails( $post_id, $plaintiff_rows, $def
 	if ( ! get_option( 'summit_intake_confirmation_enabled', false ) ) return;
 
 	$default_subject = 'Mediation Session Booked — {case_name}';
-	$default_body    = "Dear {counsel_name},\n\nA mediation session has been booked with Summit Law LLP in which you or your client has been listed as a party. The details on file are included below for your reference.\n\nIf you believe you have received this in error, please contact us at info@summitlaw.ca or (613) 749-4700.\n\nParties on record:\n\n   Plaintiff(s): {plaintiff_list}\n   Defendant(s): {defendant_list}\n{third_party_section}\nSession details:\n\n   Case:      {case_name}\n   Date:      {booking_date}\n   Mediator:  {mediator_name}\n\nWhat happens next:\n\n1. Conflict Check — Our team will conduct a conflict check and be in touch shortly to confirm that Summit Law LLP is able to proceed.\n\n2. Mediation Agreement — Once confirmed, we will send a Mediation Agreement to all parties for review and signature, along with full session details.\n\n3. Document Upload — After signing, you will receive a secure upload link to return your signed agreement. A separate request for your mediation brief will follow closer to the session date.\n\nThank you,\nSummit Law LLP\n(613) 749-4700";
+	$default_body    = "Dear {counsel_name},\n\nA mediation session has been booked with Summit Law LLP in which you or your client has been listed as a party. The details on file are included below for your reference.\n\nIf you believe you have received this in error, please contact us at {team_email} or (613) 749-4700.\n\nParties on record:\n\n   Plaintiff(s): {plaintiff_list}\n   Defendant(s): {defendant_list}\n{third_party_section}\nSession details:\n\n   Case:      {case_name}\n   Date:      {booking_date}\n   Mediator:  {mediator_name}\n\nWhat happens next:\n\n1. Conflict Check — Our team will conduct a conflict check and be in touch shortly to confirm that Summit Law LLP is able to proceed.\n\n2. Mediation Agreement — Once confirmed, we will send a Mediation Agreement to all parties for review and signature, along with full session details.\n\n3. Document Upload — After signing, you will receive a secure upload link to return your signed agreement. A separate request for your mediation brief will follow closer to the session date.\n\nThank you,\nSummit Law LLP\n(613) 749-4700";
 
 	$subject_tpl = get_option( 'summit_intake_confirmation_subject', $default_subject );
 	$body_tpl    = get_option( 'summit_intake_confirmation_body',    $default_body );
@@ -3603,6 +3918,11 @@ function summit_intake_send_confirmation_emails( $post_id, $plaintiff_rows, $def
 		$third_party_section = "   <b>{$tp_label}:</b>\n   " . $format( $third_party_rows );
 	}
 
+	$_team_email_addr = get_option( 'summit_intake_notification_email', get_option( 'admin_email' ) );
+	$_team_email_link = $_team_email_addr
+		? '<a href="mailto:' . esc_attr( $_team_email_addr ) . '" style="color:#1a73e8;">' . esc_html( $_team_email_addr ) . '</a>'
+		: '';
+
 	$all_parties = array_merge( $plaintiff_rows, $defendant_rows, $third_party_rows );
 
 	foreach ( $all_parties as $party ) {
@@ -3614,11 +3934,11 @@ function summit_intake_send_confirmation_emails( $post_id, $plaintiff_rows, $def
 
 		$tags = [
 			'{counsel_name}', '{case_name}', '{booking_date}', '{mediator_name}',
-			'{plaintiff_list}', '{defendant_list}', '{third_party_section}',
+			'{plaintiff_list}', '{defendant_list}', '{third_party_section}', '{team_email}',
 		];
 		$vals = [
 			$name, $case_name, $booking_date, $mediator,
-			$plaintiff_list, $defendant_list, $third_party_section,
+			$plaintiff_list, $defendant_list, $third_party_section, $_team_email_link,
 		];
 
 		$subject    = str_replace( $tags, $vals, $subject_tpl );
@@ -3744,7 +4064,7 @@ add_action( 'amelia_after_appointment_deleted', 'summit_intake_handle_amelia_del
  */
 function summit_intake_send_cancellation_emails( $post_id ) {
 	$default_subject = 'Mediation Session Cancelled — {case_name}';
-	$default_body    = "Dear {counsel_name},\n\nWe are writing to let you know that the mediation session for {case_name}, which was scheduled for {booking_date} with {mediator_name}, has been cancelled.\n\nPlease contact us directly to reschedule or if you have any questions.\n\nThank you,\nSummit Law LLP";
+	$default_body    = "Dear {counsel_name},\n\nWe are writing to let you know that the mediation session for {case_name}, which was scheduled for {booking_date} with {mediator_name}, has been cancelled.\n\nPlease refer to the mediation agreement for your obligation to cancellation fees. We will forward any invoices shortly.\n\nPlease contact us directly to reschedule or if you have any questions.\n\nThank you,\nSummit Law LLP";
 
 	$subject_tpl  = get_option( 'summit_intake_cancellation_subject', $default_subject );
 	$body_tpl     = get_option( 'summit_intake_cancellation_body', $default_body );
@@ -3760,12 +4080,17 @@ function summit_intake_send_cancellation_emails( $post_id ) {
 		get_field( 'third_parties', $post_id ) ?: []
 	);
 
-	$tags = [ '{counsel_name}', '{case_name}', '{booking_date}', '{mediator_name}' ];
+	$_team_email_addr = get_option( 'summit_intake_notification_email', get_option( 'admin_email' ) );
+	$_team_email_link = $_team_email_addr
+		? '<a href="mailto:' . esc_attr( $_team_email_addr ) . '" style="color:#1a73e8;">' . esc_html( $_team_email_addr ) . '</a>'
+		: '';
+
+	$tags = [ '{counsel_name}', '{case_name}', '{booking_date}', '{mediator_name}', '{team_email}' ];
 
 	foreach ( $parties as $party ) {
 		$counsel_email = sanitize_email( $party['counsel_email'] ?? '' );
 		if ( $counsel_email ) {
-			$vals       = [ $party['counsel_name'] ?? '', $case_name, $booking_date, $mediator ];
+			$vals       = [ $party['counsel_name'] ?? '', $case_name, $booking_date, $mediator, $_team_email_link ];
 			$body       = str_replace( $tags, $vals, $body_tpl );
 			$headers    = [
 				'Content-Type: text/html; charset=UTF-8',

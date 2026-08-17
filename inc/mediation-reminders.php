@@ -121,7 +121,7 @@ function summit_reminders_register_settings() {
 	register_setting( 'summit_reminders_settings', 'summit_agreement_reminder_body', [
 		'type'              => 'string',
 		'sanitize_callback' => 'wp_kses_post',
-		'default'           => "Dear {counsel_name},\n\nThis is a reminder that we have not yet received your signed Mediation Agreement for <b>{case_name}</b>, scheduled for <b>{booking_date}</b>.\n\nYour session is <b>{days_until_booking} days away</b>. Please sign and return the agreement as soon as possible using your secure upload link:\n\n{upload_url}\n\nIf you have misplaced the original agreement, you can download the most recent version directly from your upload page at the link above.\n\nIf you have already submitted your agreement, please disregard this message. If you have any questions or concerns, contact us at <a href=\"mailto:info@summitlaw.ca\">info@summitlaw.ca</a> or (613) 749-4700.\n\nSincerely,\n<b>Summit Law LLP — Mediation Services</b>",
+		'default'           => "Dear {counsel_name},\n\nThis is a reminder that we have not yet received your signed Mediation Agreement for <b>{case_name}</b>, scheduled for <b>{booking_date}</b>.\n\nYour session is <b>{days_until_booking} days away</b>. Please sign and return the agreement as soon as possible using your secure upload link:\n\n{upload_url}\n\nIf you have misplaced the original agreement, you can download the most recent version directly from your upload page at the link above.\n\nIf you have already submitted your agreement, please disregard this message. If you have any questions or concerns, contact us at {team_email} or (613) 749-4700.\n\nSincerely,\n<b>Summit Law LLP — Mediation Services</b>",
 	] );
 	register_setting( 'summit_reminders_settings', 'summit_brief_request_body', [
 		'type'              => 'string',
@@ -139,7 +139,7 @@ function summit_reminders_register_settings() {
 		'default'           => "Dear {counsel_name},\n\nThis is a reminder that your mediation session for {case_name} is coming up.\n\nDate: {booking_date}\nMediator: {mediator_name}\nZoom: {zoom_url}\n\nCalendar links are included below.\n\nThank you,\nSummit Law LLP",
 	] );
 }
-add_action( 'admin_init', 'summit_reminders_register_settings' );
+add_action( 'init', 'summit_reminders_register_settings' );
 
 // =============================================================================
 // Defaults
@@ -228,10 +228,9 @@ function summit_reminders_schedule_agreement( $post_id, $booking_date_raw ) {
 	$intervals = get_option( 'summit_agreement_reminder_intervals', summit_reminders_default_agreement_intervals() );
 	foreach ( $intervals as $rule ) {
 		if ( empty( $rule['enabled'] ) ) continue;
-		$ts   = strtotime( $booking_date_raw ) - ( absint( $rule['days'] ) * DAY_IN_SECONDS );
-		$args = [ $post_id ];
-		if ( $ts > time() && ! wp_next_scheduled( 'summit_agreement_reminder_check', $args ) ) {
-			wp_schedule_single_event( $ts, 'summit_agreement_reminder_check', $args );
+		$ts = strtotime( $booking_date_raw ) - ( absint( $rule['days'] ) * DAY_IN_SECONDS );
+		if ( $ts > time() ) {
+			wp_schedule_single_event( $ts, 'summit_agreement_reminder_check', [ $post_id ] );
 		}
 	}
 }
@@ -358,8 +357,12 @@ function summit_reminders_unschedule_all( $post_id ) {
  * @param string $name    Recipient display name.
  */
 function summit_reminders_send_email( $post_id, $type, $email, $name, $cc_email = '' ) {
-	$subject_tpl = get_option( 'summit_' . $type . '_subject', '' );
-	$body_tpl    = get_option( 'summit_' . $type . '_body', '' );
+	$subject_key = 'summit_' . $type . '_subject';
+	$body_key    = 'summit_' . $type . '_body';
+	$registered  = get_registered_settings();
+
+	$subject_tpl = get_option( $subject_key ) ?: ( $registered[ $subject_key ]['default'] ?? '' );
+	$body_tpl    = get_option( $body_key )    ?: ( $registered[ $body_key ]['default']    ?? '' );
 
 	if ( ! $subject_tpl || ! $body_tpl || ! $email ) return;
 
@@ -381,9 +384,14 @@ function summit_reminders_send_email( $post_id, $type, $email, $name, $cc_email 
 	$upload_link = $upload_url ? '<a href="' . esc_url( $upload_url ) . '" style="color:#1a73e8;">Secure File Upload</a>' : '';
 	$zoom_link   = $zoom_url   ? '<a href="' . esc_url( $zoom_url )   . '" style="color:#1a73e8;">Zoom Call URL</a>'      : '';
 
-	$tags        = [ '{counsel_name}', '{case_name}', '{booking_date}', '{mediator_name}', '{upload_url}', '{days_until_booking}', '{zoom_url}' ];
-	$plain_vals  = [ $name, $case_name, $booking_date, $mediator, $upload_url,   $days_until, $zoom_url   ];
-	$html_vals   = [ $name, $case_name, $booking_date, $mediator, $upload_link,  $days_until, $zoom_link  ];
+	$team_email_addr = get_option( 'summit_intake_notification_email', get_option( 'admin_email' ) );
+	$team_email_link = $team_email_addr
+		? '<a href="mailto:' . esc_attr( $team_email_addr ) . '" style="color:#1a73e8;">' . esc_html( $team_email_addr ) . '</a>'
+		: '';
+
+	$tags        = [ '{counsel_name}', '{case_name}', '{booking_date}', '{mediator_name}', '{upload_url}', '{days_until_booking}', '{zoom_url}', '{team_email}' ];
+	$plain_vals  = [ $name, $case_name, $booking_date, $mediator, $upload_url,   $days_until, $zoom_url,  $team_email_addr ];
+	$html_vals   = [ $name, $case_name, $booking_date, $mediator, $upload_link,  $days_until, $zoom_link, $team_email_link ];
 
 	$subject    = str_replace( $tags, $plain_vals, $subject_tpl );
 	$body       = str_replace( $tags, $html_vals,  $body_tpl );
@@ -426,14 +434,14 @@ function summit_reminders_send_email( $post_id, $type, $email, $name, $cc_email 
 	}
 
 	$headers = [
-		'Content-Type: ' . $content_type . '; charset=UTF-8',
+		'Content-Type: text/html; charset=UTF-8',
 		'From: Mediation — Summit Law LLP <info@summitlaw.ca>',
 	];
 	if ( $cc_email ) {
 		$headers[] = 'Cc: ' . $cc_email;
 	}
 
-	wp_mail( $email, $subject, summit_intake_email_wrap( $email_content ), $headers );
+	return wp_mail( $email, $subject, summit_intake_email_wrap( $email_content ), $headers );
 }
 
 // =============================================================================
@@ -450,15 +458,18 @@ function summit_agreement_reminder_check( $post_id ) {
 		get_field( 'defendants', $post_id ) ?: [],
 		get_field( 'third_parties', $post_id ) ?: []
 	);
+
 	$sent = 0;
 	foreach ( $parties as $party ) {
 		if ( ! empty( $party['mediation_agreement_signed'] ) ) continue;
-		if ( ! empty( $party['counsel_email'] ) ) {
+		$email = $party['counsel_email'] ?? '';
+		if ( $email ) {
 			$cc = ! empty( $party['assistant_email'] ) ? $party['assistant_email'] : '';
-			summit_reminders_send_email( $post_id, 'agreement_reminder', $party['counsel_email'], $party['counsel_name'] ?? '', $cc );
+			summit_reminders_send_email( $post_id, 'agreement_reminder', $email, $party['counsel_name'] ?? '', $cc );
 			$sent++;
 		}
 	}
+
 	if ( $sent > 0 ) {
 		summit_reminders_schedule_team_notification( $post_id, 'agreement_reminder', $sent );
 	}
@@ -554,13 +565,15 @@ function summit_reminders_send_session_internal( $post_id ) {
 	$mediator_email = $team_id ? (string) get_field( 'email', $team_id ) : '';
 	$zoom_url       = get_post_meta( $post_id, '_summit_intake_zoom_url', true ) ?: '';
 
-	$intake_url = get_admin_url( null, 'post.php?post=' . $post_id . '&action=edit' );
+	$intake_url  = get_admin_url( null, 'post.php?post=' . $post_id . '&action=edit' );
+	$intake_link = '<a href="' . esc_url( $intake_url ) . '" style="color:#1a73e8;">View Intake →</a>';
+	$zoom_link   = $zoom_url ? '<a href="' . esc_url( $zoom_url ) . '" style="color:#1a73e8;">' . esc_html( $zoom_url ) . '</a>' : '';
 
 	$tags = [ '{case_name}', '{booking_date}', '{mediator_name}', '{zoom_url}', '{intake_url}' ];
-	$vals = [ $case_name, $booking_date, $mediator, $zoom_url, $intake_url ];
+	$vals = [ $case_name, $booking_date, $mediator, $zoom_link, $intake_link ];
 
 	$default_subject = 'Upcoming Session — {case_name} — {booking_date}';
-	$default_body    = "This is an internal reminder that a mediation session is upcoming.\n\nCase: {case_name}\nDate: {booking_date}\nMediator: {mediator_name}\nZoom: {zoom_url}\n\nSession reminder emails have been sent to all parties.\n\nView intake: {intake_url}";
+	$default_body    = "This is an internal reminder that a mediation session is upcoming.\n\nCase: {case_name}\nDate: {booking_date}\nMediator: {mediator_name}\nZoom: {zoom_url}\n\nSession reminder emails have been sent to all parties.\n\n{intake_url}";
 
 	$subject = str_replace( $tags, $vals, get_option( 'summit_session_internal_subject', $default_subject ) );
 	$body    = str_replace( $tags, $vals, get_option( 'summit_session_internal_body', $default_body ) );
@@ -589,18 +602,24 @@ function summit_discovery_call_send( $post_id ) {
 	$team_id      = get_field( 'team_member', $post_id );
 	$mediator     = $team_id ? get_the_title( $team_id ) : '';
 
-	$intake_url = get_admin_url( null, 'post.php?post=' . $post_id . '&action=edit' );
+	$intake_url  = get_admin_url( null, 'post.php?post=' . $post_id . '&action=edit' );
+	$intake_link = '<a href="' . esc_url( $intake_url ) . '" style="color:#1a73e8;">View Intake →</a>';
 
 	$tags = [ '{case_name}', '{booking_date}', '{mediator_name}', '{intake_url}' ];
-	$vals = [ $case_name, $booking_date, $mediator, $intake_url ];
+	$vals = [ $case_name, $booking_date, $mediator, $intake_link ];
 
 	$default_subject = 'Discovery Calls Due — {case_name}';
-	$default_body    = "This is a reminder to initiate discovery calls for {case_name}, scheduled for {booking_date} with {mediator_name}.\n\nPlease reach out to all parties to arrange discovery calls.\n\nView intake: {intake_url}";
+	$default_body    = "This is a reminder to initiate discovery calls for {case_name}, scheduled for {booking_date} with {mediator_name}.\n\nPlease reach out to all parties to arrange discovery calls.\n\n{intake_url}";
 
 	$subject = str_replace( $tags, $vals, get_option( 'summit_discovery_call_subject', $default_subject ) );
 	$body    = str_replace( $tags, $vals, get_option( 'summit_discovery_call_body', $default_body ) );
 
 	if ( ! $subject || ! $body ) return;
+
+	// Prepend urgency note for expedited intakes (booking ≤ 30 days out at time of intake submission).
+	if ( get_post_meta( $post_id, '_summit_intake_expedited', true ) ) {
+		$body = "⚠ EXPEDITED BOOKING: This session has been booked on an expedited basis. Please action discovery calls urgently.\n\n" . $body;
+	}
 
 	$headers = [
 		'Content-Type: text/html; charset=UTF-8',
@@ -627,13 +646,14 @@ function summit_team_reminder_notification( $post_id, $type, $count ) {
 	$case_name    = summit_intake_case_name( $post_id );
 	$booking_date = get_post_meta( $post_id, '_summit_intake_booking_date', true );
 
-	$intake_url = get_admin_url( null, 'post.php?post=' . $post_id . '&action=edit' );
+	$intake_url  = get_admin_url( null, 'post.php?post=' . $post_id . '&action=edit' );
+	$intake_link = '<a href="' . esc_url( $intake_url ) . '" style="color:#1a73e8;">View Intake →</a>';
 
 	$tags = [ '{case_name}', '{booking_date}', '{reminder_type}', '{party_count}', '{intake_url}' ];
-	$vals = [ $case_name, $booking_date, $type_labels[ $type ] ?? $type, (string) $count, $intake_url ];
+	$vals = [ $case_name, $booking_date, $type_labels[ $type ] ?? $type, (string) $count, $intake_link ];
 
 	$default_subject = 'Reminder Follow-up — {case_name} — {reminder_type}';
-	$default_body    = "{party_count} {reminder_type} email(s) were sent yesterday for {case_name} (session: {booking_date}).\n\nPlease check whether additional documents or responses have been submitted.\n\nView intake: {intake_url}";
+	$default_body    = "{party_count} {reminder_type} email(s) were sent yesterday for {case_name} (session: {booking_date}).\n\nPlease check whether additional documents or responses have been submitted.\n\n{intake_url}";
 
 	$subject = str_replace( $tags, $vals, get_option( 'summit_team_notification_subject', $default_subject ) );
 	$body    = str_replace( $tags, $vals, get_option( 'summit_team_notification_body', $default_body ) );
